@@ -1,0 +1,33 @@
+# =====================================================================
+# FILE MẪU – copy thành "application-local.properties" (cùng thư mục) rồi điền thông tin của máy bạn.
+# File application-local.properties đã nằm trong .gitignore nên KHÔNG bị đẩy lên GitHub.
+# =====================================================================
+
+# ===== SQL Server =====
+# Nhớ tạo database trước trong SSMS:  CREATE DATABASE bookstore_db;
+spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=bookstore_db;encrypt=true;trustServerCertificate=true
+spring.datasource.username=sa
+spring.datasource.password=DOI_MAT_KHAU_SA
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.SQLServerDialect
+
+# ===== Gmail SMTP (gửi OTP) – dùng App Password, không dùng mật khẩu Gmail thật =====
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your_email@gmail.com
+spring.mail.password=your_app_password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+# ===== Cloudinary (https://console.cloudinary.com -> Dashboard) =====
+cloudinary.cloud-name=your_cloud_name
+cloudinary.api-key=your_api_key
+cloudinary.api-secret=your_api_secret
+
+# ===== JWT secret (chuỗi ngẫu nhiên, tối thiểu 32 ký tự) =====
+jwt.secret=thay-bang-chuoi-bi-mat-dai-it-nhat-32-ky-tu-1234567890
+
+# ===== VNPAY / MOMO sandbox (TV1 điền khi làm thanh toán) =====
+vnpay.tmn-code=
+vnpay.hash-secret=
+vnpay.pay-url=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+vnpay.return-url=http://localhost:8080/payment/vnpay-return
