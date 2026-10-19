@@ -50,11 +50,11 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.ignoringRequestMatchers("/ws/**", "/api/**", "/payment/**"))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Công khai: Guest, Tài nguyên tĩnh, Auth
+                // Công khai: Guest, Tài nguyên tĩnh, Auth, Upload API
                 .requestMatchers(
                         "/", "/home", "/books/**", "/shops/**", "/search/**",
                         "/auth/**", "/login", "/register", "/verify-otp", "/forgot-password", "/reset-password",
-                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**"
+                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**"
                 ).permitAll()
 
                 // Phân quyền theo role
