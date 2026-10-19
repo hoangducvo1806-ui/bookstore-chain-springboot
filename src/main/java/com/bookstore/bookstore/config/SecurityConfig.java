@@ -1,51 +1,73 @@
 package com.bookstore.bookstore.config;
 
+import com.bookstore.bookstore.security.CustomUserDetailsService;
+import com.bookstore.bookstore.security.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Cấu hình Spring Security (khung ban đầu).
- * TODO (TV3): thêm JwtAuthenticationFilter, xử lý đăng nhập JWT lưu trong HttpOnly Cookie,
- * trang lỗi 403/404, refresh token.
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    /** Mã hóa mật khẩu bằng BCrypt (yêu cầu bắt buộc của đề). */
+    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final CustomUserDetailsService userDetailsService;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.ignoringRequestMatchers("/ws/**", "/api/**", "/payment/**"))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Tài nguyên tĩnh + trang công khai (Guest)
-                .requestMatchers("/", "/home", "/books/**", "/shops/**", "/search/**",
-                        "/auth/**", "/error/**", "/ws/**",
-                        "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                // Công khai: Guest, Tài nguyên tĩnh, Auth
+                .requestMatchers(
+                        "/", "/home", "/books/**", "/shops/**", "/search/**",
+                        "/auth/**", "/login", "/register", "/verify-otp", "/forgot-password", "/reset-password",
+                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**"
+                ).permitAll()
+
                 // Phân quyền theo role
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN")
                 .requestMatchers("/vendor/**").hasRole("VENDOR")
                 .requestMatchers("/shipper/**").hasRole("SHIPPER")
-                .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**")
-                    .hasAnyRole("USER", "VENDOR")
-                // TODO (TV3): đổi thành .authenticated() khi đã có JWT filter
-                .anyRequest().permitAll()
+                .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**").hasAnyRole("USER", "VENDOR")
+
+                .anyRequest().authenticated()
             )
-            .formLogin(form -> form.disable())
-            .httpBasic(basic -> basic.disable());
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

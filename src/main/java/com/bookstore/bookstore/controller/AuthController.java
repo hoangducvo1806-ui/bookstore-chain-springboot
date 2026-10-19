@@ -1,0 +1,124 @@
+package com.bookstore.bookstore.controller;
+
+import com.bookstore.bookstore.dto.LoginRequest;
+import com.bookstore.bookstore.dto.RegisterRequest;
+import com.bookstore.bookstore.dto.VerifyOtpRequest;
+import com.bookstore.bookstore.service.AuthService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AuthService authService;
+
+    // --- ĐĂNG NHẬP ---
+    @GetMapping("/login")
+    public String loginPage(Model model) {
+        if (!model.containsAttribute("loginRequest")) {
+            model.addAttribute("loginRequest", new LoginRequest());
+        }
+        return "auth/login";
+    }
+
+    @PostMapping("/login")
+    public String handleLogin(@Valid @ModelAttribute("loginRequest") LoginRequest request,
+                              BindingResult bindingResult,
+                              HttpServletResponse response,
+                              RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "auth/login";
+        }
+
+        try {
+            String token = authService.login(request);
+
+            // Lưu JWT token vào HttpOnly Cookie để Thymeleaf dùng
+            Cookie cookie = new Cookie("jwt_token", token);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(7 * 24 * 60 * 60); // 7 ngày
+            response.addCookie(cookie);
+
+            return "redirect:/";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Email hoặc mật khẩu không chính xác hoặc tài khoản chưa kích hoạt!");
+            return "redirect:/login";
+        }
+    }
+
+    // --- ĐĂNG KÝ ---
+    @GetMapping("/register")
+    public String registerPage(Model model) {
+        if (!model.containsAttribute("registerRequest")) {
+            model.addAttribute("registerRequest", new RegisterRequest());
+        }
+        return "auth/register";
+    }
+
+    @PostMapping("/register")
+    public String handleRegister(@Valid @ModelAttribute("registerRequest") RegisterRequest request,
+                                 BindingResult bindingResult,
+                                 RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "auth/register";
+        }
+
+        try {
+            authService.register(request);
+            redirectAttributes.addFlashAttribute("email", request.getEmail());
+            redirectAttributes.addFlashAttribute("successMessage", "Đăng ký thành công! Vui lòng kiểm tra email để lấy mã OTP kích hoạt.");
+            return "redirect:/verify-otp?email=" + request.getEmail();
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/register";
+        }
+    }
+
+    // --- XÁC THỰC OTP ---
+    @GetMapping("/verify-otp")
+    public String verifyOtpPage(@RequestParam(value = "email", required = false) String email, Model model) {
+        VerifyOtpRequest request = new VerifyOtpRequest();
+        request.setEmail(email);
+        model.addAttribute("verifyOtpRequest", request);
+        return "auth/verify-otp";
+    }
+
+    @PostMapping("/verify-otp")
+    public String handleVerifyOtp(@Valid @ModelAttribute("verifyOtpRequest") VerifyOtpRequest request,
+                                  BindingResult bindingResult,
+                                  RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "auth/verify-otp";
+        }
+
+        try {
+            authService.verifyRegistrationOtp(request);
+            redirectAttributes.addFlashAttribute("successMessage", "Kích hoạt tài khoản thành công! Bạn có thể đăng nhập ngay.");
+            return "redirect:/login";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("email", request.getEmail());
+            return "redirect:/verify-otp?email=" + request.getEmail();
+        }
+    }
+
+    // --- ĐĂNG XUẤT ---
+    @GetMapping("/logout")
+    public String handleLogout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwt_token", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // Xóa cookie
+        response.addCookie(cookie);
+        return "redirect:/login";
+    }
+}
