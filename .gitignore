@@ -35,3 +35,6 @@ build/
 ### Secrets (moi thanh vien tu tao) ###
 application-local.properties
 .env
+
+.vs/
+*.vsidx
