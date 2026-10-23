@@ -91,6 +91,13 @@
 			<version>${cloudinary.version}</version>
 		</dependency>
 
+		<!-- Configuration Processor (tạo metadata cấu hình cho Eclipse STS) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
