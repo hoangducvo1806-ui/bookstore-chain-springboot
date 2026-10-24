@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Đánh Giá Sách Cũ Đã Mua - Chuỗi Sách Cũ</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="bg-light py-4 border-bottom mb-4">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/user/orders}" class="text-decoration-none">Đơn mua</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Đánh giá sản phẩm</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">Đánh Giá Sản Phẩm Đã Mua</h2>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <!-- Thông tin cuốn sách đang được đánh giá -->
+                    <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-4">
+                        <img th:if="${book.mainImageUrl != null and !book.mainImageUrl.isEmpty()}" 
+                             th:src="${book.mainImageUrl}" class="rounded border" style="width: 70px; height: 90px; object-fit: cover;">
+                        <img th:unless="${book.mainImageUrl != null and !book.mainImageUrl.isEmpty()}" 
+                             th:src="@{/images/product-item1.png}" class="rounded border" style="width: 70px; height: 90px; object-fit: cover;">
+                        <div>
+                            <span class="badge bg-light text-dark border small mb-1" th:text="${book.bookCondition.label}">Như mới</span>
+                            <h5 class="fw-bold mb-1" th:text="${book.title}">Tên cuốn sách</h5>
+                            <small class="text-muted">Tác giả: <span th:text="${book.author}">Tác giả</span></small>
+                        </div>
+                    </div>
+
+                    <!-- Form Đánh Giá -->
+                    <form th:action="@{/user/reviews/submit}" th:object="${reviewForm}" method="post" enctype="multipart/form-data" id="reviewForm">
+                        <input type="hidden" th:field="*{bookId}">
+                        <input type="hidden" th:field="*{orderId}">
+
+                        <!-- Chấm sao 1-5 -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold d-block">1. Đánh giá chất lượng thực tế của sách cũ (1 - 5 sao):</label>
+                            <div class="d-flex gap-3 align-items-center">
+                                <div class="form-check form-check-inline" th:each="s : ${#numbers.sequence(1, 5)}">
+                                    <input class="form-check-input" type="radio" th:field="*{rating}" th:value="${s}" th:id="${'star_' + s}" checked>
+                                    <label class="form-check-label" th:for="${'star_' + s}">
+                                        <span th:text="${s}">5</span> <i class="bi bi-star-fill text-warning"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nhận xét (Bắt buộc tối thiểu 50 ký tự - Validate client & server) -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-bold mb-0">2. Nhận xét chi tiết về tình trạng sách * (Tối thiểu 50 ký tự):</label>
+                                <span class="small text-muted" id="charCount">0/50 ký tự</span>
+                            </div>
+                            <textarea th:field="*{comment}" id="commentText" class="form-control" rows="5" minlength="50" maxlength="2000"
+                                      placeholder="Mô tả cụ thể về tình trạng trang sách, gáy sách, độ mới, sự hài lòng khi mua từ chi nhánh... (Yêu cầu ít nhất 50 ký tự)" required></textarea>
+                            <small class="text-danger" th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}"></small>
+                            <small class="text-muted d-block mt-1">Đánh giá chi tiết giúp cộng đồng người đọc sách cũ có cái nhìn khách quan và chính xác hơn.</small>
+                        </div>
+
+                        <!-- Upload hình ảnh lên Cloudinary -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="bi bi-images text-primary me-1"></i> 3. Đăng tải hình ảnh thực tế (Tải lên Cloudinary):</label>
+                            <input type="file" name="imageFiles" class="form-control" accept="image/*" multiple>
+                            <small class="text-muted">Bạn có thể chọn nhiều ảnh chụp bìa, gáy sách và trang ruột.</small>
+                        </div>
+
+                        <!-- Upload video lên Cloudinary -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="bi bi-camera-video text-danger me-1"></i> 4. Đăng tải video thực tế (Tải lên Cloudinary - Tùy chọn):</label>
+                            <input type="file" name="videoFile" class="form-control" accept="video/*">
+                            <small class="text-muted">Quay video ngắn (dưới 15s) lật mở từng trang sách cũ.</small>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 text-white fw-bold py-2 shadow-sm" id="submitBtn">
+                                Gửi Đánh Giá Ngay
+                            </button>
+                            <a th:href="@{/user/orders}" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                                Hủy Bỏ
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client-side validation script cho ký tự tối thiểu 50 -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const commentInput = document.getElementById("commentText");
+            const charCount = document.getElementById("charCount");
+            const form = document.getElementById("reviewForm");
+
+            function updateCount() {
+                const len = commentInput.value.trim().length;
+                charCount.textContent = len + "/50 ký tự";
+                if (len < 50) {
+                    charCount.classList.remove("text-success");
+                    charCount.classList.add("text-danger");
+                } else {
+                    charCount.classList.remove("text-danger");
+                    charCount.classList.add("text-success");
+                }
+            }
+
+            commentInput.addEventListener("input", updateCount);
+            updateCount();
+
+            form.addEventListener("submit", function (e) {
+                if (commentInput.value.trim().length < 50) {
+                    e.preventDefault();
+                    alert("Nội dung đánh giá phải có độ dài tối thiểu 50 ký tự để được phê duyệt!");
+                    commentInput.focus();
+                }
+            });
+        });
+    </script>
+
+</div>
+</body>
+</html>

@@ -52,7 +52,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Công khai: Guest, Tài nguyên tĩnh, Auth, Upload API
                 .requestMatchers(
-                        "/", "/home", "/books/**", "/shops/**", "/search/**",
+                        "/", "/home", "/books/**", "/categories/**", "/shops/**", "/search/**", "/payment/**",
                         "/auth/**", "/login", "/register", "/verify-otp", "/forgot-password", "/reset-password",
                         "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**"
                 ).permitAll()

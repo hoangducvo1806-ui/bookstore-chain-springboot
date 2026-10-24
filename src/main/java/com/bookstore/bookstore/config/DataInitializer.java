@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Configuration
@@ -22,6 +23,8 @@ public class DataInitializer implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final ShopRepository shopRepository;
     private final BookRepository bookRepository;
+    private final ShippingCarrierRepository shippingCarrierRepository;
+    private final VoucherRepository voucherRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -102,6 +105,7 @@ public class DataInitializer implements CommandLineRunner {
         Category vanHoc = createCategoryIfNotExist("Văn học Việt Nam", "van-hoc-viet-nam", "Tiểu thuyết, truyện ngắn, thơ ca Việt Nam qua các thời kỳ");
         Category kienThuc = createCategoryIfNotExist("Khoa học & Kỹ thuật", "khoa-hoc-ky-thuat", "Sách giáo trình đại học, công nghệ thông tin, toán lý hóa");
         Category lichSu = createCategoryIfNotExist("Lịch sử - Triết học", "lich-su-triet-hoc", "Sách nghiên cứu lịch sử cổ cận hiện đại và văn hóa");
+        Category kinhTe = createCategoryIfNotExist("Kinh tế & Khởi nghiệp", "kinh-te-khoi-nghiep", "Sách quản trị kinh doanh, marketing, bài học thành công");
 
         // 4. Tạo chi nhánh cửa hàng mẫu cho Vendor
         Shop shopChiNhanh1 = shopRepository.findByOwner(vendor)
@@ -116,7 +120,7 @@ public class DataInitializer implements CommandLineRunner {
 
         // 5. Tạo một số sách cũ mẫu (Có cuốn soldQuantity > 10 để phục vụ trang Guest)
         createBookIfNotExist(shopChiNhanh1, vanHoc, "Số Đỏ (Bản in 1989)", "ISBN9780001", "Vũ Trọng Phụng",
-                "NXB Văn Học", 1989, BookCondition.OLD, "Sách bìa mềm ố vàng theo thời gian, đủ trang, chữ rõ",
+                "NXB Văn Học", 1989, BookCondition.OLD, "Sách bìa mềm ố vàng theo thời gian, đủ trang, chữ rõ nét",
                 new BigDecimal("120000"), new BigDecimal("65000"), 5, 25,
                 "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500");
 
@@ -134,6 +138,80 @@ public class DataInitializer implements CommandLineRunner {
                 "NXB Kim Đồng", 1995, BookCondition.ACCEPTABLE, "Bìa có sờn mép nhẹ, ruột sách lành lặn",
                 new BigDecimal("70000"), new BigDecimal("35000"), 2, 4,
                 "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500");
+
+        createBookIfNotExist(shopChiNhanh1, kinhTe, "Quốc Gia Khởi Nghiệp", "ISBN9780005", "Dan Senor & Saul Singer",
+                "NXB Thế Giới", 2018, BookCondition.GOOD, "Tình trạng tốt 85%, không rách, giấy còn sáng",
+                new BigDecimal("150000"), new BigDecimal("75000"), 6, 18,
+                "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=500");
+
+        // 6. Tạo đơn vị vận chuyển mẫu nếu chưa có
+        if (shippingCarrierRepository.count() == 0) {
+            shippingCarrierRepository.save(ShippingCarrier.builder()
+                    .name("Giao Hàng Nhanh (GHN)")
+                    .shippingFee(new BigDecimal("25000"))
+                    .description("Giao hàng tiêu chuẩn 2-3 ngày toàn quốc")
+                    .active(true)
+                    .build());
+
+            shippingCarrierRepository.save(ShippingCarrier.builder()
+                    .name("Viettel Post")
+                    .shippingFee(new BigDecimal("30000"))
+                    .description("Mạng lưới giao tận xã phường, an toàn bảo đảm")
+                    .active(true)
+                    .build());
+
+            shippingCarrierRepository.save(ShippingCarrier.builder()
+                    .name("Hỏa Tốc Nội Thành (Giao trong 2h)")
+                    .shippingFee(new BigDecimal("45000"))
+                    .description("Chỉ áp dụng trong khu vực nội thành có chi nhánh shop")
+                    .active(true)
+                    .build());
+        }
+
+        // 7. Tạo Voucher mẫu nếu chưa có
+        if (voucherRepository.count() == 0) {
+            voucherRepository.save(Voucher.builder()
+                    .code("SACHCU10")
+                    .title("Giảm 10% cho đơn từ 100.000 VNĐ")
+                    .discountType("PERCENTAGE")
+                    .discountValue(new BigDecimal("10"))
+                    .minOrderAmount(new BigDecimal("100000"))
+                    .maxDiscountAmount(new BigDecimal("30000"))
+                    .startDate(LocalDateTime.now().minusDays(1))
+                    .endDate(LocalDateTime.now().plusMonths(3))
+                    .usageLimit(100)
+                    .usedCount(0)
+                    .active(true)
+                    .build());
+
+            voucherRepository.save(Voucher.builder()
+                    .code("FREESHIP")
+                    .title("Miễn phí vận chuyển (Tối đa 30.000 VNĐ)")
+                    .discountType("FREE_SHIPPING")
+                    .discountValue(new BigDecimal("30000"))
+                    .minOrderAmount(new BigDecimal("150000"))
+                    .maxDiscountAmount(new BigDecimal("30000"))
+                    .startDate(LocalDateTime.now().minusDays(1))
+                    .endDate(LocalDateTime.now().plusMonths(3))
+                    .usageLimit(50)
+                    .usedCount(0)
+                    .active(true)
+                    .build());
+
+            voucherRepository.save(Voucher.builder()
+                    .code("CHAOBAN")
+                    .title("Giảm ngay 20.000 VNĐ cho khách hàng mới")
+                    .discountType("FIXED_AMOUNT")
+                    .discountValue(new BigDecimal("20000"))
+                    .minOrderAmount(new BigDecimal("50000"))
+                    .maxDiscountAmount(new BigDecimal("20000"))
+                    .startDate(LocalDateTime.now().minusDays(1))
+                    .endDate(LocalDateTime.now().plusMonths(6))
+                    .usageLimit(200)
+                    .usedCount(0)
+                    .active(true)
+                    .build());
+        }
     }
 
     private Category createCategoryIfNotExist(String name, String slug, String description) {

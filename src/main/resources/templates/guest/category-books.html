@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${category.name + ' - Sách Cũ Tuyển Chọn'}">Danh mục sách cũ</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="bg-light py-4 border-bottom mb-4">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/books}" class="text-decoration-none">Danh mục</a></li>
+                    <li class="breadcrumb-item active" aria-current="page" th:text="${category.name}">Văn học</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-1" th:text="${category.name}">Văn Học Việt Nam</h2>
+            <p class="text-muted mb-0" th:text="${category.description}">Mô tả danh mục sách</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <span class="text-muted">Hiển thị <b th:text="${totalItems}">0</b> cuốn sách cũ</span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="small text-muted">Sắp xếp:</span>
+                <select class="form-select form-select-sm" style="width: auto;" onchange="location = this.value;">
+                    <option th:value="@{'/categories/' + ${category.slug}(sort='newest')}" th:selected="${currentSort == 'newest'}">Mới nhất</option>
+                    <option th:value="@{'/categories/' + ${category.slug}(sort='best_seller')}" th:selected="${currentSort == 'best_seller'}">Bán chạy nhất</option>
+                    <option th:value="@{'/categories/' + ${category.slug}(sort='price_asc')}" th:selected="${currentSort == 'price_asc'}">Giá tăng dần</option>
+                    <option th:value="@{'/categories/' + ${category.slug}(sort='price_desc')}" th:selected="${currentSort == 'price_desc'}">Giá giảm dần</option>
+                </select>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(books)}" class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <h5 class="fw-bold mt-2">Chưa có cuốn sách nào trong danh mục này</h5>
+            <a th:href="@{/books}" class="btn btn-outline-primary btn-sm rounded-pill mt-2">Xem tất cả sách cũ</a>
+        </div>
+
+        <div class="row g-4" th:unless="${#lists.isEmpty(books)}">
+            <div class="col-xl-3 col-lg-4 col-sm-6" th:each="book : ${books}">
+                <div class="book-card p-3">
+                    <div class="book-img-wrap mb-3">
+                        <img th:if="${book.mainImageUrl != null and !book.mainImageUrl.isEmpty()}" 
+                             th:src="${book.mainImageUrl}" th:alt="${book.title}">
+                        <img th:unless="${book.mainImageUrl != null and !book.mainImageUrl.isEmpty()}" 
+                             th:src="@{/images/product-item1.png}" th:alt="${book.title}">
+
+                        <span class="badge position-absolute top-0 start-0 m-2 condition-badge"
+                              th:classappend="${book.bookCondition.name() == 'LIKE_NEW' ? 'badge-like-new' : 
+                                               (book.bookCondition.name() == 'VERY_GOOD' ? 'badge-very-good' : 
+                                               (book.bookCondition.name() == 'GOOD' ? 'badge-good' : 
+                                               (book.bookCondition.name() == 'ACCEPTABLE' ? 'badge-acceptable' : 'badge-old')))}"
+                              th:text="${book.bookCondition.label}">Tình trạng</span>
+
+                        <div th:if="${currentUser != null}">
+                            <form th:action="@{'/user/wishlist/toggle/' + ${book.id}}" method="post" class="d-inline">
+                                <button type="submit" class="btn-wishlist" title="Thêm/Bỏ yêu thích">
+                                    <i class="bi bi-heart text-danger"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div th:unless="${currentUser != null}">
+                            <a th:href="@{/login}" class="btn-wishlist" title="Đăng nhập để lưu yêu thích">
+                                <i class="bi bi-heart"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex-grow-1 d-flex flex-column">
+                        <h5 class="fw-bold mb-1 text-truncate-2" style="font-size: 1rem; height: 44px; overflow: hidden;">
+                            <a th:href="@{'/books/' + ${book.id}}" class="text-dark text-decoration-none" th:text="${book.title}">Tên sách</a>
+                        </h5>
+                        <small class="text-muted mb-1 text-truncate"><i class="bi bi-pencil-square me-1"></i><span th:text="${book.author}">Tác giả</span></small>
+
+                        <small class="text-primary mb-2 text-truncate" th:if="${book.shop != null}">
+                            <i class="bi bi-geo-alt me-1"></i><span th:text="${book.shop.name}">Chi nhánh</span>
+                        </small>
+
+                        <div class="mt-auto">
+                            <div class="d-flex align-items-baseline gap-2 mb-2">
+                                <span class="selling-price" th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</span>
+                                <span class="original-price" th:if="${book.originalPrice != null}" 
+                                      th:text="${#numbers.formatDecimal(book.originalPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}">120.000 đ</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3 text-muted" style="font-size: 0.8rem;">
+                                <span>Đã bán: <b class="text-danger" th:text="${book.soldQuantity}">25</b></span>
+                                <span>Tồn: <b th:text="${book.stock}">5</b></span>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <div th:if="${currentUser != null}">
+                                    <form th:action="@{/cart/add}" method="post">
+                                        <input type="hidden" name="bookId" th:value="${book.id}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 text-white" th:disabled="${book.stock <= 0}">
+                                            <i class="bi bi-cart-plus me-1"></i> <span th:text="${book.stock > 0 ? 'Thêm Giỏ Hàng' : 'Hết Hàng'}">Thêm Giỏ Hàng</span>
+                                        </button>
+                                    </form>
+                                </div>
+                                <div th:unless="${currentUser != null}">
+                                    <a th:href="@{/login}" class="btn btn-primary btn-sm rounded-pill w-100 text-white"
+                                       onclick="return confirm('Vui lòng đăng nhập để mua sách!');">
+                                        <i class="bi bi-cart-plus me-1"></i> Mua Sách (Đăng Nhập)
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phân trang 20 cuốn/trang -->
+        <nav th:if="${totalPages > 1}" class="mt-5" aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{'/categories/' + ${category.slug}(page=${currentPage - 1}, sort=${currentSort})}">Trước</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{'/categories/' + ${category.slug}(page=${i}, sort=${currentSort})}" th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{'/categories/' + ${category.slug}(page=${currentPage + 1}, sort=${currentSort})}">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</div>
+</body>
+</html>

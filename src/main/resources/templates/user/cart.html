@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Giỏ Hàng Của Bạn - Chuỗi Sách Cũ</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="bg-light py-4 border-bottom mb-4">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Giỏ hàng</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">Giỏ Hàng Mua Sách</h2>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <!-- Khi giỏ hàng trống -->
+        <div th:if="${#lists.isEmpty(shopGroups)}" class="text-center py-5">
+            <i class="bi bi-cart-x display-1 text-muted"></i>
+            <h4 class="fw-bold mt-3">Giỏ hàng của bạn đang trống</h4>
+            <p class="text-muted">Hãy dạo quanh một vòng và chọn những cuốn sách cũ ưng ý nhé!</p>
+            <a th:href="@{/books}" class="btn btn-primary rounded-pill px-4 text-white">Khám Phá Sách Cũ Ngay</a>
+        </div>
+
+        <!-- Khi có sản phẩm (Nhóm theo từng Shop chi nhánh) -->
+        <div class="row g-4" th:unless="${#lists.isEmpty(shopGroups)}">
+            <div class="col-lg-8">
+                <!-- Vòng lặp từng Shop chi nhánh -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" th:each="group : ${shopGroups}">
+                    <!-- Tiêu đề chi nhánh shop -->
+                    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-shop text-primary fs-5"></i>
+                            <h6 class="fw-bold mb-0 text-primary" th:text="${group.shop != null ? group.shop.name : 'Chi nhánh sách cũ'}">Chi nhánh</h6>
+                        </div>
+                        <small class="text-muted" th:if="${group.shop != null}" th:text="${group.shop.address}">Địa chỉ chi nhánh</small>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr style="font-size: 0.85rem;">
+                                        <th class="ps-3" style="width: 45%;">Sách cũ</th>
+                                        <th class="text-center">Tình trạng</th>
+                                        <th class="text-center">Đơn giá</th>
+                                        <th class="text-center" style="width: 140px;">Số lượng</th>
+                                        <th class="text-end">Thành tiền</th>
+                                        <th class="text-center pe-3">Xóa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="item : ${group.items}">
+                                        <td class="ps-3 py-3">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img th:if="${item.book.mainImageUrl != null and !item.book.mainImageUrl.isEmpty()}" 
+                                                     th:src="${item.book.mainImageUrl}" th:alt="${item.book.title}" 
+                                                     class="rounded border" style="width: 60px; height: 75px; object-fit: cover;">
+                                                <img th:unless="${item.book.mainImageUrl != null and !item.book.mainImageUrl.isEmpty()}" 
+                                                     th:src="@{/images/product-item1.png}" class="rounded border" style="width: 60px; height: 75px; object-fit: cover;">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">
+                                                        <a th:href="@{'/books/' + ${item.book.id}}" class="text-dark text-decoration-none" th:text="${item.book.title}">Tên sách</a>
+                                                    </h6>
+                                                    <small class="text-muted d-block"><i class="bi bi-pencil me-1"></i><span th:text="${item.book.author}">Tác giả</span></small>
+                                                    <small class="text-danger fw-bold" th:if="${item.outOfStock}">
+                                                        <i class="bi bi-exclamation-triangle"></i> Tồn kho chỉ còn <span th:text="${item.book.stock}">0</span> cuốn!
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge condition-badge"
+                                                  th:classappend="${item.book.bookCondition.name() == 'LIKE_NEW' ? 'badge-like-new' : 
+                                                                   (item.book.bookCondition.name() == 'VERY_GOOD' ? 'badge-very-good' : 
+                                                                   (item.book.bookCondition.name() == 'GOOD' ? 'badge-good' : 
+                                                                   (item.book.bookCondition.name() == 'ACCEPTABLE' ? 'badge-acceptable' : 'badge-old')))}"
+                                                  th:text="${item.book.bookCondition.label}">Như mới</span>
+                                        </td>
+                                        <td class="text-center fw-semibold text-secondary" 
+                                            th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</td>
+                                        <td class="text-center">
+                                            <!-- Form cập nhật số lượng -->
+                                            <form th:action="@{/cart/update}" method="post" class="d-flex align-items-center justify-content-center">
+                                                <input type="hidden" name="cartItemId" th:value="${item.id}">
+                                                <div class="input-group input-group-sm" style="width: 100px;">
+                                                    <button class="btn btn-outline-secondary" type="submit" name="quantity" th:value="${item.quantity - 1}">-</button>
+                                                    <input type="text" class="form-control text-center bg-white" th:value="${item.quantity}" readonly>
+                                                    <button class="btn btn-outline-secondary" type="submit" name="quantity" th:value="${item.quantity + 1}"
+                                                            th:disabled="${item.quantity >= item.book.stock}">+</button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                        <td class="text-end fw-bold text-danger" 
+                                            th:text="${#numbers.formatDecimal(item.subtotal, 0, 'COMMA', 0, 'POINT') + ' đ'}">130.000 đ</td>
+                                        <td class="text-center pe-3">
+                                            <form th:action="@{'/cart/remove/' + ${item.id}}" method="post">
+                                                <button type="submit" class="btn btn-link text-danger p-0" title="Xóa cuốn này">
+                                                    <i class="bi bi-trash fs-5"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-light py-2 text-end">
+                        <small class="text-muted">Tổng phụ chi nhánh này: </small>
+                        <b class="text-dark fs-6" th:text="${#numbers.formatDecimal(group.shopSubtotal, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">130.000 VNĐ</b>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Tóm tắt tổng đơn hàng & Tiến hành thanh toán -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top bg-white" style="top: 80px;">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">Tóm Tắt Đơn Hàng</h5>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tổng tiền sách:</span>
+                        <b class="fs-5 text-dark" th:text="${#numbers.formatDecimal(cartSubtotal, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</b>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 text-muted" style="font-size: 0.9rem;">
+                        <span>Phí vận chuyển:</span>
+                        <span>Tính tại bước thanh toán</span>
+                    </div>
+
+                    <div class="alert alert-info py-2 small mb-4">
+                        <i class="bi bi-shield-check me-1"></i> Miễn phí đổi trả trong 48h nếu tình trạng sách không đúng mô tả.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a th:href="@{/checkout}" class="btn btn-primary rounded-pill py-2 text-white fw-bold fs-6">
+                            Tiến Hành Thanh Toán <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                        <a th:href="@{/books}" class="btn btn-outline-secondary rounded-pill py-2">
+                            Tiếp Tục Chọn Sách
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
