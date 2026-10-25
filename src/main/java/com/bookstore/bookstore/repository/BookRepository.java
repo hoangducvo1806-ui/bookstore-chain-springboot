@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
@@ -19,6 +20,8 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
     List<Book> findBySoldQuantityGreaterThanEqualOrderBySoldQuantityDesc(Integer soldQuantity);
 
     boolean existsByIsbn(String isbn);
+
+    Optional<Book> findByIsbn(String isbn);
 
     Page<Book> findByActiveTrue(Pageable pageable);
 

@@ -7,16 +7,16 @@
 <body>
 <div th:fragment="content">
 
-    <div class="bg-light py-3 border-bottom mb-4">
+    <div class="page-title-banner py-3 border-bottom mb-4">
         <div class="container">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-white-50 text-decoration-none">Trang chủ</a></li>
                     <li class="breadcrumb-item">
                         <a th:if="${book.category != null}" th:href="@{'/categories/' + ${book.category.slug}}" 
-                           class="text-decoration-none" th:text="${book.category.name}">Danh mục</a>
+                           class="text-white-50 text-decoration-none" th:text="${book.category.name}">Danh mục</a>
                     </li>
-                    <li class="breadcrumb-item active text-truncate" style="max-width: 300px;" aria-current="page" th:text="${book.title}">Tên sách</li>
+                    <li class="breadcrumb-item active text-white text-truncate" style="max-width: 300px;" aria-current="page" th:text="${book.title}">Tên sách</li>
                 </ol>
             </nav>
         </div>

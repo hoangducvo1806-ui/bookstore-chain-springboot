@@ -7,7 +7,8 @@
 <body>
 <div th:fragment="content">
 
-    <div class="bg-light py-4 border-bottom mb-4">
+    <!-- Page Title Banner (Background màu đen #1a1a1a) -->
+    <div class="page-title-banner py-4 mb-4">
         <div class="container">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1">
@@ -55,7 +56,7 @@
         <!-- Khi không có đơn nào -->
         <div th:if="${#lists.isEmpty(orders)}" class="text-center py-5 bg-white rounded-4 shadow-sm p-4">
             <i class="bi bi-receipt fs-1 text-muted"></i>
-            <h5 class="fw-bold mt-2">Chưa có đơn hàng nào trong mục này</h5>
+            <h5 class="fw-bold mt-2 text-dark">Chưa có đơn hàng nào trong mục này</h5>
             <p class="text-muted">Các đơn đặt mua sách cũ của bạn sẽ hiển thị tại đây.</p>
             <a th:href="@{/books}" class="btn btn-outline-primary btn-sm rounded-pill">Tiếp tục mua sách</a>
         </div>
@@ -117,7 +118,7 @@
                     <!-- Footer đơn: Tổng tiền và các nút hành động -->
                     <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div>
-                            <small class="text-muted">Phương thức: <b th:text="${order.paymentMethod.label}">COD</b></small>
+                            <small class="text-muted">Phương thức: <b class="text-dark" th:text="${order.paymentMethod.label}">COD</b></small>
                             <span class="mx-2">•</span>
                             <small class="text-muted">Thanh toán: <span class="badge" th:classappend="${order.paymentStatus.name() == 'COMPLETED' ? 'bg-success' : 'bg-secondary'}" th:text="${order.paymentStatus.label}"></span></small>
                         </div>
