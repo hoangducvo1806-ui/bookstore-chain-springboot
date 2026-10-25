@@ -164,35 +164,6 @@
         });
       }
 
-      // Xử lý mở Dropdown Menu (User Menu, Category Menu) chắc chắn 100%
-      $(document).on('click', '.dropdown-toggle', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var $dropdown = $(this).closest('.dropdown, .nav-item.dropdown');
-        var $menu = $dropdown.find('.dropdown-menu').first();
-        var isShown = $menu.hasClass('show');
-
-        // Đóng các dropdown khác đang mở
-        $('.dropdown-menu.show').not($menu).removeClass('show');
-        $('.dropdown-toggle[aria-expanded="true"]').not(this).attr('aria-expanded', 'false');
-
-        if (isShown) {
-          $menu.removeClass('show');
-          $(this).attr('aria-expanded', 'false');
-        } else {
-          $menu.addClass('show');
-          $(this).attr('aria-expanded', 'true');
-        }
-      });
-
-      // Đóng dropdown khi click ra ngoài
-      $(document).on('click', function(e) {
-        if (!$(e.target).closest('.dropdown, .nav-item.dropdown').length) {
-          $('.dropdown-menu.show').removeClass('show');
-          $('.dropdown-toggle[aria-expanded="true"]').attr('aria-expanded', 'false');
-        }
-      });
-
     }); // End of a document ready
 
     window.addEventListener("load", function () {

@@ -57,7 +57,7 @@
                         <a class="nav-link text-light" th:href="@{/}">Trang Chủ</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-light" href="javascript:void(0);" role="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                        <a class="nav-link dropdown-toggle text-light" href="javascript:void(0);" role="button" id="categoryDropdown" aria-expanded="false" style="cursor: pointer; user-select: none;">
                             Danh Mục Sách
                         </a>
                         <ul class="dropdown-menu shadow-sm" aria-labelledby="categoryDropdown">
@@ -98,27 +98,32 @@
                         <a th:href="@{/register}" class="btn btn-primary btn-sm px-3 rounded-pill text-white">Đăng Ký</a>
                     </div>
 
-                    <div th:if="${currentUser != null}" class="dropdown">
-                        <a href="javascript:void(0);" role="button" class="d-flex align-items-center text-light text-decoration-none dropdown-toggle px-2 py-1 rounded" 
-                           id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; user-select: none;">
-                            <img th:if="${currentUser.avatarUrl != null and !currentUser.avatarUrl.isEmpty()}" 
-                                 th:src="${currentUser.avatarUrl}" alt="Avatar" class="rounded-circle me-1 border border-secondary" style="width: 32px; height: 32px; object-fit: cover;">
-                            <i th:unless="${currentUser.avatarUrl != null and !currentUser.avatarUrl.isEmpty()}" 
-                               class="bi bi-person-circle fs-4 me-1 text-primary"></i>
-                            <span class="d-none d-md-inline fw-semibold text-white" style="font-size: 0.85rem;" th:text="${currentUser.fullName}">Người dùng</span>
+                    <div th:if="${currentUser != null}" class="d-flex align-items-center">
+                        <div class="dropdown">
+                            <a href="javascript:void(0);" role="button" class="d-flex align-items-center text-light text-decoration-none dropdown-toggle px-2 py-1 rounded" 
+                               id="userMenuDropdown" aria-expanded="false" style="cursor: pointer; user-select: none;">
+                                <img th:if="${currentUser.avatarUrl != null and !currentUser.avatarUrl.isEmpty()}" 
+                                     th:src="${currentUser.avatarUrl}" alt="Avatar" class="rounded-circle me-1 border border-secondary" style="width: 32px; height: 32px; object-fit: cover;">
+                                <i th:unless="${currentUser.avatarUrl != null and !currentUser.avatarUrl.isEmpty()}" 
+                                   class="bi bi-person-circle fs-4 me-1 text-primary"></i>
+                                <span class="d-none d-md-inline fw-semibold text-white" style="font-size: 0.85rem;" th:text="${currentUser.fullName}">Người dùng</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenuDropdown" style="min-width: 220px;">
+                                <li class="px-3 py-2 border-bottom">
+                                    <div class="fw-bold text-white text-truncate" style="max-width: 190px;" th:text="${currentUser.fullName}"></div>
+                                    <small class="text-muted text-truncate d-block" style="max-width: 190px;" th:text="${currentUser.email}"></small>
+                                </li>
+                                <li><a class="dropdown-item py-2" th:href="@{/user/profile}"><i class="bi bi-person me-2 text-primary"></i> Hồ sơ & Sổ địa chỉ</a></li>
+                                <li><a class="dropdown-item py-2" th:href="@{/user/orders}"><i class="bi bi-bag-check me-2 text-success"></i> Lịch sử đơn mua</a></li>
+                                <li><a class="dropdown-item py-2" th:href="@{/user/wishlist}"><i class="bi bi-heart me-2 text-danger"></i> Sách yêu thích</a></li>
+                                <li><a class="dropdown-item py-2" th:href="@{/user/viewed-books}"><i class="bi bi-clock-history me-2 text-info"></i> Sách đã xem</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item py-2 text-danger fw-bold" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                        <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm rounded-pill px-3 ms-2 fw-semibold" title="Đăng xuất nhanh khỏi tài khoản">
+                            <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenuDropdown" style="min-width: 220px;">
-                            <li class="px-3 py-2 border-bottom">
-                                <div class="fw-bold text-white text-truncate" style="max-width: 190px;" th:text="${currentUser.fullName}"></div>
-                                <small class="text-muted text-truncate d-block" style="max-width: 190px;" th:text="${currentUser.email}"></small>
-                            </li>
-                            <li><a class="dropdown-item py-2" th:href="@{/user/profile}"><i class="bi bi-person me-2 text-primary"></i> Hồ sơ & Sổ địa chỉ</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{/user/orders}"><i class="bi bi-bag-check me-2 text-success"></i> Lịch sử đơn mua</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{/user/wishlist}"><i class="bi bi-heart me-2 text-danger"></i> Sách yêu thích</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{/user/viewed-books}"><i class="bi bi-clock-history me-2 text-info"></i> Sách đã xem</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item py-2 text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
-                        </ul>
                     </div>
                 </div>
             </div>
