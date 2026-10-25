@@ -159,7 +159,7 @@
             color: #ef4444 !important;
         }
 
-        /* Dropdown Menu Dark Theme & Smooth Toggle */
+        /* Dropdown Menu Dark Theme, Positioning, Hover & Click Support */
         .dropdown, .nav-item.dropdown {
             position: relative !important;
         }
@@ -167,22 +167,49 @@
             display: none;
             position: absolute !important;
             top: 100% !important;
-            margin-top: 8px !important;
+            margin-top: 4px !important;
             background-color: #171b26 !important;
             border: 1px solid #2d3345 !important;
             color: #f3f4f6 !important;
-            box-shadow: 0 14px 35px rgba(0,0,0,0.65) !important;
+            box-shadow: 0 14px 35px rgba(0,0,0,0.7) !important;
             border-radius: 10px !important;
             z-index: 99999 !important;
+            min-width: 220px;
         }
+
+        /* Invisible bridge so mouse hover doesn't break between button and menu */
+        .dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 0;
+            right: 0;
+            height: 8px;
+            display: block;
+        }
+
         .dropdown-menu.dropdown-menu-end {
             right: 0 !important;
             left: auto !important;
         }
+
+        /* Open on HOVER for desktop */
+        @media (min-width: 768px) {
+            .dropdown:hover > .dropdown-menu,
+            .nav-item.dropdown:hover > .dropdown-menu {
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+            }
+        }
+
+        /* Open on CLICK or programmatic .show */
         .dropdown-menu.show {
             display: block !important;
             opacity: 1 !important;
             visibility: visible !important;
+            pointer-events: auto !important;
         }
         .dropdown-item {
             color: #e2e8f0 !important;
@@ -261,7 +288,7 @@
     <script th:src="@{/js/jquery-1.11.0.min.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
-    <script th:src="@{/js/script.js(v=3.0)}"></script>
+    <script th:src="@{/js/script.js(v='3.1')}"></script>
 
     <!-- Dedicated Bulletproof Dropdown Script -->
     <script>
@@ -274,7 +301,7 @@
                 var menu = parent.querySelector('.dropdown-menu');
                 if (!menu) return;
 
-                toggle.addEventListener('click', function(e) {
+                toggle.onclick = function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     var willOpen = !menu.classList.contains('show');
@@ -296,7 +323,7 @@
                         menu.classList.remove('show');
                         toggle.setAttribute('aria-expanded', 'false');
                     }
-                });
+                };
             }
 
             function initDropdowns() {
@@ -306,7 +333,7 @@
                 // Fallback for other dropdown-toggles
                 document.querySelectorAll('.dropdown-toggle').forEach(function(btn) {
                     if (btn.id === 'userMenuDropdown' || btn.id === 'categoryDropdown') return;
-                    btn.addEventListener('click', function(e) {
+                    btn.onclick = function(e) {
                         var p = btn.closest('.dropdown, .nav-item.dropdown');
                         if (!p) return;
                         var m = p.querySelector('.dropdown-menu');
@@ -316,7 +343,7 @@
                         var open = !m.classList.contains('show');
                         document.querySelectorAll('.dropdown-menu.show').forEach(function(el) { el.classList.remove('show'); });
                         if (open) m.classList.add('show');
-                    });
+                    };
                 });
 
                 // Close when clicking outside
