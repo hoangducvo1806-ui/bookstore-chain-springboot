@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Sách Cũ Đã Xem - Chuỗi Sách Cũ</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="bg-light py-4 border-bottom mb-4">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Lịch sử xem sách</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">Các Cuốn Sách Cũ Bạn Vừa Xem</h2>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div th:if="${#lists.isEmpty(viewedBooks)}" class="text-center py-5 bg-white rounded-4 shadow-sm p-4">
+            <i class="bi bi-clock-history fs-1 text-muted"></i>
+            <h5 class="fw-bold mt-2">Chưa có lịch sử xem sách</h5>
+            <p class="text-muted">Khi bạn bấm xem chi tiết các cuốn sách cũ, chúng sẽ được tự động lưu lại ở đây.</p>
+            <a th:href="@{/books}" class="btn btn-primary btn-sm rounded-pill px-4 text-white">Khám Phá Sách Cũ</a>
+        </div>
+
+        <div class="row g-4" th:unless="${#lists.isEmpty(viewedBooks)}">
+            <div class="col-xl-3 col-lg-4 col-sm-6" th:each="book : ${viewedBooks}">
+                <div class="book-card p-3">
+                    <div class="book-img-wrap mb-3">
+                        <img th:if="${book.mainImageUrl != null and !book.mainImageUrl.isEmpty()}" 
+                             th:src="${book.mainImageUrl}" th:alt="${book.title}">
+                        <img th:unless="${book.mainImageUrl != null and !book.mainImageUrl.isEmpty()}" 
+                             th:src="@{/images/product-item1.png}" th:alt="${book.title}">
+
+                        <span class="badge position-absolute top-0 start-0 m-2 condition-badge"
+                              th:classappend="${book.bookCondition.name() == 'LIKE_NEW' ? 'badge-like-new' : 
+                                               (book.bookCondition.name() == 'VERY_GOOD' ? 'badge-very-good' : 
+                                               (book.bookCondition.name() == 'GOOD' ? 'badge-good' : 
+                                               (book.bookCondition.name() == 'ACCEPTABLE' ? 'badge-acceptable' : 'badge-old')))}"
+                              th:text="${book.bookCondition.label}">Tình trạng</span>
+                    </div>
+
+                    <div class="flex-grow-1 d-flex flex-column">
+                        <small class="text-muted text-truncate" th:text="${book.category != null ? book.category.name : 'Sách cũ'}">Danh mục</small>
+                        <h6 class="fw-bold mb-1 text-truncate-2" style="height: 44px; overflow: hidden;">
+                            <a th:href="@{'/books/' + ${book.id}}" class="text-dark text-decoration-none" th:text="${book.title}">Tên sách</a>
+                        </h6>
+                        <small class="text-muted mb-2 text-truncate" th:text="${book.author}">Tác giả</small>
+
+                        <div class="mt-auto">
+                            <span class="selling-price d-block mb-2" th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</span>
+                            <div class="d-grid gap-2">
+                                <a th:href="@{'/books/' + ${book.id}}" class="btn btn-outline-primary btn-sm rounded-pill w-100">
+                                    Xem Lại Sách
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

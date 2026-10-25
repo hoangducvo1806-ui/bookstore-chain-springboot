@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Lịch Sử Mua Hàng - Chuỗi Sách Cũ</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="bg-light py-4 border-bottom mb-4">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Lịch sử đơn mua</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">Quản Lý Đơn Mua Sách Cũ</h2>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <!-- 6 Tabs trạng thái theo đúng yêu cầu đề bài C7 -->
+        <ul class="nav nav-pills nav-fill bg-white p-2 rounded-4 shadow-sm mb-4 border flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link rounded-pill py-2" th:classappend="${currentTab == 'all'} ? 'active bg-primary text-white' : 'text-dark'" 
+                   th:href="@{/user/orders(tab='all')}">Tất Cả</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill py-2" th:classappend="${currentTab == 'new'} ? 'active bg-primary text-white' : 'text-dark'" 
+                   th:href="@{/user/orders(tab='new')}">Đơn Mới</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill py-2" th:classappend="${currentTab == 'confirmed'} ? 'active bg-primary text-white' : 'text-dark'" 
+                   th:href="@{/user/orders(tab='confirmed')}">Đã Xác Nhận</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill py-2" th:classappend="${currentTab == 'shipping'} ? 'active bg-primary text-white' : 'text-dark'" 
+                   th:href="@{/user/orders(tab='shipping')}">Đang Giao</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill py-2" th:classappend="${currentTab == 'delivered'} ? 'active bg-primary text-white' : 'text-dark'" 
+                   th:href="@{/user/orders(tab='delivered')}">Đã Giao</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill py-2" th:classappend="${currentTab == 'cancelled'} ? 'active bg-primary text-white' : 'text-dark'" 
+                   th:href="@{/user/orders(tab='cancelled')}">Đã Hủy</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill py-2" th:classappend="${currentTab == 'returned'} ? 'active bg-primary text-white' : 'text-dark'" 
+                   th:href="@{/user/orders(tab='returned')}">Trả Hàng / Hoàn Tiền</a>
+            </li>
+        </ul>
+
+        <!-- Khi không có đơn nào -->
+        <div th:if="${#lists.isEmpty(orders)}" class="text-center py-5 bg-white rounded-4 shadow-sm p-4">
+            <i class="bi bi-receipt fs-1 text-muted"></i>
+            <h5 class="fw-bold mt-2">Chưa có đơn hàng nào trong mục này</h5>
+            <p class="text-muted">Các đơn đặt mua sách cũ của bạn sẽ hiển thị tại đây.</p>
+            <a th:href="@{/books}" class="btn btn-outline-primary btn-sm rounded-pill">Tiếp tục mua sách</a>
+        </div>
+
+        <!-- Danh sách đơn hàng -->
+        <div class="row g-4" th:unless="${#lists.isEmpty(orders)}">
+            <div class="col-12" th:each="order : ${orders}">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                    <!-- Header đơn -->
+                    <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-bold text-dark">Mã đơn: <span class="text-primary" th:text="${order.orderCode}">ORD-XXXX</span></span>
+                            <span class="text-muted">|</span>
+                            <small class="text-muted" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">Thời gian</small>
+                            <span class="text-muted" th:if="${order.shop != null}">|</span>
+                            <small class="text-secondary" th:if="${order.shop != null}"><i class="bi bi-shop me-1"></i><span th:text="${order.shop.name}">Chi nhánh</span></small>
+                        </div>
+                        <div>
+                            <!-- Badge trạng thái đơn -->
+                            <span class="badge py-2 px-3 rounded-pill"
+                                  th:classappend="${order.status.name() == 'NEW' ? 'bg-primary' : 
+                                                   (order.status.name() == 'CONFIRMED' ? 'bg-info text-dark' : 
+                                                   (order.status.name() == 'SHIPPING' or order.status.name() == 'PICKED_UP' ? 'bg-warning text-dark' : 
+                                                   (order.status.name() == 'DELIVERED' ? 'bg-success' : 
+                                                   (order.status.name() == 'CANCELLED' ? 'bg-danger' : 'bg-secondary'))))}"
+                                  th:text="${order.status.label}">Trạng thái</span>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách các sách trong đơn -->
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center justify-content-between py-2 border-bottom" th:each="item : ${order.items}">
+                            <div class="d-flex align-items-center gap-3">
+                                <img th:if="${item.book.mainImageUrl != null and !item.book.mainImageUrl.isEmpty()}" 
+                                     th:src="${item.book.mainImageUrl}" class="rounded border" style="width: 55px; height: 70px; object-fit: cover;">
+                                <img th:unless="${item.book.mainImageUrl != null and !item.book.mainImageUrl.isEmpty()}" 
+                                     th:src="@{/images/product-item1.png}" class="rounded border" style="width: 55px; height: 70px; object-fit: cover;">
+                                <div>
+                                    <h6 class="fw-bold mb-1">
+                                        <a th:href="@{'/books/' + ${item.book.id}}" class="text-dark text-decoration-none" th:text="${item.book.title}">Tên sách</a>
+                                    </h6>
+                                    <small class="text-muted d-block">Tình trạng: <span class="badge bg-light text-dark border" th:text="${item.book.bookCondition.label}"></span></small>
+                                    <small class="text-muted">Số lượng: <b th:text="${item.quantity}">1</b></small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="fw-bold text-dark" th:text="${#numbers.formatDecimal(item.price.multiply(T(java.math.BigDecimal).valueOf(item.quantity)), 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</span>
+                                <!-- Nút Đánh giá sản phẩm nếu đơn đã giao -->
+                                <div class="mt-2" th:if="${order.status.name() == 'DELIVERED'}">
+                                    <a th:href="@{/user/reviews/write(bookId=${item.book.id}, orderId=${order.id})}" 
+                                       class="btn btn-outline-warning btn-sm rounded-pill py-1 px-3" style="font-size: 0.75rem;">
+                                        <i class="bi bi-star me-1"></i> Đánh giá cuốn này
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer đơn: Tổng tiền và các nút hành động -->
+                    <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <small class="text-muted">Phương thức: <b th:text="${order.paymentMethod.label}">COD</b></small>
+                            <span class="mx-2">•</span>
+                            <small class="text-muted">Thanh toán: <span class="badge" th:classappend="${order.paymentStatus.name() == 'COMPLETED' ? 'bg-success' : 'bg-secondary'}" th:text="${order.paymentStatus.label}"></span></small>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div>
+                                <span class="text-muted small">Thành tiền: </span>
+                                <b class="text-danger fs-5" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">65.000 VNĐ</b>
+                            </div>
+
+                            <a th:href="@{'/user/orders/' + ${order.orderCode}}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                Chi Tiết Đơn
+                            </a>
+
+                            <!-- Nút Hủy đơn (C7: User được hủy đơn khi đơn còn mới) -->
+                            <form th:if="${order.status.name() == 'NEW'}" 
+                                  th:action="@{'/user/orders/' + ${order.orderCode} + '/cancel'}" method="post" class="d-inline"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này? Sách sẽ được hoàn lại vào kho.');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                    Hủy Đơn Hàng
+                                </button>
+                            </form>
+
+                            <!-- Nút Yêu cầu trả hàng (C7: User gửi yêu cầu trả hàng khi đã giao) -->
+                            <form th:if="${order.status.name() == 'DELIVERED'}" 
+                                  th:action="@{'/user/orders/' + ${order.orderCode} + '/return'}" method="post" class="d-inline"
+                                  onsubmit="return confirm('Bạn muốn gửi yêu cầu trả hàng / hoàn tiền cho đơn này? Cửa hàng sẽ liên hệ xác nhận.');">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                    Yêu Cầu Trả Hàng
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

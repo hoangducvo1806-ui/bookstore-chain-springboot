@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Thanh Toán Đơn Hàng - Chuỗi Sách Cũ</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="bg-light py-4 border-bottom mb-4">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/cart}" class="text-decoration-none">Giỏ hàng</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Thanh toán</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">Thanh Toán Đặt Mua Sách</h2>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <form th:action="@{/checkout}" th:object="${checkoutForm}" method="post">
+            <div class="row g-4">
+                <!-- Cột trái: Thông tin nhận hàng, Vận chuyển, Voucher, Phương thức thanh toán -->
+                <div class="col-lg-7">
+                    <!-- 1. Địa chỉ giao hàng -->
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                        <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-geo-alt me-1"></i> 1. Thông Tin Nhận Hàng</h5>
+
+                        <!-- Chọn địa chỉ lưu sẵn nếu có -->
+                        <div th:if="${not #lists.isEmpty(addresses)}" class="mb-3">
+                            <label class="form-label fw-semibold small">Chọn từ sổ địa chỉ của bạn:</label>
+                            <div class="form-check p-3 border rounded-3 mb-2" th:each="addr : ${addresses}">
+                                <input class="form-check-input" type="radio" th:field="*{addressId}" th:value="${addr.id}" 
+                                       th:id="${'addr_' + addr.id}" checked>
+                                <label class="form-check-label w-100" th:for="${'addr_' + addr.id}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <b th:text="${addr.recipientName + ' - ' + addr.phone}">Tên - SĐT</b>
+                                        <span class="badge bg-primary-subtle text-primary" th:if="${addr.isDefault}">Mặc định</span>
+                                    </div>
+                                    <small class="text-muted d-block" 
+                                           th:text="${addr.streetAddress + ', ' + addr.ward + ', ' + addr.district + ', ' + addr.province}">Địa chỉ</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Hoặc nhập địa chỉ mới -->
+                        <div class="border-top pt-3 mt-3">
+                            <p class="small text-muted mb-2">Hoặc nhập địa chỉ giao hàng trực tiếp:</p>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <input type="text" th:field="*{recipientName}" class="form-control form-control-sm" placeholder="Họ và tên người nhận">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" th:field="*{recipientPhone}" class="form-control form-control-sm" placeholder="Số điện thoại nhận hàng">
+                                </div>
+                                <div class="col-12">
+                                    <input type="text" th:field="*{shippingAddress}" class="form-control form-control-sm" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/TP">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Chọn nhà vận chuyển -->
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                        <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-truck me-1"></i> 2. Đơn Vị Vận Chuyển</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6" th:each="carrier : ${carriers}">
+                                <div class="form-check p-3 border rounded-3 h-100">
+                                    <input class="form-check-input" type="radio" th:field="*{carrierId}" th:value="${carrier.id}" 
+                                           th:id="${'carrier_' + carrier.id}" checked>
+                                    <label class="form-check-label w-100" th:for="${'carrier_' + carrier.id}">
+                                        <div class="fw-bold" th:text="${carrier.name}">Giao Hàng Nhanh</div>
+                                        <div class="text-danger fw-semibold my-1" 
+                                             th:text="${#numbers.formatDecimal(carrier.shippingFee, 0, 'COMMA', 0, 'POINT') + ' đ'}">25.000 đ</div>
+                                        <small class="text-muted" th:text="${carrier.description}">Mô tả vận chuyển</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Mã giảm giá (Voucher) -->
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                        <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-ticket-perforated me-1"></i> 3. Mã Giảm Giá (Voucher)</h5>
+                        <div class="input-group">
+                            <input type="text" th:field="*{voucherCode}" class="form-control" placeholder="Nhập mã voucher (VD: SACHCU10, FREESHIP, CHAOBAN)">
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            * Gợi ý: Dùng mã <b>SACHCU10</b> (giảm 10%), <b>FREESHIP</b> (giảm 30.000đ), hoặc <b>CHAOBAN</b> (giảm 20.000đ).
+                        </small>
+                    </div>
+
+                    <!-- 4. Phương thức thanh toán -->
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                        <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-credit-card me-1"></i> 4. Phương Thức Thanh Toán</h5>
+                        
+                        <div class="form-check p-3 border rounded-3 mb-3">
+                            <input class="form-check-input" type="radio" th:field="*{paymentMethod}" value="COD" id="payCOD" checked>
+                            <label class="form-check-label w-100" for="payCOD">
+                                <b class="d-block"><i class="bi bi-cash-stack text-success me-1"></i> Thanh toán khi nhận hàng (COD)</b>
+                                <small class="text-muted">Kiểm tra sách cũ đúng với tình trạng cam kết trước khi thanh toán cho Shipper</small>
+                            </label>
+                        </div>
+
+                        <div class="form-check p-3 border rounded-3 mb-3">
+                            <input class="form-check-input" type="radio" th:field="*{paymentMethod}" value="VNPAY" id="payVNPAY">
+                            <label class="form-check-label w-100" for="payVNPAY">
+                                <b class="d-block text-primary"><i class="bi bi-qr-code text-primary me-1"></i> Cổng thanh toán VNPAY (Sandbox)</b>
+                                <small class="text-muted">Quét mã VNPAY-QR hoặc thẻ ATM / Visa / Mastercard qua môi trường thử nghiệm VNPAY Sandbox</small>
+                            </label>
+                        </div>
+
+                        <div class="form-check p-3 border rounded-3">
+                            <input class="form-check-input" type="radio" th:field="*{paymentMethod}" value="MOMO" id="payMOMO">
+                            <label class="form-check-label w-100" for="payMOMO">
+                                <b class="d-block text-danger"><i class="bi bi-wallet2 text-danger me-1"></i> Ví Điện Tử MOMO (Sandbox)</b>
+                                <small class="text-muted">Thanh toán nhanh chóng và bảo mật qua ví MoMo</small>
+                            </label>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="form-label small fw-bold">Ghi chú cho đơn hàng (tùy chọn):</label>
+                            <textarea th:field="*{note}" class="form-control form-control-sm" rows="2" 
+                                      placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi giao..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Xem lại danh sách sách & Nút Đặt hàng -->
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top bg-white" style="top: 80px;">
+                        <h5 class="fw-bold mb-3 border-bottom pb-2">Đơn Hàng Của Bạn</h5>
+
+                        <div class="order-items-scroll mb-3" style="max-height: 280px; overflow-y: auto;">
+                            <div th:each="group : ${shopGroups}" class="mb-3 border-bottom pb-2">
+                                <small class="fw-bold text-primary d-block mb-2" th:text="${group.shop != null ? group.shop.name : 'Chi nhánh'}">Chi nhánh</small>
+                                <div class="d-flex align-items-center gap-3 mb-2" th:each="it : ${group.items}">
+                                    <img th:if="${it.book.mainImageUrl != null and !it.book.mainImageUrl.isEmpty()}" 
+                                         th:src="${it.book.mainImageUrl}" class="rounded border" style="width: 45px; height: 55px; object-fit: cover;">
+                                    <img th:unless="${it.book.mainImageUrl != null and !it.book.mainImageUrl.isEmpty()}" 
+                                         th:src="@{/images/product-item1.png}" class="rounded border" style="width: 45px; height: 55px; object-fit: cover;">
+                                    <div class="flex-grow-1 text-truncate">
+                                        <small class="fw-bold d-block text-truncate" th:text="${it.book.title}">Tên sách</small>
+                                        <small class="text-muted">SL: <span th:text="${it.quantity}">1</span> x <span th:text="${#numbers.formatDecimal(it.price, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span></small>
+                                    </div>
+                                    <small class="fw-bold text-danger" th:text="${#numbers.formatDecimal(it.subtotal, 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tóm tắt chi phí -->
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tiền sách:</span>
+                            <span class="fw-bold text-dark" th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Phí vận chuyển:</span>
+                            <span class="fw-bold text-dark">Theo đơn vị chọn</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
+                            <span class="text-muted">Giảm giá voucher:</span>
+                            <span class="fw-bold text-success">Áp dụng khi bấm đặt</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary rounded-pill py-3 w-100 text-white fw-bold fs-6 shadow">
+                            <i class="bi bi-check2-circle me-1"></i> XÁC NHẬN ĐẶT HÀNG
+                        </button>
+                        <small class="text-muted text-center d-block mt-3" style="font-size: 0.8rem;">
+                            Bằng việc đặt hàng, bạn đồng ý với các điều khoản mua bán sách cũ của Bookly Chain.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>

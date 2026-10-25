@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Danh Sách Sách Yêu Thích - Chuỗi Sách Cũ</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="bg-light py-4 border-bottom mb-4">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Sách yêu thích</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">Sách Cũ Yêu Thích Của Bạn</h2>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div th:if="${#lists.isEmpty(wishlistBooks)}" class="text-center py-5 bg-white rounded-4 shadow-sm p-4">
+            <i class="bi bi-heartbreak fs-1 text-muted"></i>
+            <h5 class="fw-bold mt-2">Danh sách yêu thích đang trống</h5>
+            <p class="text-muted">Bạn chưa lưu cuốn sách nào vào mục yêu thích.</p>
+            <a th:href="@{/books}" class="btn btn-primary btn-sm rounded-pill px-4 text-white">Khám Phá Sách Cũ Ngay</a>
+        </div>
+
+        <div class="row g-4" th:unless="${#lists.isEmpty(wishlistBooks)}">
+            <div class="col-xl-3 col-lg-4 col-sm-6" th:each="book : ${wishlistBooks}">
+                <div class="book-card p-3">
+                    <div class="book-img-wrap mb-3">
+                        <img th:if="${book.mainImageUrl != null and !book.mainImageUrl.isEmpty()}" 
+                             th:src="${book.mainImageUrl}" th:alt="${book.title}">
+                        <img th:unless="${book.mainImageUrl != null and !book.mainImageUrl.isEmpty()}" 
+                             th:src="@{/images/product-item1.png}" th:alt="${book.title}">
+
+                        <span class="badge position-absolute top-0 start-0 m-2 condition-badge"
+                              th:classappend="${book.bookCondition.name() == 'LIKE_NEW' ? 'badge-like-new' : 
+                                               (book.bookCondition.name() == 'VERY_GOOD' ? 'badge-very-good' : 
+                                               (book.bookCondition.name() == 'GOOD' ? 'badge-good' : 
+                                               (book.bookCondition.name() == 'ACCEPTABLE' ? 'badge-acceptable' : 'badge-old')))}"
+                              th:text="${book.bookCondition.label}">Tình trạng</span>
+
+                        <!-- Form bỏ thích -->
+                        <form th:action="@{'/user/wishlist/toggle/' + ${book.id}}" method="post" class="d-inline">
+                            <button type="submit" class="btn-wishlist text-danger" title="Bỏ yêu thích">
+                                <i class="bi bi-heart-fill"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="flex-grow-1 d-flex flex-column">
+                        <small class="text-muted text-truncate" th:text="${book.category != null ? book.category.name : 'Sách cũ'}">Danh mục</small>
+                        <h6 class="fw-bold mb-1 text-truncate-2" style="height: 44px; overflow: hidden;">
+                            <a th:href="@{'/books/' + ${book.id}}" class="text-dark text-decoration-none" th:text="${book.title}">Tên sách</a>
+                        </h6>
+                        <small class="text-muted mb-2 text-truncate" th:text="${book.author}">Tác giả</small>
+
+                        <div class="mt-auto">
+                            <div class="d-flex align-items-baseline gap-2 mb-2">
+                                <span class="selling-price" th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</span>
+                                <span class="original-price" th:if="${book.originalPrice != null}" 
+                                      th:text="${#numbers.formatDecimal(book.originalPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}">120.000 đ</span>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <form th:action="@{/cart/add}" method="post">
+                                    <input type="hidden" name="bookId" th:value="${book.id}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 text-white" th:disabled="${book.stock <= 0}">
+                                        <i class="bi bi-cart-plus me-1"></i> <span th:text="${book.stock > 0 ? 'Thêm Giỏ Hàng' : 'Hết Hàng'}">Thêm Giỏ Hàng</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

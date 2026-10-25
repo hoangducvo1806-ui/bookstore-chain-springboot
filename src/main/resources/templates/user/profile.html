@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Hồ Sơ & Sổ Địa Chỉ - Chuỗi Sách Cũ</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="bg-light py-4 border-bottom mb-4">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Hồ sơ cá nhân</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">Tài Khoản & Sổ Địa Chỉ Nhận Hàng</h2>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row g-4">
+            <!-- Cột trái: Thông tin cá nhân & Đổi avatar Cloudinary -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white text-center">
+                    <div class="mb-3 position-relative d-inline-block">
+                        <img th:if="${profileDto.avatarUrl != null and !profileDto.avatarUrl.isEmpty()}" 
+                             th:src="${profileDto.avatarUrl}" alt="Avatar" class="rounded-circle shadow" style="width: 120px; height: 120px; object-fit: cover;">
+                        <i th:unless="${profileDto.avatarUrl != null and !profileDto.avatarUrl.isEmpty()}" 
+                           class="bi bi-person-circle display-1 text-primary"></i>
+                    </div>
+
+                    <h5 class="fw-bold mb-1" th:text="${profileDto.fullName}">Họ và Tên</h5>
+                    <p class="text-muted small mb-3" th:text="${profileDto.email}">email@example.com</p>
+
+                    <!-- Form Đổi Avatar (Cloudinary) -->
+                    <form th:action="@{/user/profile/avatar}" method="post" enctype="multipart/form-data" class="border-top pt-3 text-start">
+                        <label class="form-label small fw-bold"><i class="bi bi-camera me-1"></i> Đổi ảnh đại diện (Tải lên Cloudinary):</label>
+                        <div class="input-group input-group-sm mb-2">
+                            <input type="file" name="avatarFile" class="form-control" accept="image/*" required>
+                            <button class="btn btn-outline-primary" type="submit">Tải lên</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Form Cập Nhật Thông Tin Cá Nhân -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-pencil-square me-1"></i> Cập Nhật Thông Tin</h5>
+
+                    <form th:action="@{/user/profile/update}" th:object="${profileDto}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Họ và tên *</label>
+                            <input type="text" th:field="*{fullName}" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Số điện thoại *</label>
+                            <input type="text" th:field="*{phone}" class="form-control form-control-sm" placeholder="VD: 0912345678">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Địa chỉ Email</label>
+                            <input type="email" th:field="*{email}" class="form-control form-control-sm bg-light" readonly>
+                            <small class="text-muted" style="font-size: 0.75rem;">Email tài khoản không thể chỉnh sửa</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 text-white fw-bold py-2">
+                            Lưu Thay Đổi
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Cột phải: Quản lý nhiều địa chỉ nhận hàng (Thêm, Sửa, Xóa, Đặt mặc định) -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-geo-alt me-1"></i> Sổ Địa Chỉ Nhận Hàng</h5>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAddAddress">
+                            <i class="bi bi-plus-circle me-1"></i> Thêm Địa Chỉ Mới
+                        </button>
+                    </div>
+
+                    <!-- Form Thêm Địa Chỉ Mới (Collapsible) -->
+                    <div class="collapse mb-4" id="collapseAddAddress">
+                        <div class="card card-body bg-light border-0 rounded-3">
+                            <h6 class="fw-bold mb-3">Thêm Địa Chỉ Mới</h6>
+                            <form th:action="@{/user/addresses/add}" th:object="${newAddress}" method="post">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-6">
+                                        <input type="text" th:field="*{recipientName}" class="form-control form-control-sm" placeholder="Họ và tên người nhận *" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" th:field="*{phone}" class="form-control form-control-sm" placeholder="Số điện thoại *" required>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <input type="text" th:field="*{streetAddress}" class="form-control form-control-sm" placeholder="Số nhà, tên đường *" required>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-4">
+                                        <input type="text" th:field="*{ward}" class="form-control form-control-sm" placeholder="Phường / Xã *" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" th:field="*{district}" class="form-control form-control-sm" placeholder="Quận / Huyện *" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" th:field="*{province}" class="form-control form-control-sm" placeholder="Tỉnh / Thành phố *" required>
+                                    </div>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" th:field="*{isDefault}" id="newDefault">
+                                    <label class="form-check-label small" for="newDefault">Đặt làm địa chỉ mặc định</label>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 text-white">Lưu Địa Chỉ</button>
+                                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-toggle="collapse" data-bs-target="#collapseAddAddress">Hủy</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách địa chỉ đã lưu -->
+                    <div th:if="${#lists.isEmpty(addresses)}" class="text-center py-4 text-muted">
+                        <i class="bi bi-geo-alt fs-2"></i>
+                        <p class="mt-2 mb-0">Bạn chưa lưu địa chỉ nhận hàng nào. Hãy thêm địa chỉ để thanh toán nhanh hơn!</p>
+                    </div>
+
+                    <div class="address-list" th:unless="${#lists.isEmpty(addresses)}">
+                        <div class="p-3 border rounded-3 mb-3" th:each="addr : ${addresses}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <b class="fs-6" th:text="${addr.recipientName}">Nguyễn Văn A</b>
+                                    <span class="text-muted ms-2">(<span th:text="${addr.phone}">0912345678</span>)</span>
+                                    <span class="badge bg-primary ms-2" th:if="${addr.isDefault}">Mặc định</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <!-- Đặt làm mặc định -->
+                                    <form th:unless="${addr.isDefault}" th:action="@{'/user/addresses/' + ${addr.id} + '/default'}" method="post">
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                                            Thiết lập mặc định
+                                        </button>
+                                    </form>
+
+                                    <!-- Xóa địa chỉ -->
+                                    <form th:action="@{'/user/addresses/' + ${addr.id} + '/delete'}" method="post"
+                                          onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                                            Xóa
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block" 
+                                   th:text="${addr.streetAddress + ', ' + addr.ward + ', ' + addr.district + ', ' + addr.province}">
+                                Địa chỉ chi tiết...
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

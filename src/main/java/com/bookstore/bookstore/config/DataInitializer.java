@@ -106,6 +106,7 @@ public class DataInitializer implements CommandLineRunner {
         Category vanHoc = createCategoryIfNotExist("Văn học Việt Nam", "van-hoc-viet-nam", "Tiểu thuyết, truyện ngắn, thơ ca Việt Nam qua các thời kỳ");
         Category kienThuc = createCategoryIfNotExist("Khoa học & Kỹ thuật", "khoa-hoc-ky-thuat", "Sách giáo trình đại học, công nghệ thông tin, toán lý hóa");
         Category lichSu = createCategoryIfNotExist("Lịch sử - Triết học", "lich-su-triet-hoc", "Sách nghiên cứu lịch sử cổ cận hiện đại và văn hóa");
+        Category kinhTe = createCategoryIfNotExist("Kinh tế & Khởi nghiệp", "kinh-te-khoi-nghiep", "Sách quản trị kinh doanh, marketing, bài học thành công");
 
         // 4. Tạo chi nhánh cửa hàng mẫu cho Vendor
         Shop shopChiNhanh1 = shopRepository.findByOwner(vendor)
@@ -120,7 +121,7 @@ public class DataInitializer implements CommandLineRunner {
 
         // 5. Tạo một số sách cũ mẫu (Có cuốn soldQuantity > 10 để phục vụ trang Guest)
         Book book1 = createBookIfNotExist(shopChiNhanh1, vanHoc, "Số Đỏ (Bản in 1989)", "ISBN9780001", "Vũ Trọng Phụng",
-                "NXB Văn Học", 1989, BookCondition.OLD, "Sách bìa mềm ố vàng theo thời gian, đủ trang, chữ rõ",
+                "NXB Văn Học", 1989, BookCondition.OLD, "Sách bìa mềm ố vàng theo thời gian, đủ trang, chữ rõ nét",
                 new BigDecimal("120000"), new BigDecimal("65000"), 5, 25,
                 "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500");
 
@@ -139,10 +140,15 @@ public class DataInitializer implements CommandLineRunner {
                 new BigDecimal("70000"), new BigDecimal("35000"), 2, 4,
                 "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500");
 
+        createBookIfNotExist(shopChiNhanh1, kinhTe, "Quốc Gia Khởi Nghiệp", "ISBN9780005", "Dan Senor & Saul Singer",
+                "NXB Thế Giới", 2018, BookCondition.GOOD, "Tình trạng tốt 85%, không rách, giấy còn sáng",
+                new BigDecimal("150000"), new BigDecimal("75000"), 6, 18,
+                "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=500");
+
         // 6. Tạo đối tác vận chuyển mẫu
-        createCarrierIfNotExist("Giao Hàng Nhanh (GHN)", new BigDecimal("28000"), "Giao hàng tiêu chuẩn 1-2 ngày nội thành");
-        createCarrierIfNotExist("Viettel Post", new BigDecimal("25000"), "Mạng lưới bưu cục rộng khắp cả nước");
-        createCarrierIfNotExist("Giao Hàng Tiết Kiệm (GHTK)", new BigDecimal("22000"), "Tiết kiệm chi phí cho đơn hàng xa");
+        createCarrierIfNotExist("Giao Hàng Nhanh (GHN)", new BigDecimal("25000"), "Giao hàng tiêu chuẩn 2-3 ngày toàn quốc");
+        createCarrierIfNotExist("Viettel Post", new BigDecimal("30000"), "Mạng lưới bưu cục rộng khắp cả nước");
+        createCarrierIfNotExist("Hỏa Tốc Nội Thành (Giao trong 2h)", new BigDecimal("45000"), "Chỉ áp dụng trong khu vực nội thành có chi nhánh shop");
 
         // 7. Tạo chiết khấu mẫu cho shop chi nhánh 1
         if (!appCommissionRepository.existsByShop(shopChiNhanh1)) {
@@ -153,11 +159,15 @@ public class DataInitializer implements CommandLineRunner {
                     .build());
         }
 
-        // 8. Tạo mã giảm giá mẫu
-        createVoucherIfNotExist("SACHCU10", "Giảm 10% đơn sách cũ", "PERCENTAGE", new BigDecimal("10.00"), new BigDecimal("100000"), 100);
-        createVoucherIfNotExist("FREESHIP", "Miễn phí vận chuyển", "FREE_SHIPPING", new BigDecimal("30000.00"), new BigDecimal("150000"), 50);
+        // 8. Tạo các mã giảm giá mẫu
+        createVoucherIfNotExist("SACHCU10", "Giảm 10% cho đơn từ 100.000 VNĐ", "PERCENTAGE",
+                new BigDecimal("10"), new BigDecimal("100000"), new BigDecimal("30000"), 100);
+        createVoucherIfNotExist("FREESHIP", "Miễn phí vận chuyển (Tối đa 30.000 VNĐ)", "FREE_SHIPPING",
+                new BigDecimal("30000"), new BigDecimal("150000"), new BigDecimal("30000"), 50);
+        createVoucherIfNotExist("CHAOBAN", "Giảm ngay 20.000 VNĐ cho khách hàng mới", "FIXED_AMOUNT",
+                new BigDecimal("20000"), new BigDecimal("50000"), new BigDecimal("20000"), 200);
 
-        // 9. Tạo đơn hàng mẫu
+        // 9. Tạo đơn hàng mẫu cho Admin Dashboard
         if (orderRepository.count() == 0 && book1 != null) {
             Order order1 = Order.builder()
                     .orderCode("ORD" + System.currentTimeMillis())
@@ -228,7 +238,8 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void createVoucherIfNotExist(String code, String title, String type, BigDecimal value, BigDecimal minOrder, Integer limit) {
+    private void createVoucherIfNotExist(String code, String title, String type, BigDecimal value,
+                                        BigDecimal minOrder, BigDecimal maxDiscount, Integer limit) {
         if (!voucherRepository.existsByCode(code)) {
             voucherRepository.save(Voucher.builder()
                     .code(code)
@@ -236,9 +247,10 @@ public class DataInitializer implements CommandLineRunner {
                     .discountType(type)
                     .discountValue(value)
                     .minOrderAmount(minOrder)
+                    .maxDiscountAmount(maxDiscount)
                     .usageLimit(limit)
                     .usedCount(0)
-                    .startDate(LocalDateTime.now())
+                    .startDate(LocalDateTime.now().minusDays(1))
                     .endDate(LocalDateTime.now().plusMonths(3))
                     .active(true)
                     .build());

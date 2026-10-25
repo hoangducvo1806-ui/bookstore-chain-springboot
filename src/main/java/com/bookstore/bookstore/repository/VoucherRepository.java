@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     Optional<Voucher> findByCode(String code);
+    Optional<Voucher> findByCodeIgnoreCaseAndActiveTrue(String code);
     boolean existsByCode(String code);
 }
