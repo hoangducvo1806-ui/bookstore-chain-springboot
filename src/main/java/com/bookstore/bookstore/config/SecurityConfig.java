@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/", "/home", "/books/**", "/categories/**", "/shops/**", "/search/**", "/payment/**",
                         "/auth/**", "/login", "/register", "/verify-otp", "/forgot-password", "/reset-password",
-                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**"
+                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**", "/error"
                 ).permitAll()
 
                 // Phân quyền theo role

@@ -93,9 +93,11 @@
         </div>
     </section>
 
-    <!-- Reusable Book Card Fragment -->
-    <div th:fragment="bookCard(book)" class="book-card p-3">
-        <div class="book-img-wrap mb-3">
+</div>
+
+<!-- Reusable Book Card Fragment -->
+<div th:fragment="bookCard(book)" class="book-card p-3" th:if="${book != null}">
+    <div class="book-img-wrap mb-3">
             <img th:if="${book.mainImageUrl != null and !book.mainImageUrl.isEmpty()}" 
                  th:src="${book.mainImageUrl}" th:alt="${book.title}">
             <img th:unless="${book.mainImageUrl != null and !book.mainImageUrl.isEmpty()}" 
