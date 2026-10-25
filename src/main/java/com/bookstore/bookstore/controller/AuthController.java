@@ -114,11 +114,11 @@ public class AuthController {
     // --- ĐĂNG XUẤT ---
     @GetMapping("/logout")
     public String handleLogout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("jwt_token", null);
+        Cookie cookie = new Cookie("jwt_token", "");
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(0); // Xóa cookie
         response.addCookie(cookie);
-        return "redirect:/login";
+        return "redirect:/";
     }
 }
