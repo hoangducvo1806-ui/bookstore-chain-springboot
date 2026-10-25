@@ -58,8 +58,8 @@ public class SecurityConfig {
                 ).permitAll()
 
                 // Phân quyền theo role
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN")
+                .requestMatchers("/admin/users/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**", "/manager/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/vendor/**").hasRole("VENDOR")
                 .requestMatchers("/shipper/**").hasRole("SHIPPER")
                 .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**").hasAnyRole("USER", "VENDOR")

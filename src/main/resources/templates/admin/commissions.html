@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: header('Quản lý Chiết Khấu App')}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{admin/fragments/layout :: sidebar('commissions')}"></div>
+
+    <div class="content-area">
+        <nav th:replace="~{admin/fragments/layout :: topbar}"></nav>
+        <div th:replace="~{admin/fragments/layout :: alerts}"></div>
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-0">💰 Quản Lý Chiết Khấu Ứng Dụng</h4>
+                <small class="text-muted">Cấu hình tỷ lệ phần trăm (%) hoa hồng hệ thống thu từ từng chi nhánh cửa hàng</small>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#setCommissionModal">
+                    <i class="bi bi-percent me-1"></i> Thiết Lập Chiết Khấu Mới
+                </button>
+            </div>
+        </div>
+
+        <!-- Commissions Table -->
+        <div class="card table-card p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th>Chi Nhánh Cửa Hàng</th>
+                        <th>Chủ Shop</th>
+                        <th>Tỷ Lệ Chiết Khấu</th>
+                        <th>Ghi Chú</th>
+                        <th>Ngày Cập Nhật</th>
+                        <th class="text-center" style="width: 140px;">Thao Tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(commissions)}">
+                        <td colspan="7" class="text-center text-muted py-4">Chưa có cấu hình chiết khấu nào. Hãy thiết lập chiết khấu cho các shop.</td>
+                    </tr>
+                    <tr th:each="comm : ${commissions}">
+                        <td th:text="${comm.id}">1</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-shop fs-3 text-primary me-2"></i>
+                                <div>
+                                    <span class="fw-bold text-dark d-block" th:text="${comm.shop.name}">Tên Shop</span>
+                                    <small class="text-muted" th:text="${comm.shop.address}">Địa chỉ</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${comm.shop.owner != null ? comm.shop.owner.fullName : 'N/A'}">Chủ shop</td>
+                        <td>
+                            <span class="badge bg-success fs-6 fw-bold" th:text="${comm.commissionRate} + '%'">5.00%</span>
+                        </td>
+                        <td class="text-muted small" th:text="${comm.note != null ? comm.note : 'Mức chiết khấu chuẩn'}">Chiết khấu ưu đãi...</td>
+                        <td th:text="${comm.createdAt != null ? #temporals.format(comm.createdAt, 'dd/MM/yyyy') : ''}">2026-10-25</td>
+                        <td class="text-center">
+                            <!-- Nút Sửa chiết khấu -->
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" th:data-bs-target="'#editCommModal-' + ${comm.id}">
+                                <i class="bi bi-pencil-square"></i> Cập nhật
+                            </button>
+
+                            <!-- Modal Sửa Chiết Khấu -->
+                            <div class="modal fade text-start" th:id="'editCommModal-' + ${comm.id}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form th:action="@{/admin/commissions/save}" method="post">
+                                            <input type="hidden" name="shopId" th:value="${comm.shop.id}">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fw-bold">✏️ Cập Nhật Chiết Khấu: <span th:text="${comm.shop.name}"></span></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Tỷ lệ chiết khấu (%)</label>
+                                                    <div class="input-group">
+                                                        <input type="number" name="commissionRate" class="form-control" th:value="${comm.commissionRate}" required min="0" max="100" step="0.5">
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Ghi chú chính sách</label>
+                                                    <textarea name="note" class="form-control" rows="2" th:text="${comm.note}"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                                                <button type="submit" class="btn btn-primary btn-sm">Lưu Thay Đổi</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal Thêm Chiết Khấu Mới -->
+        <div class="modal fade" id="setCommissionModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/admin/commissions/save}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">✨ Thiết Lập Chiết Khấu Mới</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Chọn chi nhánh cửa hàng</label>
+                                <select name="shopId" class="form-select" required>
+                                    <option value="">-- Chọn một cửa hàng --</option>
+                                    <option th:each="s : ${shops}" th:value="${s.id}" th:text="${s.name} + ' (' + ${s.address} + ')'">Shop</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Tỷ lệ chiết khấu (%)</label>
+                                <div class="input-group">
+                                    <input type="number" name="commissionRate" class="form-control" placeholder="5.0" required min="0" max="100" step="0.5">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Ghi chú chính sách</label>
+                                <textarea name="note" class="form-control" rows="2" placeholder="Ví dụ: Áp dụng chiết khấu 5% cho quý 4..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary btn-sm">Lưu Chiết Khấu</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+</body>
+</html>

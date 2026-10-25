@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: header('Quản lý Đơn Vị Vận Chuyển')}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{admin/fragments/layout :: sidebar('shipping')}"></div>
+
+    <div class="content-area">
+        <nav th:replace="~{admin/fragments/layout :: topbar}"></nav>
+        <div th:replace="~{admin/fragments/layout :: alerts}"></div>
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-0">🚚 Quản Lý Đơn Vị Vận Chuyển</h4>
+                <small class="text-muted">Cấu hình đối tác giao nhận và cước phí vận chuyển tiêu chuẩn</small>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createCarrierModal">
+                    <i class="bi bi-plus-circle me-1"></i> Thêm Nhà Vận Chuyển
+                </button>
+            </div>
+        </div>
+
+        <!-- Carriers Table -->
+        <div class="card table-card p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th>Đơn Vị Giao Hàng</th>
+                        <th>Cước Phí Vận Chuyển</th>
+                        <th>Ghi Chú / Mô Tả</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-center" style="width: 180px;">Thao Tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(carriers)}">
+                        <td colspan="6" class="text-center text-muted py-4">Chưa có nhà vận chuyển nào. Hãy thêm đối tác mới.</td>
+                    </tr>
+                    <tr th:each="carrier : ${carriers}">
+                        <td th:text="${carrier.id}">1</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-truck fs-3 text-primary me-2"></i>
+                                <span class="fw-bold text-dark" th:text="${carrier.name}">Giao Hàng Nhanh (GHN)</span>
+                            </div>
+                        </td>
+                        <td class="fw-bold text-success" th:text="${#numbers.formatDecimal(carrier.shippingFee, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                            30,000 đ
+                        </td>
+                        <td class="text-muted small" th:text="${carrier.description}">Giao hàng hỏa tốc trong ngày...</td>
+                        <td>
+                            <span th:if="${carrier.active}" class="badge bg-success"><i class="bi bi-check-circle"></i> Đang hợp tác</span>
+                            <span th:if="${!carrier.active}" class="badge bg-secondary"><i class="bi bi-pause-circle"></i> Tạm ngưng</span>
+                        </td>
+                        <td class="text-center">
+                            <!-- Nút Sửa -->
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" th:data-bs-target="'#editCarrierModal-' + ${carrier.id}">
+                                <i class="bi bi-pencil"></i> Sửa
+                            </button>
+
+                            <!-- Nút Bật/Tắt -->
+                            <form th:action="@{'/admin/shipping/' + ${carrier.id} + '/toggle-status'}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm"
+                                        th:classappend="${carrier.active ? 'btn-outline-danger' : 'btn-outline-success'}"
+                                        th:title="${carrier.active ? 'Tạm ngưng hợp tác' : 'Bật hoạt động'}">
+                                    <i th:class="${carrier.active ? 'bi bi-pause-fill' : 'bi bi-play-fill'}"></i>
+                                </button>
+                            </form>
+
+                            <!-- Modal Sửa Nhà Vận Chuyển -->
+                            <div class="modal fade text-start" th:id="'editCarrierModal-' + ${carrier.id}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form th:action="@{/admin/shipping/save}" method="post">
+                                            <input type="hidden" name="id" th:value="${carrier.id}">
+                                            <input type="hidden" name="active" th:value="${carrier.active}">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fw-bold">✏️ Sửa Đối Tác: <span th:text="${carrier.name}"></span></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Tên nhà vận chuyển</label>
+                                                    <input type="text" name="name" class="form-control" th:value="${carrier.name}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Cước phí giao hàng (VNĐ)</label>
+                                                    <input type="number" name="shippingFee" class="form-control" th:value="${carrier.shippingFee}" required step="1000" min="0">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Mô tả dịch vụ</label>
+                                                    <textarea name="description" class="form-control" rows="3" th:text="${carrier.description}"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                                                <button type="submit" class="btn btn-primary btn-sm">Lưu Thay Đổi</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal Thêm Nhà Vận Chuyển Mới -->
+        <div class="modal fade" id="createCarrierModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/admin/shipping/save}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">✨ Thêm Đối Tác Vận Chuyển Mới</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Tên đối tác giao hàng</label>
+                                <input type="text" name="name" class="form-control" placeholder="Ví dụ: Viettel Post, GHTK..." required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Cước phí giao hàng (VNĐ)</label>
+                                <input type="number" name="shippingFee" class="form-control" placeholder="25000" required step="1000" min="0">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mô tả / Thời gian giao dự kiến</label>
+                                <textarea name="description" class="form-control" rows="3" placeholder="Giao hàng tiêu chuẩn 2-3 ngày..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary btn-sm">Thêm Đối Tác</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+</body>
+</html>

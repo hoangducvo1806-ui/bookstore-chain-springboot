@@ -1,8 +1,7 @@
 package com.bookstore.bookstore.config;
 
 import com.bookstore.bookstore.entity.*;
-import com.bookstore.bookstore.enums.BookCondition;
-import com.bookstore.bookstore.enums.RoleName;
+import com.bookstore.bookstore.enums.*;
 import com.bookstore.bookstore.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -11,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Configuration
@@ -22,6 +22,10 @@ public class DataInitializer implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final ShopRepository shopRepository;
     private final BookRepository bookRepository;
+    private final ShippingCarrierRepository shippingCarrierRepository;
+    private final AppCommissionRepository appCommissionRepository;
+    private final VoucherRepository voucherRepository;
+    private final OrderRepository orderRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -55,7 +59,7 @@ public class DataInitializer implements CommandLineRunner {
                         .build()));
 
         // Manager
-        userRepository.findByEmail("manager@gmail.com")
+        User manager = userRepository.findByEmail("manager@gmail.com")
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("manager@gmail.com")
                         .fullName("Quản Lý Chuỗi Cửa Hàng (Manager)")
@@ -66,7 +70,7 @@ public class DataInitializer implements CommandLineRunner {
                         .build()));
 
         // Shipper
-        userRepository.findByEmail("shipper@gmail.com")
+        User shipper = userRepository.findByEmail("shipper@gmail.com")
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("shipper@gmail.com")
                         .fullName("Nhân Viên Giao Hàng (Shipper)")
@@ -88,7 +92,7 @@ public class DataInitializer implements CommandLineRunner {
                         .build()));
 
         // Khách hàng thông thường (User)
-        userRepository.findByEmail("user@gmail.com")
+        User user = userRepository.findByEmail("user@gmail.com")
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("user@gmail.com")
                         .fullName("Khách Mua Sách (User)")
@@ -115,7 +119,7 @@ public class DataInitializer implements CommandLineRunner {
                         .build()));
 
         // 5. Tạo một số sách cũ mẫu (Có cuốn soldQuantity > 10 để phục vụ trang Guest)
-        createBookIfNotExist(shopChiNhanh1, vanHoc, "Số Đỏ (Bản in 1989)", "ISBN9780001", "Vũ Trọng Phụng",
+        Book book1 = createBookIfNotExist(shopChiNhanh1, vanHoc, "Số Đỏ (Bản in 1989)", "ISBN9780001", "Vũ Trọng Phụng",
                 "NXB Văn Học", 1989, BookCondition.OLD, "Sách bìa mềm ố vàng theo thời gian, đủ trang, chữ rõ",
                 new BigDecimal("120000"), new BigDecimal("65000"), 5, 25,
                 "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500");
@@ -134,6 +138,47 @@ public class DataInitializer implements CommandLineRunner {
                 "NXB Kim Đồng", 1995, BookCondition.ACCEPTABLE, "Bìa có sờn mép nhẹ, ruột sách lành lặn",
                 new BigDecimal("70000"), new BigDecimal("35000"), 2, 4,
                 "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500");
+
+        // 6. Tạo đối tác vận chuyển mẫu
+        createCarrierIfNotExist("Giao Hàng Nhanh (GHN)", new BigDecimal("28000"), "Giao hàng tiêu chuẩn 1-2 ngày nội thành");
+        createCarrierIfNotExist("Viettel Post", new BigDecimal("25000"), "Mạng lưới bưu cục rộng khắp cả nước");
+        createCarrierIfNotExist("Giao Hàng Tiết Kiệm (GHTK)", new BigDecimal("22000"), "Tiết kiệm chi phí cho đơn hàng xa");
+
+        // 7. Tạo chiết khấu mẫu cho shop chi nhánh 1
+        if (!appCommissionRepository.existsByShop(shopChiNhanh1)) {
+            appCommissionRepository.save(AppCommission.builder()
+                    .shop(shopChiNhanh1)
+                    .commissionRate(new BigDecimal("5.00"))
+                    .note("Mức chiết khấu ưu đãi cho chi nhánh sáng lập chuỗi")
+                    .build());
+        }
+
+        // 8. Tạo mã giảm giá mẫu
+        createVoucherIfNotExist("SACHCU10", "Giảm 10% đơn sách cũ", "PERCENTAGE", new BigDecimal("10.00"), new BigDecimal("100000"), 100);
+        createVoucherIfNotExist("FREESHIP", "Miễn phí vận chuyển", "FREE_SHIPPING", new BigDecimal("30000.00"), new BigDecimal("150000"), 50);
+
+        // 9. Tạo đơn hàng mẫu
+        if (orderRepository.count() == 0 && book1 != null) {
+            Order order1 = Order.builder()
+                    .orderCode("ORD" + System.currentTimeMillis())
+                    .customer(user)
+                    .shop(shopChiNhanh1)
+                    .shipper(shipper)
+                    .status(OrderStatus.DELIVERED)
+                    .paymentMethod(PaymentMethod.COD)
+                    .paymentStatus(PaymentStatus.COMPLETED)
+                    .subtotal(new BigDecimal("65000"))
+                    .shippingFee(new BigDecimal("25000"))
+                    .discountAmount(BigDecimal.ZERO)
+                    .totalAmount(new BigDecimal("90000"))
+                    .recipientName(user.getFullName())
+                    .recipientPhone(user.getPhone())
+                    .shippingAddress("123 Lê Văn Việt, Tăng Nhơn Phú B, TP. Thủ Đức")
+                    .note("Giao giờ hành chính")
+                    .createdAt(LocalDateTime.now().minusDays(1))
+                    .build();
+            orderRepository.save(order1);
+        }
     }
 
     private Category createCategoryIfNotExist(String name, String slug, String description) {
@@ -146,12 +191,12 @@ public class DataInitializer implements CommandLineRunner {
                         .build()));
     }
 
-    private void createBookIfNotExist(Shop shop, Category category, String title, String isbn, String author,
+    private Book createBookIfNotExist(Shop shop, Category category, String title, String isbn, String author,
                                      String publisher, Integer publishYear, BookCondition condition, String conditionNote,
                                      BigDecimal originalPrice, BigDecimal price, Integer stock, Integer soldQuantity,
                                      String imageUrl) {
         if (!bookRepository.existsByIsbn(isbn)) {
-            bookRepository.save(Book.builder()
+            return bookRepository.save(Book.builder()
                     .shop(shop)
                     .category(category)
                     .title(title)
@@ -166,6 +211,35 @@ public class DataInitializer implements CommandLineRunner {
                     .stock(stock)
                     .soldQuantity(soldQuantity)
                     .mainImageUrl(imageUrl)
+                    .active(true)
+                    .build());
+        }
+        return null;
+    }
+
+    private void createCarrierIfNotExist(String name, BigDecimal fee, String desc) {
+        if (!shippingCarrierRepository.existsByName(name)) {
+            shippingCarrierRepository.save(ShippingCarrier.builder()
+                    .name(name)
+                    .shippingFee(fee)
+                    .description(desc)
+                    .active(true)
+                    .build());
+        }
+    }
+
+    private void createVoucherIfNotExist(String code, String title, String type, BigDecimal value, BigDecimal minOrder, Integer limit) {
+        if (!voucherRepository.existsByCode(code)) {
+            voucherRepository.save(Voucher.builder()
+                    .code(code)
+                    .title(title)
+                    .discountType(type)
+                    .discountValue(value)
+                    .minOrderAmount(minOrder)
+                    .usageLimit(limit)
+                    .usedCount(0)
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusMonths(3))
                     .active(true)
                     .build());
         }

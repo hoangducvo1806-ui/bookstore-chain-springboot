@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: header('Quản lý Mã Giảm Giá')}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{admin/fragments/layout :: sidebar('vouchers')}"></div>
+
+    <div class="content-area">
+        <nav th:replace="~{admin/fragments/layout :: topbar}"></nav>
+        <div th:replace="~{admin/fragments/layout :: alerts}"></div>
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-0">🎟️ Quản Lý Chương Trình Khuyến Mãi & Voucher</h4>
+                <small class="text-muted">Tạo và quản lý các mã giảm giá toàn hệ thống (Giảm % sản phẩm, giảm phí vận chuyển)</small>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createVoucherModal">
+                    <i class="bi bi-plus-circle me-1"></i> Tạo Voucher Mới
+                </button>
+            </div>
+        </div>
+
+        <!-- Vouchers Table -->
+        <div class="card table-card p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Mã Voucher</th>
+                        <th>Tên Chương Trình</th>
+                        <th>Loại Giảm Giá</th>
+                        <th>Giá Trị</th>
+                        <th>Đơn Tối Thiểu</th>
+                        <th>Lượt Dùng</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-center" style="width: 120px;">Thao Tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(vouchers)}">
+                        <td colspan="8" class="text-center text-muted py-4">Chưa có mã giảm giá nào. Hãy tạo mã khuyến mại đầu tiên.</td>
+                    </tr>
+                    <tr th:each="v : ${vouchers}">
+                        <td><span class="badge bg-secondary font-monospace fs-6" th:text="${v.code}">SACHCU10</span></td>
+                        <td class="fw-bold text-dark" th:text="${v.title}">Giảm giá ngày hội đọc sách</td>
+                        <td>
+                            <span th:if="${v.discountType == 'PERCENTAGE'}" class="badge bg-info text-dark">Giảm % Sản Phẩm</span>
+                            <span th:if="${v.discountType == 'FIXED_AMOUNT'}" class="badge bg-primary">Giảm Số Tiền Cố Định</span>
+                            <span th:if="${v.discountType == 'FREE_SHIPPING'}" class="badge bg-warning text-dark">Giảm Phí Vận Chuyển</span>
+                        </td>
+                        <td class="fw-bold text-success">
+                            <span th:if="${v.discountType == 'PERCENTAGE'}" th:text="${v.discountValue} + '%'">10%</span>
+                            <span th:if="${v.discountType != 'PERCENTAGE'}" th:text="${#numbers.formatDecimal(v.discountValue, 0, 'COMMA', 0, 'POINT')} + ' đ'">20,000 đ</span>
+                        </td>
+                        <td>
+                            <span th:text="${v.minOrderAmount != null ? #numbers.formatDecimal(v.minOrderAmount, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">0 đ</span>
+                        </td>
+                        <td>
+                            <span class="small" th:text="${v.usedCount} + ' / ' + (${v.usageLimit != null ? v.usageLimit : '∞'})">0 / 100</span>
+                        </td>
+                        <td>
+                            <span th:if="${v.active}" class="badge bg-success"><i class="bi bi-check-circle"></i> Đang kích hoạt</span>
+                            <span th:if="${!v.active}" class="badge bg-secondary"><i class="bi bi-x-circle"></i> Tạm dừng</span>
+                        </td>
+                        <td class="text-center">
+                            <form th:action="@{'/admin/vouchers/' + ${v.id} + '/toggle-status'}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm"
+                                        th:classappend="${v.active ? 'btn-outline-danger' : 'btn-outline-success'}"
+                                        th:title="${v.active ? 'Tạm dừng mã' : 'Kích hoạt lại mã'}">
+                                    <i th:class="${v.active ? 'bi bi-pause-fill' : 'bi bi-play-fill'}"></i>
+                                    <span th:text="${v.active ? 'Dừng' : 'Bật'}"></span>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal Thêm Voucher Mới -->
+        <div class="modal fade" id="createVoucherModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/admin/vouchers/save}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">✨ Tạo Mã Giảm Giá Mới</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Mã Voucher (Viết hoa, không dấu)</label>
+                                <input type="text" name="code" class="form-control text-uppercase" placeholder="VD: FREESHIP50, SACHCU20" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Tên chương trình khuyến mãi</label>
+                                <input type="text" name="title" class="form-control" placeholder="Ưu đãi phí vận chuyển toàn chuỗi" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Loại giảm giá</label>
+                                <select name="discountType" class="form-select" required>
+                                    <option value="PERCENTAGE">Giảm theo % Sản Phẩm</option>
+                                    <option value="FIXED_AMOUNT">Giảm tiền mặt trực tiếp (VNĐ)</option>
+                                    <option value="FREE_SHIPPING">Giảm Phí Vận Chuyển</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Giá trị giảm (VD: 10 nếu là 10%, hoặc 30000 nếu là tiền VNĐ)</label>
+                                <input type="number" name="discountValue" class="form-control" placeholder="10 hoặc 30000" required min="1">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Giá trị đơn hàng tối thiểu (VNĐ)</label>
+                                <input type="number" name="minOrderAmount" class="form-control" placeholder="100000" min="0" step="5000">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Giới hạn số lượt sử dụng</label>
+                                <input type="number" name="usageLimit" class="form-control" placeholder="100" min="1">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary btn-sm">Tạo Voucher</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+</body>
+</html>
