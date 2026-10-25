@@ -2,34 +2,34 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head></head>
 <body>
-<footer th:fragment="footer" class="bg-dark text-white pt-5 mt-5">
+<footer th:fragment="footer" class="text-white pt-5 mt-5 border-top" style="background-color: #080a0e !important; border-color: #1a1e28 !important;">
     <div class="container pb-4">
         <div class="row g-4">
             <!-- Col 1: About Bookly Chain -->
             <div class="col-lg-4 col-md-6">
                 <div class="d-flex align-items-center mb-3">
-                    <img th:src="@{/images/main-logo.png}" alt="Logo" style="height: 40px; filter: brightness(0) invert(1);">
+                    <img th:src="@{/images/main-logo.png}" alt="Logo" style="height: 40px; filter: brightness(1.2);">
                     <h5 class="ms-2 mb-0 fw-bold text-white">CHUỖI SÁCH CŨ</h5>
                 </div>
-                <p class="text-white-50" style="font-size: 0.9rem; line-height: 1.6;">
+                <p class="text-muted" style="font-size: 0.9rem; line-height: 1.6;">
                     Nền tảng kết nối các chi nhánh và cửa hàng sách cũ uy tín trên toàn quốc. 
                     Mỗi cuốn sách cũ được thẩm định chất lượng rõ ràng: Như mới, 90%, 75%, Cũ sưu tầm, cam kết hình ảnh thật 100%.
                 </p>
-                <div class="d-flex gap-3 fs-5 text-white-50">
-                    <a href="#" class="text-white-50 text-decoration-none"><i class="bi bi-facebook"></i></a>
-                    <a href="#" class="text-white-50 text-decoration-none"><i class="bi bi-youtube"></i></a>
-                    <a href="#" class="text-white-50 text-decoration-none"><i class="bi bi-instagram"></i></a>
-                    <a href="#" class="text-white-50 text-decoration-none"><i class="bi bi-tiktok"></i></a>
+                <div class="d-flex gap-3 fs-5 text-muted">
+                    <a href="#" class="text-muted text-decoration-none"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-muted text-decoration-none"><i class="bi bi-youtube"></i></a>
+                    <a href="#" class="text-muted text-decoration-none"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-muted text-decoration-none"><i class="bi bi-tiktok"></i></a>
                 </div>
             </div>
 
             <!-- Col 2: Categories -->
             <div class="col-lg-2 col-md-6">
                 <h6 class="text-uppercase fw-bold mb-3 text-warning">Danh Mục Sách</h6>
-                <ul class="list-unstyled text-white-50" style="font-size: 0.9rem; line-height: 2;">
-                    <li><a th:href="@{/books}" class="text-white-50 text-decoration-none">Tất cả sách cũ</a></li>
+                <ul class="list-unstyled text-muted" style="font-size: 0.9rem; line-height: 2;">
+                    <li><a th:href="@{/books}" class="text-muted text-decoration-none">Tất cả sách cũ</a></li>
                     <li th:each="cat : ${allCategories}">
-                        <a th:href="@{'/categories/' + ${cat.slug}}" class="text-white-50 text-decoration-none" th:text="${cat.name}">Văn học</a>
+                        <a th:href="@{'/categories/' + ${cat.slug}}" class="text-muted text-decoration-none" th:text="${cat.name}">Văn học</a>
                     </li>
                 </ul>
             </div>
@@ -37,24 +37,24 @@
             <!-- Col 3: Customer Policies -->
             <div class="col-lg-3 col-md-6">
                 <h6 class="text-uppercase fw-bold mb-3 text-warning">Hỗ Trợ Khách Hàng</h6>
-                <ul class="list-unstyled text-white-50" style="font-size: 0.9rem; line-height: 2;">
-                    <li><a href="#" class="text-white-50 text-decoration-none">Chính sách kiểm tra sách cũ</a></li>
-                    <li><a href="#" class="text-white-50 text-decoration-none">Chính sách đổi trả & hoàn tiền</a></li>
-                    <li><a href="#" class="text-white-50 text-decoration-none">Quy chuẩn đánh giá tình trạng sách</a></li>
-                    <li><a href="#" class="text-white-50 text-decoration-none">Hướng dẫn thanh toán VNPAY & COD</a></li>
-                    <li><a href="#" class="text-white-50 text-decoration-none">Chính sách vận chuyển toàn quốc</a></li>
+                <ul class="list-unstyled text-muted" style="font-size: 0.9rem; line-height: 2;">
+                    <li><a href="#" class="text-muted text-decoration-none">Chính sách kiểm tra sách cũ</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none">Chính sách đổi trả & hoàn tiền</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none">Quy chuẩn đánh giá tình trạng sách</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none">Hướng dẫn thanh toán VNPAY & COD</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none">Chính sách vận chuyển toàn quốc</a></li>
                 </ul>
             </div>
 
             <!-- Col 4: Contact & Payment -->
             <div class="col-lg-3 col-md-6">
                 <h6 class="text-uppercase fw-bold mb-3 text-warning">Liên Hệ & Chi Nhánh</h6>
-                <p class="text-white-50 mb-1" style="font-size: 0.9rem;"><i class="bi bi-geo-alt me-2 text-warning"></i> Chi nhánh 1: Số 1 Võ Văn Ngân, TP. Thủ Đức, TP. HCM</p>
-                <p class="text-white-50 mb-1" style="font-size: 0.9rem;"><i class="bi bi-telephone me-2 text-warning"></i> Hotline: 1900 6868</p>
-                <p class="text-white-50 mb-3" style="font-size: 0.9rem;"><i class="bi bi-envelope me-2 text-warning"></i> sachcu.chain@gmail.com</p>
+                <p class="text-muted mb-1" style="font-size: 0.9rem;"><i class="bi bi-geo-alt me-2 text-warning"></i> Chi nhánh 1: Số 1 Võ Văn Ngân, TP. Thủ Đức, TP. HCM</p>
+                <p class="text-muted mb-1" style="font-size: 0.9rem;"><i class="bi bi-telephone me-2 text-warning"></i> Hotline: 1900 6868</p>
+                <p class="text-muted mb-3" style="font-size: 0.9rem;"><i class="bi bi-envelope me-2 text-warning"></i> sachcu.chain@gmail.com</p>
 
                 <div class="mt-3">
-                    <small class="d-block text-white-50 mb-2">Đối tác vận chuyển & thanh toán:</small>
+                    <small class="d-block text-muted mb-2">Đối tác vận chuyển & thanh toán:</small>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <span class="badge bg-secondary">VNPAY Sandbox</span>
                         <span class="badge bg-secondary">MOMO</span>
@@ -66,9 +66,9 @@
             </div>
         </div>
 
-        <hr class="border-secondary my-4">
+        <hr class="my-4" style="border-color: #1a1e28 !important;">
 
-        <div class="d-flex flex-wrap justify-content-between align-items-center text-white-50" style="font-size: 0.85rem;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center text-muted" style="font-size: 0.85rem;">
             <div>
                 © 2026 Chuỗi Cửa Hàng Sách Cũ. Phát triển dựa trên giao diện Bookly. Đề tài 14.
             </div>

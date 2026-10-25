@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<html lang="vi" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,98 +14,116 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <!-- Google Fonts hỗ trợ 100% Tiếng Việt không bị lỗi font chữ / nhảy font -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300..1000;1,300..1000&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --bs-secondary-color: #6c757d !important;
-            --bs-body-color: #2b2b2b !important;
+        :root, [data-bs-theme="dark"] {
+            --bs-body-bg: #0b0d11;
+            --bs-body-color: #f3f4f6;
+            --bs-tertiary-bg: #141720;
+            --bs-secondary-bg: #1a1e2a;
+            --bs-border-color: #272c3a;
         }
 
-        /* Khắc phục triệt để lỗi font chữ tiếng Việt */
-        body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, .navbar, .nav-link, p, span, a, label {
-            font-family: 'Plus Jakarta Sans', 'Nunito', 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, Arial, sans-serif !important;
+        html, body {
+            background-color: #0b0d11 !important;
+            color: #f3f4f6 !important;
+            font-family: 'Nunito', sans-serif;
+            min-height: 100vh;
         }
 
-        /* Hủy bỏ CSS capitalize tự động làm hỏng dấu tiếng Việt */
-        h1, h2, h3, h4, h5, h6 {
-            text-transform: none !important;
-            letter-spacing: normal !important;
+        /* Dark background overrides for clean UI */
+        .bg-white {
+            background-color: #141720 !important;
+            color: #f3f4f6 !important;
         }
-
-        /* Khắc phục màu chữ text-muted bị mờ nhạt */
+        .bg-light {
+            background-color: #0f1218 !important;
+            color: #f3f4f6 !important;
+        }
+        .bg-light-subtle {
+            background-color: #12151e !important;
+            color: #f3f4f6 !important;
+        }
+        .bg-primary-subtle {
+            background: linear-gradient(135deg, #181d2a 0%, #0e1117 100%) !important;
+            color: #f3f4f6 !important;
+        }
+        .bg-secondary-subtle {
+            background-color: #1c202d !important;
+            color: #e5e7eb !important;
+        }
+        .border, .border-bottom, .border-top, .border-start, .border-end {
+            border-color: #242937 !important;
+        }
+        .card {
+            background-color: #141720 !important;
+            border-color: #242937 !important;
+            color: #f3f4f6 !important;
+        }
+        .card-header, .card-footer {
+            background-color: #181c26 !important;
+            border-color: #242937 !important;
+            color: #f3f4f6 !important;
+        }
+        .text-dark {
+            color: #f3f4f6 !important;
+        }
+        .text-secondary {
+            color: #9ba3af !important;
+        }
         .text-muted {
-            color: #6c757d !important;
+            color: #8c96a5 !important;
         }
 
-        /* Background màu đen sang trọng cho thanh Top-Info */
-        .top-info {
-            background-color: #111111 !important;
-            color: #ffffff !important;
-        }
-        .top-info a {
-            color: #ffffff !important;
-        }
-
-        /* Background màu đen cho Banner tiêu đề trang */
-        .page-title-banner {
-            background-color: #1a1a1a !important;
-            color: #ffffff !important;
-            border-bottom: 2px solid #333 !important;
-        }
-        .page-title-banner h2 {
-            color: #ffffff !important;
-            font-weight: 700 !important;
-        }
-        .page-title-banner .breadcrumb-item a {
-            color: #ffc107 !important;
-            text-decoration: none;
-        }
-        .page-title-banner .breadcrumb-item.active {
-            color: #e0e0e0 !important;
-        }
-        .page-title-banner small {
-            color: #cccccc !important;
-        }
-
-        /* Huy hiệu tình trạng sách cũ */
+        /* Condition Badges */
         .condition-badge {
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
             font-weight: 600;
         }
-        .badge-like-new { background-color: #198754; color: #fff; }
-        .badge-very-good { background-color: #0d6efd; color: #fff; }
-        .badge-good { background-color: #0dcaf0; color: #000; }
-        .badge-acceptable { background-color: #ffc107; color: #000; }
-        .badge-old { background-color: #6c757d; color: #fff; }
+        .badge-like-new { background-color: #059669; color: #fff; }
+        .badge-very-good { background-color: #2563eb; color: #fff; }
+        .badge-good { background-color: #0891b2; color: #fff; }
+        .badge-acceptable { background-color: #d97706; color: #fff; }
+        .badge-old { background-color: #4b5563; color: #fff; }
 
-        .original-price { text-decoration: line-through; color: #888888; font-size: 0.9rem; }
-        .selling-price { color: #dc3545; font-weight: 700; font-size: 1.15rem; }
+        .original-price {
+            text-decoration: line-through;
+            color: #6b7280 !important;
+            font-size: 0.9rem;
+        }
+        .selling-price {
+            color: #ff5277 !important;
+            font-weight: 700;
+            font-size: 1.15rem;
+        }
 
+        /* Book Card Dark Styling */
         .book-card {
-            border: 1px solid #e9ecef;
+            border: 1px solid #242937 !important;
             border-radius: 10px;
             transition: all 0.25s ease-in-out;
-            background: #fff;
+            background: #141720 !important;
             height: 100%;
             display: flex;
             flex-direction: column;
         }
         .book-card:hover {
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 28px rgba(0,0,0,0.6) !important;
             transform: translateY(-4px);
+            border-color: #3b82f6 !important;
         }
         .book-img-wrap {
             position: relative;
             height: 260px;
             overflow: hidden;
-            border-radius: 10px 10px 0 0;
-            background: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+            background: #0d0f15 !important;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -123,25 +141,88 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            background: rgba(255,255,255,0.9);
-            border: none;
+            background: rgba(20, 23, 32, 0.85) !important;
+            border: 1px solid #2e3547;
             border-radius: 50%;
             width: 36px;
             height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            color: #f3f4f6;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
         .btn-wishlist:hover {
-            background: #fff;
-            color: #dc3545;
+            background: #252b3b !important;
+            color: #ef4444 !important;
+        }
+
+        /* Dropdown Menu Dark Theme & Smooth Toggle */
+        .dropdown {
+            position: relative;
+        }
+        .dropdown-menu {
+            background-color: #171b26 !important;
+            border: 1px solid #2d3345 !important;
+            color: #f3f4f6 !important;
+            box-shadow: 0 14px 35px rgba(0,0,0,0.65) !important;
+            border-radius: 10px;
+            z-index: 1050;
+        }
+        .dropdown-menu.show {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        .dropdown-item {
+            color: #e2e8f0 !important;
+            transition: background-color 0.15s, color 0.15s;
+        }
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: #232838 !important;
+            color: #38bdf8 !important;
+        }
+        .dropdown-divider {
+            border-top-color: #272d3b !important;
+        }
+
+        /* Form Controls Dark */
+        .form-control, .form-select {
+            background-color: #161924 !important;
+            border-color: #272d3b !important;
+            color: #f3f4f6 !important;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #1b1f2c !important;
+            border-color: #3b82f6 !important;
+            color: #f3f4f6 !important;
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+        }
+        .form-control::placeholder {
+            color: #6b7280 !important;
+        }
+
+        /* Tables Dark */
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: #f3f4f6;
+            --bs-table-border-color: #242937;
+        }
+        .table-light {
+            --bs-table-bg: #181c26 !important;
+            --bs-table-color: #f3f4f6 !important;
+        }
+
+        .order-tab-link.active {
+            font-weight: 700;
+            border-bottom: 3px solid #3b82f6 !important;
+            color: #3b82f6 !important;
         }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
     <!-- Header Fragment -->
     <div th:replace="~{fragments/header :: header}"></div>
@@ -173,15 +254,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
     <script th:src="@{/js/script.js}"></script>
-
-    <!-- Khởi tạo Bootstrap Dropdown đáng tin cậy -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
-            dropdownElementList.map(function (dropdownToggleEl) {
-                return new bootstrap.Dropdown(dropdownToggleEl);
-            });
-        });
-    </script>
 </body>
 </html>

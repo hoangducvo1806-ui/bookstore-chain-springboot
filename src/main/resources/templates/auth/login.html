@@ -1,49 +1,43 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Đăng nhập - Chuỗi Sách Cũ</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300..900;1,300..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-            background-color: #f8f9fa;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            text-transform: none !important;
-        }
+        body { background-color: #0b0d11 !important; color: #f3f4f6; }
+        .card { background-color: #141720 !important; border: 1px solid #242937 !important; }
+        .form-control { background-color: #171b26 !important; border-color: #272d3b !important; color: #f3f4f6 !important; }
+        .form-control:focus { border-color: #3b82f6 !important; }
     </style>
 </head>
-<body class="bg-light">
+<body>
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <div class="card shadow-sm border-0 rounded-3">
+            <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-body p-4">
-                    <h3 class="card-title text-center fw-bold mb-4">📚 Đăng Nhập</h3>
+                    <h3 class="card-title text-center fw-bold mb-4 text-white">📚 Đăng Nhập</h3>
 
                     <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
                     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
 
                     <form th:action="@{/login}" th:object="${loginRequest}" method="post">
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
+                            <label class="form-label text-light">Email</label>
                             <input type="email" class="form-control" th:field="*{email}" placeholder="name@example.com" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Mật khẩu</label>
+                            <label class="form-label text-light">Mật khẩu</label>
                             <input type="password" class="form-control" th:field="*{password}" placeholder="••••••••" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 py-2">Đăng Nhập</button>
+                        <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill fw-bold">Đăng Nhập</button>
                     </form>
 
-                    <div class="text-center mt-3">
+                    <div class="text-center mt-3 text-muted">
                         <span>Chưa có tài khoản? </span>
-                        <a th:href="@{/register}" class="text-decoration-none">Đăng ký ngay</a>
+                        <a th:href="@{/register}" class="text-primary text-decoration-none">Đăng ký ngay</a>
                     </div>
                 </div>
             </div>

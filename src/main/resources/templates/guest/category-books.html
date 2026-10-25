@@ -7,8 +7,7 @@
 <body>
 <div th:fragment="content">
 
-    <!-- Page Title Banner (Background màu đen #1a1a1a) -->
-    <div class="page-title-banner py-4 mb-4">
+    <div class="bg-light py-4 border-bottom mb-4">
         <div class="container">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1">
@@ -18,13 +17,13 @@
                 </ol>
             </nav>
             <h2 class="fw-bold mb-1" th:text="${category.name}">Văn Học Việt Nam</h2>
-            <p class="mb-0 text-white-50" th:text="${category.description}">Mô tả danh mục sách</p>
+            <p class="text-muted mb-0" th:text="${category.description}">Mô tả danh mục sách</p>
         </div>
     </div>
 
     <div class="container pb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <span class="text-muted">Hiển thị <b class="text-dark" th:text="${totalItems}">0</b> cuốn sách cũ</span>
+            <span class="text-muted">Hiển thị <b th:text="${totalItems}">0</b> cuốn sách cũ</span>
             <div class="d-flex align-items-center gap-2">
                 <span class="small text-muted">Sắp xếp:</span>
                 <select class="form-select form-select-sm" style="width: auto;" onchange="location = this.value;">
@@ -36,7 +35,7 @@
             </div>
         </div>
 
-        <div th:if="${#lists.isEmpty(books)}" class="text-center py-5 bg-white rounded-4 shadow-sm p-4">
+        <div th:if="${#lists.isEmpty(books)}" class="text-center py-5">
             <i class="bi bi-inbox fs-1 text-muted"></i>
             <h5 class="fw-bold mt-2">Chưa có cuốn sách nào trong danh mục này</h5>
             <a th:href="@{/books}" class="btn btn-outline-primary btn-sm rounded-pill mt-2">Xem tất cả sách cũ</a>
@@ -88,7 +87,7 @@
                                 <span class="original-price" th:if="${book.originalPrice != null}" 
                                       th:text="${#numbers.formatDecimal(book.originalPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}">120.000 đ</span>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mb-3 text-muted" style="font-size: 0.85rem;">
+                            <div class="d-flex justify-content-between align-items-center mb-3 text-muted" style="font-size: 0.8rem;">
                                 <span>Đã bán: <b class="text-danger" th:text="${book.soldQuantity}">25</b></span>
                                 <span>Tồn: <b th:text="${book.stock}">5</b></span>
                             </div>
@@ -98,13 +97,13 @@
                                     <form th:action="@{/cart/add}" method="post">
                                         <input type="hidden" name="bookId" th:value="${book.id}">
                                         <input type="hidden" name="quantity" value="1">
-                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 text-white fw-bold" th:disabled="${book.stock <= 0}">
+                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 text-white" th:disabled="${book.stock <= 0}">
                                             <i class="bi bi-cart-plus me-1"></i> <span th:text="${book.stock > 0 ? 'Thêm Giỏ Hàng' : 'Hết Hàng'}">Thêm Giỏ Hàng</span>
                                         </button>
                                     </form>
                                 </div>
                                 <div th:unless="${currentUser != null}">
-                                    <a th:href="@{/login}" class="btn btn-primary btn-sm rounded-pill w-100 text-white fw-bold"
+                                    <a th:href="@{/login}" class="btn btn-primary btn-sm rounded-pill w-100 text-white"
                                        onclick="return confirm('Vui lòng đăng nhập để mua sách!');">
                                         <i class="bi bi-cart-plus me-1"></i> Mua Sách (Đăng Nhập)
                                     </a>
