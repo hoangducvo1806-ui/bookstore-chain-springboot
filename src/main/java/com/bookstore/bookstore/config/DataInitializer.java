@@ -143,10 +143,10 @@ public class DataInitializer implements CommandLineRunner {
                 new BigDecimal("150000"), new BigDecimal("75000"), 6, 18,
                 "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=500");
 
-        // 6. Tạo đối tác vận chuyển mẫu
-        createCarrierIfNotExist("Giao Hàng Nhanh (GHN)", new BigDecimal("25000"), "Giao hàng tiêu chuẩn 2-3 ngày toàn quốc");
-        createCarrierIfNotExist("Viettel Post", new BigDecimal("30000"), "Mạng lưới bưu cục rộng khắp cả nước");
-        createCarrierIfNotExist("Hỏa Tốc Nội Thành (Giao trong 2h)", new BigDecimal("45000"), "Chỉ áp dụng trong khu vực nội thành có chi nhánh shop");
+        // 6. Tạo hoặc cập nhật đối tác vận chuyển mẫu (chuẩn tiếng Việt Unicode)
+        saveOrUpdateCarrier("Giao Hàng Nhanh (GHN)", new BigDecimal("25000"), "Giao hàng tiêu chuẩn 2-3 ngày toàn quốc");
+        saveOrUpdateCarrier("Viettel Post", new BigDecimal("30000"), "Mạng lưới bưu cục rộng khắp cả nước");
+        saveOrUpdateCarrier("Hỏa Tốc Nội Thành (Giao trong 2h)", new BigDecimal("45000"), "Chỉ áp dụng trong khu vực nội thành có chi nhánh shop");
 
         // 7. Tạo chiết khấu mẫu cho shop chi nhánh 1
         if (!appCommissionRepository.existsByShop(shopChiNhanh1)) {
@@ -157,12 +157,12 @@ public class DataInitializer implements CommandLineRunner {
                     .build());
         }
 
-        // 8. Tạo các mã giảm giá mẫu
-        createVoucherIfNotExist("SACHCU10", "Giảm 10% cho đơn từ 100.000 VNĐ", "PERCENTAGE",
+        // 8. Tạo hoặc cập nhật các mã giảm giá mẫu (chuẩn tiếng Việt Unicode)
+        saveOrUpdateVoucher("SACHCU10", "Giảm 10% cho đơn từ 100.000 VNĐ", "PERCENTAGE",
                 new BigDecimal("10"), new BigDecimal("100000"), new BigDecimal("30000"), 100);
-        createVoucherIfNotExist("FREESHIP", "Miễn phí vận chuyển (Tối đa 30.000 VNĐ)", "FREE_SHIPPING",
+        saveOrUpdateVoucher("FREESHIP", "Miễn phí vận chuyển (Tối đa 30.000 VNĐ)", "FREE_SHIPPING",
                 new BigDecimal("30000"), new BigDecimal("150000"), new BigDecimal("30000"), 50);
-        createVoucherIfNotExist("CHAOBAN", "Giảm ngay 20.000 VNĐ cho khách hàng mới", "FIXED_AMOUNT",
+        saveOrUpdateVoucher("CHAOBAN", "Giảm ngay 20.000 VNĐ cho khách hàng mới", "FIXED_AMOUNT",
                 new BigDecimal("20000"), new BigDecimal("50000"), new BigDecimal("20000"), 200);
 
         // 9. Tạo đơn hàng mẫu cho Admin Dashboard
@@ -229,21 +229,28 @@ public class DataInitializer implements CommandLineRunner {
         return bookRepository.save(book);
     }
 
-    private void createCarrierIfNotExist(String name, BigDecimal fee, String desc) {
-        if (!shippingCarrierRepository.existsByName(name)) {
-            shippingCarrierRepository.save(ShippingCarrier.builder()
+    private void saveOrUpdateCarrier(String name, BigDecimal fee, String desc) {
+        ShippingCarrier carrier = shippingCarrierRepository.findByName(name).orElse(null);
+        if (carrier == null) {
+            carrier = ShippingCarrier.builder()
                     .name(name)
                     .shippingFee(fee)
                     .description(desc)
                     .active(true)
-                    .build());
+                    .build();
+        } else {
+            carrier.setShippingFee(fee);
+            carrier.setDescription(desc);
+            carrier.setActive(true);
         }
+        shippingCarrierRepository.save(carrier);
     }
 
-    private void createVoucherIfNotExist(String code, String title, String type, BigDecimal value,
-                                        BigDecimal minOrder, BigDecimal maxDiscount, Integer limit) {
-        if (!voucherRepository.existsByCode(code)) {
-            voucherRepository.save(Voucher.builder()
+    private void saveOrUpdateVoucher(String code, String title, String type, BigDecimal value,
+                                    BigDecimal minOrder, BigDecimal maxDiscount, Integer limit) {
+        Voucher voucher = voucherRepository.findByCode(code).orElse(null);
+        if (voucher == null) {
+            voucher = Voucher.builder()
                     .code(code)
                     .title(title)
                     .discountType(type)
@@ -255,7 +262,15 @@ public class DataInitializer implements CommandLineRunner {
                     .startDate(LocalDateTime.now().minusDays(1))
                     .endDate(LocalDateTime.now().plusMonths(3))
                     .active(true)
-                    .build());
+                    .build();
+        } else {
+            voucher.setTitle(title);
+            voucher.setDiscountType(type);
+            voucher.setDiscountValue(value);
+            voucher.setMinOrderAmount(minOrder);
+            voucher.setMaxDiscountAmount(maxDiscount);
+            voucher.setActive(true);
         }
+        voucherRepository.save(voucher);
     }
 }
