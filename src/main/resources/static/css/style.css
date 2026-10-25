@@ -1,4 +1,4 @@
-/*
+﻿/*
 Theme Name: Bookly
 Theme URI: https://templatejungle.com/
 Author: TemplatesJungle
@@ -62,8 +62,8 @@ CSS STRUCTURE:
   --light-gray-color:         #D2D2D2;
   --primary-color:            #F86D72;
   --bs-body-color:            #272727;
-  --bs-secondary-color:       #FFE8F0;
-  --bs-secondary-rgb:         255, 232, 240;
+  --bs-secondary-color: #6c757d;
+  --bs-secondary-rgb: 108, 117, 125;
   --bs-primary-rgb:           248,109,114;
   --bs-border-color:          #E3E3E3;
   --bs-dropdown-link-active-bg: #F5F5F5;
@@ -197,7 +197,7 @@ h4,
 h5,
 h6 {
   font-family: var(--heading-font);
-  text-transform: capitalize;
+  text-transform: none;
   letter-spacing: 0.03em;
   font-weight: 600;
   line-height: 115%;
@@ -223,7 +223,7 @@ h4{
 h5{
   font-size: 1.3rem;
   font-weight: 300;
-  text-transform: capitalize;
+  text-transform: none;
   letter-spacing: 0.01rem;
 }
 h6{
@@ -262,7 +262,7 @@ h6{
 --------------------------------------------------------------*/
 .btn {
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
   letter-spacing: 0.09em;
   color: var(--white-color);
   background-color: var(--primary-color);
