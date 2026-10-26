@@ -63,7 +63,7 @@ public class SecurityConfig {
                 .requestMatchers("/admin/**", "/manager/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/vendor/**").hasRole("VENDOR")
                 .requestMatchers("/shipper/**").hasRole("SHIPPER")
-                .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**").authenticated()
+                .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**", "/chat", "/chat/**", "/api/chat/**").authenticated()
 
                 .anyRequest().authenticated()
             )

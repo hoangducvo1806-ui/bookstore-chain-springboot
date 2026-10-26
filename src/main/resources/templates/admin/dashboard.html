@@ -20,7 +20,10 @@
                 <h4 class="fw-bold mb-0">📊 Báo Cáo Tổng Quan</h4>
                 <small class="text-muted">Thống kê hoạt động của toàn bộ chuỗi cửa hàng sách cũ</small>
             </div>
-            <div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/admin/revenue/export-excel}" class="btn btn-success btn-sm fw-semibold">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Xuất Báo Cáo Excel
+                </a>
                 <a th:href="@{/admin/orders}" class="btn btn-primary btn-sm">
                     <i class="bi bi-receipt me-1"></i> Quản lý Đơn hàng
                 </a>
@@ -86,11 +89,78 @@
             </div>
         </div>
 
+        <!-- Biểu Đồ Thống Kê (Chart.js) -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-8">
+                <div class="card table-card p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-bar-chart-line text-primary me-2"></i>Doanh Thu Theo Từng Chi Nhánh (VND)</h6>
+                        <span class="badge bg-light text-muted border">Cập nhật realtime</span>
+                    </div>
+                    <div style="position: relative; height: 280px; width: 100%;">
+                        <canvas id="shopRevenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card table-card p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-pie-chart text-success me-2"></i>Tỷ Lệ Trạng Thái Đơn</h6>
+                        <span class="badge bg-light text-muted border">Toàn chuỗi</span>
+                    </div>
+                    <div style="position: relative; height: 280px; width: 100%;">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng Doanh Thu Chi Tiết Theo Chi Nhánh -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card table-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-shop me-2 text-primary"></i> Doanh Thu Chi Tiết Từng Chi Nhánh</h5>
+                        <a th:href="@{/admin/revenue/export-excel}" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-download me-1"></i> Xuất Excel Chi Nhánh
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Mã Shop</th>
+                                <th>Tên Chi Nhánh</th>
+                                <th>Chủ Cửa Hàng</th>
+                                <th class="text-center">Tổng Đơn Hàng</th>
+                                <th class="text-center">Đơn Giao Hoàn Tất</th>
+                                <th class="text-end">Doanh Thu Đã Thu</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(shopRevenues)}">
+                                <td colspan="6" class="text-center text-muted py-4">Chưa có dữ liệu chi nhánh cửa hàng.</td>
+                            </tr>
+                            <tr th:each="sr : ${shopRevenues}">
+                                <td><span class="badge bg-secondary font-monospace" th:text="'SHOP-' + ${sr.shopId}">SHOP-1</span></td>
+                                <td class="fw-bold text-dark" th:text="${sr.shopName}">Chi nhánh Hà Nội</td>
+                                <td th:text="${sr.ownerName}">Nguyễn Văn A</td>
+                                <td class="text-center"><span class="badge bg-light text-dark border" th:text="${sr.totalOrders}">0</span></td>
+                                <td class="text-center"><span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold" th:text="${sr.deliveredOrders}">0</span></td>
+                                <td class="text-end fw-bold text-primary" th:text="${#numbers.formatDecimal(sr.deliveredRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Trạng thái đơn hàng -->
         <div class="row g-3 mb-4">
             <div class="col-12">
                 <div class="card table-card p-3">
-                    <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart me-1 text-primary"></i> Phân loại trạng thái đơn hàng</h6>
+                    <h6 class="fw-bold mb-3"><i class="bi bi-grid me-1 text-primary"></i> Số lượng đơn theo trạng thái</h6>
                     <div class="row g-2 text-center">
                         <div class="col" th:each="entry : ${stats.ordersByStatus}">
                             <div class="p-2 border rounded bg-light">
@@ -155,5 +225,87 @@
 </div>
 
 <div th:replace="~{admin/fragments/layout :: scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener("DOMContentLoaded", function() {
+        // Dữ liệu Doanh thu từng shop
+        var shopNames = /*[[${shopRevenues.![shopName]}]]*/ [];
+        var shopRevs = /*[[${shopRevenues.![deliveredRevenue]}]]*/ [];
+
+        var ctxRevenue = document.getElementById('shopRevenueChart');
+        if (ctxRevenue) {
+            new Chart(ctxRevenue, {
+                type: 'bar',
+                data: {
+                    labels: shopNames.length > 0 ? shopNames : ['Chưa có shop'],
+                    datasets: [{
+                        label: 'Doanh thu hoàn tất (VNĐ)',
+                        data: shopRevs.length > 0 ? shopRevs : [0],
+                        backgroundColor: 'rgba(59, 130, 246, 0.75)',
+                        borderColor: '#2563eb',
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('vi-VN') + ' đ';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Dữ liệu trạng thái đơn hàng
+        var statusData = /*[[${stats.ordersByStatus}]]*/ {};
+        var statusLabels = Object.keys(statusData);
+        var statusValues = Object.values(statusData);
+
+        var ctxStatus = document.getElementById('orderStatusChart');
+        if (ctxStatus) {
+            new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusValues,
+                        backgroundColor: [
+                            '#f59e0b', // PENDING
+                            '#3b82f6', // CONFIRMED
+                            '#8b5cf6', // PREPARING
+                            '#06b6d4', // SHIPPING
+                            '#10b981', // DELIVERED
+                            '#ef4444', // CANCELLED
+                            '#6b7280'  // DELIVERY_FAILED
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 12, font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+    });
+    /*]]>*/
+</script>
 </body>
 </html>

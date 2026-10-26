@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>404 - Không Tìm Thấy Trang | Chuỗi Sách Cũ</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="container py-5 my-5 text-center">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white">
+                    <div class="mb-4">
+                        <span class="badge bg-warning-subtle text-warning p-3 rounded-circle" style="font-size: 3rem;">
+                            <i class="bi bi-compass"></i>
+                        </span>
+                    </div>
+                    <h1 class="fw-bold display-4 text-white mb-2">404</h1>
+                    <h4 class="fw-bold mb-3 text-white">Không Tìm Thấy Trang Bạn Yêu Cầu</h4>
+                    <p class="text-secondary mb-4" style="line-height: 1.6;" th:text="${errorMessage != null ? errorMessage : 'Đường dẫn bạn truy cập có thể đã bị thay đổi, xóa bỏ hoặc tạm thời không khả dụng.'}">
+                        Đường dẫn bạn truy cập có thể đã bị thay đổi, xóa bỏ hoặc tạm thời không khả dụng.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a th:href="@{/}" class="btn btn-primary px-4 py-2 rounded-pill fw-bold">
+                            <i class="bi bi-house-door me-2"></i> Quay Về Trang Chủ
+                        </a>
+                        <a th:href="@{/books}" class="btn btn-outline-light px-4 py-2 rounded-pill">
+                            <i class="bi bi-search me-2"></i> Khám Phá Sách Cũ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

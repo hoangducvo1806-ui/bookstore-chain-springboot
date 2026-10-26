@@ -100,6 +100,16 @@
                             <i class="bi bi-shop me-1"></i> Kênh Người Bán
                         </a>
                     </li>
+                    <li class="nav-item" th:if="${currentUser != null and currentUser.shipper}">
+                        <a class="btn btn-info btn-sm text-dark fw-bold px-3 py-1 my-1 ms-lg-2 rounded-pill shadow-sm" th:href="@{/shipper/orders}">
+                            <i class="bi bi-bicycle me-1"></i> Kênh Shipper
+                        </a>
+                    </li>
+                    <li class="nav-item" th:if="${currentUser != null}">
+                        <a class="btn btn-outline-info btn-sm fw-semibold px-3 py-1 my-1 ms-lg-2 rounded-pill shadow-sm" th:href="@{/chat}">
+                            <i class="bi bi-chat-dots-fill me-1"></i> Chat Tư Vấn
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- Right Action Icons: Cart, Wishlist, Auth -->
@@ -153,6 +163,7 @@
                             </li>
                             <li><a class="dropdown-item py-2" th:href="@{/user/profile}"><i class="bi bi-person me-2 text-primary"></i> Hồ sơ & Sổ địa chỉ</a></li>
                             <li><a class="dropdown-item py-2" th:href="@{/user/orders}"><i class="bi bi-bag-check me-2 text-success"></i> Lịch sử đơn mua</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{/chat}"><i class="bi bi-chat-dots-fill me-2 text-info"></i> Chat tư vấn với Shop</a></li>
                             <li><a class="dropdown-item py-2" th:href="@{/user/wishlist}"><i class="bi bi-heart me-2 text-danger"></i> Sách yêu thích</a></li>
                             <li><a class="dropdown-item py-2" th:href="@{/user/viewed-books}"><i class="bi bi-clock-history me-2 text-info"></i> Sách đã xem</a></li>
                             

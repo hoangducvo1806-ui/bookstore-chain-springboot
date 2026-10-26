@@ -27,8 +27,49 @@ public class AdminController {
     public String dashboard(Model model) {
         model.addAttribute("stats", adminService.getDashboardStats());
         model.addAttribute("recentOrders", adminService.getRecentOrders());
+        model.addAttribute("shopRevenues", adminService.getShopRevenueStats());
         model.addAttribute("activeTab", "dashboard");
         return "admin/dashboard";
+    }
+
+    @GetMapping("/revenue/export-excel")
+    public void exportRevenueExcel(jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"bao-cao-doanh-thu-chuoi-sach.csv\"");
+
+        var out = response.getOutputStream();
+        // UTF-8 BOM so Excel opens with proper accents and diacritics
+        out.write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF});
+
+        java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.OutputStreamWriter(out, java.nio.charset.StandardCharsets.UTF_8));
+        writer.println("Mã Shop,Tên Chi Nhánh Shop,Chủ Cửa Hàng,Tổng Số Đơn,Số Đơn Hoàn Tất,Doanh Thu Hoàn Tất (VND)");
+
+        var revenues = adminService.getShopRevenueStats();
+        java.math.BigDecimal grandTotal = java.math.BigDecimal.ZERO;
+        long totalOrdersAll = 0;
+        long deliveredOrdersAll = 0;
+
+        for (var r : revenues) {
+            grandTotal = grandTotal.add(r.getDeliveredRevenue() != null ? r.getDeliveredRevenue() : java.math.BigDecimal.ZERO);
+            totalOrdersAll += r.getTotalOrders();
+            deliveredOrdersAll += r.getDeliveredOrders();
+            writer.printf("\"%d\",\"%s\",\"%s\",%d,%d,%s\n",
+                    r.getShopId(),
+                    r.getShopName().replace("\"", "\"\""),
+                    r.getOwnerName().replace("\"", "\"\""),
+                    r.getTotalOrders(),
+                    r.getDeliveredOrders(),
+                    r.getDeliveredRevenue() != null ? r.getDeliveredRevenue().toPlainString() : "0"
+            );
+        }
+
+        writer.printf("\"TỔNG CỘNG\",\"Toàn bộ chuỗi cửa hàng\",\"---\",%d,%d,%s\n",
+                totalOrdersAll,
+                deliveredOrdersAll,
+                grandTotal.toPlainString()
+        );
+
+        writer.flush();
     }
 
     // 2. QUẢN LÝ NGƯỜI DÙNG

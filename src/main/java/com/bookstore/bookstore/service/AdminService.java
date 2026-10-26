@@ -1,6 +1,7 @@
 package com.bookstore.bookstore.service;
 
 import com.bookstore.bookstore.dto.AdminDashboardStats;
+import com.bookstore.bookstore.dto.ShopRevenueDTO;
 import com.bookstore.bookstore.entity.*;
 import com.bookstore.bookstore.enums.OrderStatus;
 import com.bookstore.bookstore.enums.RoleName;
@@ -15,6 +16,7 @@ public interface AdminService {
     // Thống kê Dashboard
     AdminDashboardStats getDashboardStats();
     List<Order> getRecentOrders();
+    List<ShopRevenueDTO> getShopRevenueStats();
 
     // Quản lý User & Phân quyền
     Page<User> searchUsers(String keyword, RoleName roleName, int page, int size);

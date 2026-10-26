@@ -134,4 +134,62 @@ public class AuthController {
         response.addCookie(cookie);
         return "redirect:/login";
     }
+
+    // --- QUÊN MẬT KHẨU ---
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage() {
+        return "auth/forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String handleForgotPassword(@RequestParam("email") String email, RedirectAttributes redirectAttributes) {
+        try {
+            authService.forgotPassword(email);
+            redirectAttributes.addFlashAttribute("email", email);
+            redirectAttributes.addFlashAttribute("successMessage", "Mã OTP đặt lại mật khẩu đã được gửi đến email của bạn.");
+            return "redirect:/reset-password?email=" + email;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/forgot-password";
+        }
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPasswordPage(@RequestParam(value = "email", required = false) String email, Model model) {
+        model.addAttribute("email", email);
+        return "auth/reset-password";
+    }
+
+    @PostMapping("/reset-password")
+    public String handleResetPassword(@RequestParam("email") String email,
+                                      @RequestParam("otpCode") String otpCode,
+                                      @RequestParam("newPassword") String newPassword,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            authService.resetPassword(email, otpCode, newPassword);
+            redirectAttributes.addFlashAttribute("successMessage", "Đặt lại mật khẩu thành công! Bạn có thể đăng nhập ngay.");
+            return "redirect:/login";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("email", email);
+            return "redirect:/reset-password?email=" + email;
+        }
+    }
+
+    // --- REFRESH TOKEN (API) ---
+    @PostMapping("/auth/refresh-token")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<?> handleRefreshToken(@RequestParam("refreshToken") String refreshToken, HttpServletResponse response) {
+        try {
+            String newAccessToken = authService.refreshToken(refreshToken);
+            Cookie cookie = new Cookie("jwt_token", newAccessToken);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(7 * 24 * 60 * 60);
+            response.addCookie(cookie);
+            return org.springframework.http.ResponseEntity.ok(java.util.Map.of("accessToken", newAccessToken));
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
 }

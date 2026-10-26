@@ -138,6 +138,18 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    // 6. Làm mới Access Token (Refresh Token)
+    public String refreshToken(String refreshToken) {
+        String userEmail = jwtService.extractUsername(refreshToken);
+        if (userEmail != null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+            if (jwtService.isTokenValid(refreshToken, userDetails)) {
+                return jwtService.generateToken(userDetails);
+            }
+        }
+        throw new RuntimeException("Refresh token không hợp lệ hoặc đã hết hạn!");
+    }
+
     private void generateAndSendOtp(String email, String type, String purpose) {
         SecureRandom random = new SecureRandom();
         int num = 100000 + random.nextInt(900000);
