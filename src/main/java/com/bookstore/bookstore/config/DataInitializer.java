@@ -27,6 +27,7 @@ public class DataInitializer implements CommandLineRunner {
     private final VoucherRepository voucherRepository;
     private final OrderRepository orderRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ExtendedBookDataSeeder extendedBookDataSeeder;
 
     @Override
     @Transactional
@@ -49,6 +50,10 @@ public class DataInitializer implements CommandLineRunner {
 
         // Admin
         User admin = userRepository.findByEmail("admin@gmail.com")
+                .map(u -> {
+                    u.setFullName("Quản Trị Viên (Admin)");
+                    return userRepository.save(u);
+                })
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("admin@gmail.com")
                         .fullName("Quản Trị Viên (Admin)")
@@ -60,6 +65,10 @@ public class DataInitializer implements CommandLineRunner {
 
         // Manager
         User manager = userRepository.findByEmail("manager@gmail.com")
+                .map(u -> {
+                    u.setFullName("Quản Lý Chuỗi Cửa Hàng (Manager)");
+                    return userRepository.save(u);
+                })
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("manager@gmail.com")
                         .fullName("Quản Lý Chuỗi Cửa Hàng (Manager)")
@@ -71,6 +80,10 @@ public class DataInitializer implements CommandLineRunner {
 
         // Shipper
         User shipper = userRepository.findByEmail("shipper@gmail.com")
+                .map(u -> {
+                    u.setFullName("Nhân Viên Giao Hàng (Shipper)");
+                    return userRepository.save(u);
+                })
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("shipper@gmail.com")
                         .fullName("Nhân Viên Giao Hàng (Shipper)")
@@ -82,6 +95,10 @@ public class DataInitializer implements CommandLineRunner {
 
         // Vendor (Chủ chi nhánh shop)
         User vendor = userRepository.findByEmail("vendor@gmail.com")
+                .map(u -> {
+                    u.setFullName("Chủ Chi Nhánh Cửa Hàng (Vendor)");
+                    return userRepository.save(u);
+                })
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("vendor@gmail.com")
                         .fullName("Chủ Chi Nhánh Cửa Hàng (Vendor)")
@@ -93,6 +110,10 @@ public class DataInitializer implements CommandLineRunner {
 
         // Khách hàng thông thường (User)
         User user = userRepository.findByEmail("user@gmail.com")
+                .map(u -> {
+                    u.setFullName("Khách Mua Sách (User)");
+                    return userRepository.save(u);
+                })
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("user@gmail.com")
                         .fullName("Khách Mua Sách (User)")
@@ -102,55 +123,24 @@ public class DataInitializer implements CommandLineRunner {
                         .roles(Set.of(roleMap.get(RoleName.USER)))
                         .build()));
 
-        // 3. Tạo một số danh mục sách mẫu
-        Category vanHoc = createCategoryIfNotExist("Văn học Việt Nam", "van-hoc-viet-nam", "Tiểu thuyết, truyện ngắn, thơ ca Việt Nam qua các thời kỳ");
-        Category kienThuc = createCategoryIfNotExist("Khoa học & Kỹ thuật", "khoa-hoc-ky-thuat", "Sách giáo trình đại học, công nghệ thông tin, toán lý hóa");
-        Category lichSu = createCategoryIfNotExist("Lịch sử - Triết học", "lich-su-triet-hoc", "Sách nghiên cứu lịch sử cổ cận hiện đại và văn hóa");
-        Category kinhTe = createCategoryIfNotExist("Kinh tế & Khởi nghiệp", "kinh-te-khoi-nghiep", "Sách quản trị kinh doanh, marketing, bài học thành công");
+        // 3. Tạo hoặc cập nhật chi nhánh cửa hàng
+        Shop shopChiNhanh1 = shopRepository.findByOwner(vendor).orElseGet(() -> Shop.builder().owner(vendor).build());
+        shopChiNhanh1.setName("Hiệu Sách Cũ Thủ Đức - Chi Nhánh 1");
+        shopChiNhanh1.setDescription("Chuyên thu mua và bán lại sách cũ, giáo trình sinh viên giá tốt");
+        shopChiNhanh1.setAddress("Số 1 Võ Văn Ngân, TP. Thủ Đức, TP. Hồ Chí Minh");
+        shopChiNhanh1.setPhone("0900000004");
+        shopChiNhanh1.setActive(true);
+        shopChiNhanh1 = shopRepository.save(shopChiNhanh1);
 
-        // 4. Tạo chi nhánh cửa hàng mẫu cho Vendor
-        Shop shopChiNhanh1 = shopRepository.findByOwner(vendor)
-                .orElseGet(() -> shopRepository.save(Shop.builder()
-                        .owner(vendor)
-                        .name("Hiệu Sách Cũ Thủ Đức - Chi Nhánh 1")
-                        .description("Chuyên thu mua và bán lại sách cũ, giáo trình sinh viên giá tốt")
-                        .address("Số 1 Võ Văn Ngân, TP. Thủ Đức, TP. Hồ Chí Minh")
-                        .phone("0900000004")
-                        .active(true)
-                        .build()));
+        // 4. Nạp trọn bộ hơn 90 đầu sách thật phong phú và 7 danh mục lớn
+        extendedBookDataSeeder.seedAllBooks(shopChiNhanh1);
 
-        // 5. Tạo một số sách cũ mẫu (Có cuốn soldQuantity > 10 để phục vụ trang Guest)
-        Book book1 = createBookIfNotExist(shopChiNhanh1, vanHoc, "Số Đỏ (Bản in 1989)", "ISBN9780001", "Vũ Trọng Phụng",
-                "NXB Văn Học", 1989, BookCondition.OLD, "Sách bìa mềm ố vàng theo thời gian, đủ trang, chữ rõ nét",
-                new BigDecimal("120000"), new BigDecimal("65000"), 5, 25,
-                "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500");
+        // 5. Tạo hoặc cập nhật đối tác vận chuyển mẫu (chuẩn tiếng Việt Unicode)
+        saveOrUpdateCarrier("Giao Hàng Nhanh (GHN)", new BigDecimal("25000"), "Giao hàng tiêu chuẩn 2-3 ngày toàn quốc");
+        saveOrUpdateCarrier("Viettel Post", new BigDecimal("30000"), "Mạng lưới bưu cục rộng khắp cả nước");
+        saveOrUpdateCarrier("Hỏa Tốc Nội Thành (Giao trong 2h)", new BigDecimal("45000"), "Chỉ áp dụng trong khu vực nội thành có chi nhánh shop");
 
-        createBookIfNotExist(shopChiNhanh1, kienThuc, "Giáo trình Cấu Trúc Dữ Liệu & Giải Thuật", "ISBN9780002", "Nhiều Tác Giả",
-                "NXB ĐHQG", 2021, BookCondition.VERY_GOOD, "Sách còn rất mới 90%, có ghi chú nhẹ bằng bút chì vài trang đầu",
-                new BigDecimal("95000"), new BigDecimal("45000"), 8, 16,
-                "https://images.unsplash.com/photo-1532012164546-f432f2e3777a?w=500");
-
-        createBookIfNotExist(shopChiNhanh1, lichSu, "Việt Nam Sử Lược", "ISBN9780003", "Trần Trọng Kim",
-                "NXB Văn Hóa Thông Tin", 2005, BookCondition.LIKE_NEW, "Bản bìa cứng, đẹp như mới 98%",
-                new BigDecimal("180000"), new BigDecimal("110000"), 3, 12,
-                "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500");
-
-        createBookIfNotExist(shopChiNhanh1, vanHoc, "Dế Mèn Phiêu Lưu Ký (Ấn bản xưa)", "ISBN9780004", "Tô Hoài",
-                "NXB Kim Đồng", 1995, BookCondition.ACCEPTABLE, "Bìa có sờn mép nhẹ, ruột sách lành lặn",
-                new BigDecimal("70000"), new BigDecimal("35000"), 2, 4,
-                "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500");
-
-        createBookIfNotExist(shopChiNhanh1, kinhTe, "Quốc Gia Khởi Nghiệp", "ISBN9780005", "Dan Senor & Saul Singer",
-                "NXB Thế Giới", 2018, BookCondition.GOOD, "Tình trạng tốt 85%, không rách, giấy còn sáng",
-                new BigDecimal("150000"), new BigDecimal("75000"), 6, 18,
-                "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=500");
-
-        // 6. Tạo đối tác vận chuyển mẫu
-        createCarrierIfNotExist("Giao Hàng Nhanh (GHN)", new BigDecimal("25000"), "Giao hàng tiêu chuẩn 2-3 ngày toàn quốc");
-        createCarrierIfNotExist("Viettel Post", new BigDecimal("30000"), "Mạng lưới bưu cục rộng khắp cả nước");
-        createCarrierIfNotExist("Hỏa Tốc Nội Thành (Giao trong 2h)", new BigDecimal("45000"), "Chỉ áp dụng trong khu vực nội thành có chi nhánh shop");
-
-        // 7. Tạo chiết khấu mẫu cho shop chi nhánh 1
+        // 6. Tạo chiết khấu mẫu cho shop chi nhánh 1
         if (!appCommissionRepository.existsByShop(shopChiNhanh1)) {
             appCommissionRepository.save(AppCommission.builder()
                     .shop(shopChiNhanh1)
@@ -159,89 +149,72 @@ public class DataInitializer implements CommandLineRunner {
                     .build());
         }
 
-        // 8. Tạo các mã giảm giá mẫu
-        createVoucherIfNotExist("SACHCU10", "Giảm 10% cho đơn từ 100.000 VNĐ", "PERCENTAGE",
+        // 7. Tạo hoặc cập nhật các mã giảm giá mẫu (chuẩn tiếng Việt Unicode)
+        saveOrUpdateVoucher("SACHCU10", "Giảm 10% cho đơn từ 100.000 VNĐ", "PERCENTAGE",
                 new BigDecimal("10"), new BigDecimal("100000"), new BigDecimal("30000"), 100);
-        createVoucherIfNotExist("FREESHIP", "Miễn phí vận chuyển (Tối đa 30.000 VNĐ)", "FREE_SHIPPING",
+        saveOrUpdateVoucher("FREESHIP", "Miễn phí vận chuyển (Tối đa 30.000 VNĐ)", "FREE_SHIPPING",
                 new BigDecimal("30000"), new BigDecimal("150000"), new BigDecimal("30000"), 50);
-        createVoucherIfNotExist("CHAOBAN", "Giảm ngay 20.000 VNĐ cho khách hàng mới", "FIXED_AMOUNT",
+        saveOrUpdateVoucher("CHAOBAN", "Giảm ngay 20.000 VNĐ cho khách hàng mới", "FIXED_AMOUNT",
                 new BigDecimal("20000"), new BigDecimal("50000"), new BigDecimal("20000"), 200);
 
-        // 9. Tạo đơn hàng mẫu cho Admin Dashboard
-        if (orderRepository.count() == 0 && book1 != null) {
-            Order order1 = Order.builder()
-                    .orderCode("ORD" + System.currentTimeMillis())
-                    .customer(user)
-                    .shop(shopChiNhanh1)
-                    .shipper(shipper)
-                    .status(OrderStatus.DELIVERED)
-                    .paymentMethod(PaymentMethod.COD)
-                    .paymentStatus(PaymentStatus.COMPLETED)
-                    .subtotal(new BigDecimal("65000"))
-                    .shippingFee(new BigDecimal("25000"))
-                    .discountAmount(BigDecimal.ZERO)
-                    .totalAmount(new BigDecimal("90000"))
-                    .recipientName(user.getFullName())
-                    .recipientPhone(user.getPhone())
-                    .shippingAddress("123 Lê Văn Việt, Tăng Nhơn Phú B, TP. Thủ Đức")
-                    .note("Giao giờ hành chính")
-                    .createdAt(LocalDateTime.now().minusDays(1))
-                    .build();
-            orderRepository.save(order1);
+        // 8. Tạo đơn hàng mẫu cho Admin Dashboard
+        if (orderRepository.count() == 0) {
+            Book sampleBook = bookRepository.findAll().stream().findFirst().orElse(null);
+            if (sampleBook != null) {
+                Order order1 = Order.builder()
+                        .orderCode("ORD" + System.currentTimeMillis())
+                        .customer(user)
+                        .shop(shopChiNhanh1)
+                        .shipper(shipper)
+                        .status(OrderStatus.DELIVERED)
+                        .paymentMethod(PaymentMethod.COD)
+                        .paymentStatus(PaymentStatus.COMPLETED)
+                        .subtotal(sampleBook.getPrice())
+                        .shippingFee(new BigDecimal("25000"))
+                        .discountAmount(BigDecimal.ZERO)
+                        .totalAmount(sampleBook.getPrice().add(new BigDecimal("25000")))
+                        .recipientName(user.getFullName())
+                        .recipientPhone(user.getPhone())
+                        .shippingAddress("123 Lê Văn Việt, Tăng Nhơn Phú B, TP. Thủ Đức")
+                        .note("Giao giờ hành chính")
+                        .createdAt(LocalDateTime.now().minusDays(1))
+                        .build();
+                orderRepository.save(order1);
+            }
         }
     }
 
-    private Category createCategoryIfNotExist(String name, String slug, String description) {
-        return categoryRepository.findBySlug(slug)
-                .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name(name)
-                        .slug(slug)
-                        .description(description)
-                        .active(true)
-                        .build()));
-    }
-
-    private Book createBookIfNotExist(Shop shop, Category category, String title, String isbn, String author,
-                                     String publisher, Integer publishYear, BookCondition condition, String conditionNote,
-                                     BigDecimal originalPrice, BigDecimal price, Integer stock, Integer soldQuantity,
-                                     String imageUrl) {
-        if (!bookRepository.existsByIsbn(isbn)) {
-            return bookRepository.save(Book.builder()
-                    .shop(shop)
-                    .category(category)
-                    .title(title)
-                    .isbn(isbn)
-                    .author(author)
-                    .publisher(publisher)
-                    .publishYear(publishYear)
-                    .bookCondition(condition)
-                    .conditionNote(conditionNote)
-                    .originalPrice(originalPrice)
-                    .price(price)
-                    .stock(stock)
-                    .soldQuantity(soldQuantity)
-                    .mainImageUrl(imageUrl)
-                    .active(true)
-                    .build());
+    private void saveOrUpdateCarrier(String name, BigDecimal fee, String desc) {
+        ShippingCarrier carrier = shippingCarrierRepository.findByName(name).orElse(null);
+        if (carrier == null) {
+            carrier = shippingCarrierRepository.findAll().stream()
+                    .filter(c -> c.getName() != null && (c.getName().equalsIgnoreCase(name)
+                            || c.getName().replace("?", "").equalsIgnoreCase(name.replace("?", ""))
+                            || (name.contains("Hỏa Tốc") && c.getName().contains("Giao trong 2h"))))
+                    .findFirst()
+                    .orElse(null);
         }
-        return null;
-    }
-
-    private void createCarrierIfNotExist(String name, BigDecimal fee, String desc) {
-        if (!shippingCarrierRepository.existsByName(name)) {
-            shippingCarrierRepository.save(ShippingCarrier.builder()
+        if (carrier == null) {
+            carrier = ShippingCarrier.builder()
                     .name(name)
                     .shippingFee(fee)
                     .description(desc)
                     .active(true)
-                    .build());
+                    .build();
+        } else {
+            carrier.setName(name);
+            carrier.setShippingFee(fee);
+            carrier.setDescription(desc);
+            carrier.setActive(true);
         }
+        shippingCarrierRepository.save(carrier);
     }
 
-    private void createVoucherIfNotExist(String code, String title, String type, BigDecimal value,
-                                        BigDecimal minOrder, BigDecimal maxDiscount, Integer limit) {
-        if (!voucherRepository.existsByCode(code)) {
-            voucherRepository.save(Voucher.builder()
+    private void saveOrUpdateVoucher(String code, String title, String type, BigDecimal value,
+                                    BigDecimal minOrder, BigDecimal maxDiscount, Integer limit) {
+        Voucher voucher = voucherRepository.findByCode(code).orElse(null);
+        if (voucher == null) {
+            voucher = Voucher.builder()
                     .code(code)
                     .title(title)
                     .discountType(type)
@@ -253,7 +226,15 @@ public class DataInitializer implements CommandLineRunner {
                     .startDate(LocalDateTime.now().minusDays(1))
                     .endDate(LocalDateTime.now().plusMonths(3))
                     .active(true)
-                    .build());
+                    .build();
+        } else {
+            voucher.setTitle(title);
+            voucher.setDiscountType(type);
+            voucher.setDiscountValue(value);
+            voucher.setMinOrderAmount(minOrder);
+            voucher.setMaxDiscountAmount(maxDiscount);
+            voucher.setActive(true);
         }
+        voucherRepository.save(voucher);
     }
 }

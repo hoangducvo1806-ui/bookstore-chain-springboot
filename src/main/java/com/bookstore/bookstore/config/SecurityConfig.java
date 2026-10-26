@@ -3,7 +3,6 @@ package com.bookstore.bookstore.config;
 import com.bookstore.bookstore.security.CustomUserDetailsService;
 import com.bookstore.bookstore.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,12 +51,12 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.ignoringRequestMatchers("/ws/**", "/api/**", "/payment/**"))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Công khai: Guest, Tài nguyên tĩnh, Auth, Upload API
+                // Công khai: Guest, Tài nguyên tĩnh, Auth, Upload API, Error page, Access Denied
                 .requestMatchers(
                         "/", "/home", "/books/**", "/categories/**", "/shops/**", "/search/**", "/payment/**",
                         "/auth/**", "/login", "/register", "/verify-otp", "/forgot-password", "/reset-password",
-                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**",
-                        "/library", "/api/library/**"
+                        "/logout", "/access-denied",
+                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**", "/error"
                 ).permitAll()
 
                 // Phân quyền đặc biệt: User đã đăng nhập được vào form đăng ký Shop
@@ -68,7 +67,7 @@ public class SecurityConfig {
                 .requestMatchers("/admin/**", "/manager/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/vendor/**").hasRole("VENDOR")
                 .requestMatchers("/shipper/**").hasRole("SHIPPER")
-                .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**", "/api/cart/add").authenticated()
+                .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**", "/chat", "/chat/**", "/api/chat/**", "/api/cart/add").authenticated()
 
                 .anyRequest().authenticated()
             )
@@ -81,6 +80,9 @@ public class SecurityConfig {
                     } else {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
                     }
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.sendRedirect("/access-denied");
                 })
             )
             .authenticationProvider(authenticationProvider())

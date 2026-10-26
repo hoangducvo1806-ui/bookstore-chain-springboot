@@ -8,18 +8,19 @@
 <div th:fragment="content">
 
     <!-- Hero Banner Carousel -->
-    <section id="billboard" class="position-relative d-flex align-items-center py-5 bg-light-subtle border-bottom">
+    <section id="billboard" class="position-relative d-flex align-items-center py-5 border-bottom"
+             style="background: linear-gradient(135deg, #181d2a 0%, #0e1118 100%) !important; border-color: #242937 !important;">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6 mb-4 mb-lg-0">
                     <span class="badge bg-danger-subtle text-danger mb-2 px-3 py-2 rounded-pill fw-bold">CHỢ SÁCH CŨ CHÍNH HÃNG</span>
-                    <h1 class="display-4 fw-bold lh-sm mb-3">Sách Cũ Trao Tay, <br><span class="text-primary">Tri Thức Ở Lại</span></h1>
+                    <h1 class="display-4 fw-bold lh-sm mb-3 text-white">Sách Cũ Trao Tay, <br><span class="text-primary">Tri Thức Ở Lại</span></h1>
                     <p class="lead text-muted mb-4">
                         Khám phá kho tàng sách cũ từ các chi nhánh uy tín toàn quốc. Tiết kiệm đến 60% so với giá bìa mới, minh bạch tình trạng sách và ảnh chụp thực tế.
                     </p>
                     <div class="d-flex gap-3">
                         <a th:href="@{/books}" class="btn btn-primary btn-lg rounded-pill px-4 text-white">Khám Phá Sách Ngay</a>
-                        <a th:href="@{/login}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">Đăng Nhập Mua Sách</a>
+                        <a th:href="@{/login}" class="btn btn-outline-secondary btn-lg rounded-pill px-4 text-light">Đăng Nhập Mua Sách</a>
                     </div>
                 </div>
                 <div class="col-lg-6 text-center">
@@ -30,34 +31,34 @@
     </section>
 
     <!-- Cam kết chất lượng sách cũ -->
-    <section class="py-4 border-bottom bg-white">
+    <section class="py-4 border-bottom" style="background-color: #12151f !important; border-color: #242937 !important;">
         <div class="container">
             <div class="row g-4 text-center">
                 <div class="col-md-3 col-6">
                     <div class="p-3">
                         <i class="bi bi-shield-check text-primary fs-1 mb-2"></i>
-                        <h6 class="fw-bold mb-1">Ảnh Chụp Thật 100%</h6>
+                        <h6 class="fw-bold mb-1 text-white">Ảnh Chụp Thật 100%</h6>
                         <small class="text-muted">Chụp chi tiết từng góc cạnh cuốn sách</small>
                     </div>
                 </div>
                 <div class="col-md-3 col-6">
                     <div class="p-3">
                         <i class="bi bi-tag text-success fs-1 mb-2"></i>
-                        <h6 class="fw-bold mb-1">Tiết Kiệm 40% - 70%</h6>
+                        <h6 class="fw-bold mb-1 text-white">Tiết Kiệm 40% - 70%</h6>
                         <small class="text-muted">Giá bán lại tốt nhất cho sinh viên</small>
                     </div>
                 </div>
                 <div class="col-md-3 col-6">
                     <div class="p-3">
                         <i class="bi bi-shop text-warning fs-1 mb-2"></i>
-                        <h6 class="fw-bold mb-1">Chuỗi Nhiều Chi Nhánh</h6>
+                        <h6 class="fw-bold mb-1 text-white">Chuỗi Nhiều Chi Nhánh</h6>
                         <small class="text-muted">Liên kết hệ thống cửa hàng toàn quốc</small>
                     </div>
                 </div>
                 <div class="col-md-3 col-6">
                     <div class="p-3">
                         <i class="bi bi-arrow-repeat text-danger fs-1 mb-2"></i>
-                        <h6 class="fw-bold mb-1">Đổi Trả An Tâm</h6>
+                        <h6 class="fw-bold mb-1 text-white">Đổi Trả An Tâm</h6>
                         <small class="text-muted">Được kiểm tra trước khi nhận</small>
                     </div>
                 </div>
@@ -66,12 +67,12 @@
     </section>
 
     <!-- KHỐI B: SÁCH BÁN CHẠY TRÊN 10 CUỐN CHO GUEST -->
-    <section class="py-5">
+    <section class="py-5" style="background-color: #0b0d11 !important;">
         <div class="container">
             <div class="d-flex justify-content-between align-items-end mb-4">
                 <div>
                     <span class="text-primary fw-bold text-uppercase" style="letter-spacing: 1px;">Dành Cho Khách Hàng</span>
-                    <h2 class="fw-bold mb-0">🔥 Sách Bán Chạy Nhất (Đã Bán > 10 Cuốn)</h2>
+                    <h2 class="fw-bold mb-0 text-white">🔥 Sách Bán Chạy Nhất (Đã Bán > 10 Cuốn)</h2>
                     <p class="text-muted mb-0">Các đầu sách cũ được tìm mua và đánh giá cao nhất từ các chi nhánh trong chuỗi</p>
                 </div>
                 <a th:href="@{/books(sort='best_seller')}" class="btn btn-outline-primary rounded-pill btn-sm px-3">Xem Tất Cả <i class="bi bi-arrow-right"></i></a>
@@ -103,13 +104,13 @@
                         <div class="flex-grow-1 d-flex flex-column">
                             <small class="text-muted text-truncate" th:text="${book.category != null ? book.category.name : 'Sách cũ'}">Danh mục</small>
                             <h5 class="fw-bold mb-1 text-truncate-2" style="font-size: 1rem; height: 44px; overflow: hidden;">
-                                <a th:href="@{'/books/' + ${book.id}}" class="text-dark text-decoration-none" th:text="${book.title}">Tên sách</a>
+                                <a th:href="@{'/books/' + ${book.id}}" class="text-light text-decoration-none" th:text="${book.title}">Tên sách</a>
                             </h5>
                             <small class="text-muted mb-2 text-truncate"><i class="bi bi-pencil-square me-1"></i><span th:text="${book.author}">Tác giả</span></small>
 
                             <!-- Shop chi nhánh -->
                             <small class="text-primary mb-2 text-truncate" th:if="${book.shop != null}">
-                                <i class="bi bi-geo-alt me-1"></i><span th:text="${book.shop.name}">Chi nhánh</span>
+                                <i class="bi bi-shop me-1"></i><span th:text="${book.shop.name}">Chi nhánh</span>
                             </small>
 
                             <div class="mt-auto">
@@ -120,11 +121,11 @@
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mb-3 text-muted" style="font-size: 0.8rem;">
                                     <span>Đã bán: <b class="text-danger" th:text="${book.soldQuantity}">25</b> cuốn</span>
-                                    <span>Tồn kho: <b th:text="${book.stock}">5</b></span>
+                                    <span>Tồn: <b class="text-light" th:text="${book.stock}">5</b></span>
                                 </div>
 
                                 <div class="d-grid gap-2">
-                                    <a th:href="@{'/books/' + ${book.id}}" class="btn btn-outline-dark btn-sm rounded-pill">
+                                    <a th:href="@{'/books/' + ${book.id}}" class="btn btn-outline-light btn-sm rounded-pill">
                                         <i class="bi bi-eye me-1"></i> Xem Chi Tiết
                                     </a>
                                     <!-- Nút mua cho Guest: Yêu cầu đăng nhập -->
@@ -142,18 +143,18 @@
     </section>
 
     <!-- Khối Danh Mục Sách Cũ Nổi Bật -->
-    <section class="py-5 bg-light">
+    <section class="py-5 border-top" style="background-color: #0f1218 !important; border-color: #242937 !important;">
         <div class="container">
             <div class="text-center mb-5">
                 <span class="text-primary fw-bold text-uppercase">Khám Phá Theo Chủ Đề</span>
-                <h2 class="fw-bold">Danh Mục Sách Cũ Nổi Bật</h2>
+                <h2 class="fw-bold text-white">Danh Mục Sách Cũ Nổi Bật</h2>
             </div>
             <div class="row g-4 justify-content-center">
                 <div class="col-md-3 col-sm-6" th:each="cat : ${allCategories}">
                     <a th:href="@{'/categories/' + ${cat.slug}}" class="text-decoration-none">
-                        <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100 bg-white hover-shadow transition">
+                        <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100" style="background-color: #141720 !important; border: 1px solid #242937 !important;">
                             <i class="bi bi-journal-bookmark-fill text-primary display-5 mb-3"></i>
-                            <h5 class="fw-bold text-dark mb-1" th:text="${cat.name}">Văn học</h5>
+                            <h5 class="fw-bold text-white mb-1" th:text="${cat.name}">Văn học</h5>
                             <small class="text-muted" th:text="${cat.description}">Mô tả danh mục</small>
                         </div>
                     </a>

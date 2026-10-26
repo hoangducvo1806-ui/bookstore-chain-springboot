@@ -4,6 +4,7 @@ import com.bookstore.bookstore.enums.BookCondition;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
@@ -32,16 +33,19 @@ public class Book {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Column(nullable = false, length = 255)
+    @Nationalized
+    @Column(nullable = false, length = 255, columnDefinition = "NVARCHAR(255)")
     private String title;
 
     @Column(length = 50)
     private String isbn;
 
-    @Column(nullable = false, length = 150)
+    @Nationalized
+    @Column(nullable = false, length = 150, columnDefinition = "NVARCHAR(150)")
     private String author;
 
-    @Column(length = 150)
+    @Nationalized
+    @Column(length = 150, columnDefinition = "NVARCHAR(150)")
     private String publisher;
 
     private Integer publishYear;
@@ -50,6 +54,7 @@ public class Book {
     @Column(nullable = false, length = 30)
     private BookCondition bookCondition; // Tình trạng sách cũ (Như mới, 90%, 75%...)
 
+    @Nationalized
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String conditionNote; // Ghi chú chi tiết tình trạng: có ố vàng nhẹ, không rách trang...
 
@@ -70,6 +75,7 @@ public class Book {
     @Column(nullable = false)
     private Integer soldQuantity = 0; // Đã bán
 
+    @Nationalized
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 

@@ -62,8 +62,8 @@ CSS STRUCTURE:
   --light-gray-color:         #D2D2D2;
   --primary-color:            #F86D72;
   --bs-body-color:            #272727;
-  --bs-secondary-color:       #FFE8F0;
-  --bs-secondary-rgb:         255, 232, 240;
+  --bs-secondary-color: #6c757d;
+  --bs-secondary-rgb: 108, 117, 125;
   --bs-primary-rgb:           248,109,114;
   --bs-border-color:          #E3E3E3;
   --bs-dropdown-link-active-bg: #F5F5F5;
@@ -79,8 +79,8 @@ CSS STRUCTURE:
 
 /* Fonts */
 :root {
-    --body-font           : "Nunito", sans-serif;
-    --heading-font        : "Nunito", sans-serif;
+    --body-font           : 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --heading-font        : 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 @media (min-width: 1850px){
@@ -106,7 +106,9 @@ html {
 body {
   font-family: var(--body-font);
   font-size: 18px;
-  font-weight: 300;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   margin: 0;
 }
 p {
@@ -197,8 +199,8 @@ h4,
 h5,
 h6 {
   font-family: var(--heading-font);
-  text-transform: capitalize;
-  letter-spacing: 0.03em;
+  text-transform: none;
+  letter-spacing: normal;
   font-weight: 600;
   line-height: 115%;
 }
@@ -222,8 +224,10 @@ h4{
 }
 h5{
   font-size: 1.3rem;
-  font-weight: 300;
-  text-transform: capitalize;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-transform: none;
   letter-spacing: 0.01rem;
 }
 h6{
@@ -262,7 +266,7 @@ h6{
 --------------------------------------------------------------*/
 .btn {
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
   letter-spacing: 0.09em;
   color: var(--white-color);
   background-color: var(--primary-color);
@@ -303,7 +307,9 @@ h6{
 .form-control {
   padding: 1rem;
   font-size: 21px;
-  font-weight: 300;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0.01rem;
   line-height: normal;
 }
@@ -323,7 +329,9 @@ textarea.form-control::placeholder {
 .filter-shop .form-select{
   padding: 0;
   font-size: 21px;
-  font-weight: 300;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   border: none;
   background-color: transparent;
   line-height: normal;
@@ -346,7 +354,9 @@ textarea.form-control::placeholder {
 /** 3.3 Table
 --------------------------------------------------------------*/
 th{
-  font-weight: 300;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0.06rem;
 }
 
@@ -1283,7 +1293,9 @@ th{
 /*----------------------------------------------*/
 #footer .menu-list .menu-item a{
   font-size: 0.7619em;
-  font-weight: 300;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0.09em;
   color: var(--black-color);
 }

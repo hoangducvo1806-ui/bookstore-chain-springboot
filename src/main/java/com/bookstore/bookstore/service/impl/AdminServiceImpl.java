@@ -1,6 +1,7 @@
 package com.bookstore.bookstore.service.impl;
 
 import com.bookstore.bookstore.dto.AdminDashboardStats;
+import com.bookstore.bookstore.dto.ShopRevenueDTO;
 import com.bookstore.bookstore.entity.*;
 import com.bookstore.bookstore.enums.OrderStatus;
 import com.bookstore.bookstore.enums.RoleName;
@@ -57,6 +58,26 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public List<Order> getRecentOrders() {
         return orderRepository.findTop10ByOrderByCreatedAtDesc();
+    }
+
+    @Override
+    public List<ShopRevenueDTO> getShopRevenueStats() {
+        List<Shop> shops = shopRepository.findAll();
+        List<ShopRevenueDTO> result = new ArrayList<>();
+        for (Shop shop : shops) {
+            long total = orderRepository.countByShop(shop);
+            long delivered = orderRepository.countByShopAndStatus(shop, OrderStatus.DELIVERED);
+            BigDecimal rev = orderRepository.calculateDeliveredRevenueByShop(shop);
+            result.add(ShopRevenueDTO.builder()
+                    .shopId(shop.getId())
+                    .shopName(shop.getName())
+                    .ownerName(shop.getOwner() != null ? shop.getOwner().getFullName() : "N/A")
+                    .totalOrders(total)
+                    .deliveredOrders(delivered)
+                    .deliveredRevenue(rev != null ? rev : BigDecimal.ZERO)
+                    .build());
+        }
+        return result;
     }
 
     @Override

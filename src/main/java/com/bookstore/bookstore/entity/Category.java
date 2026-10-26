@@ -2,6 +2,7 @@ package com.bookstore.bookstore.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
 
 @Entity
 @Table(name = "categories")
@@ -16,13 +17,15 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Nationalized
+    @Column(nullable = false, unique = true, length = 100, columnDefinition = "NVARCHAR(100)")
     private String name;
 
     @Column(nullable = false, unique = true, length = 120)
     private String slug;
 
-    @Column(length = 255)
+    @Nationalized
+    @Column(length = 255, columnDefinition = "NVARCHAR(255)")
     private String description;
 
     @Builder.Default

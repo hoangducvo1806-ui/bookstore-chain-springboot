@@ -2,6 +2,7 @@ package com.bookstore.bookstore.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 
@@ -18,13 +19,15 @@ public class ShippingCarrier {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Nationalized
+    @Column(nullable = false, unique = true, length = 100, columnDefinition = "NVARCHAR(100)")
     private String name; // Giao Hàng Nhanh, Viettel Post, Giao Hàng Tiết Kiệm...
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal shippingFee; // Cước phí vận chuyển cơ bản
 
-    @Column(length = 255)
+    @Nationalized
+    @Column(length = 255, columnDefinition = "NVARCHAR(255)")
     private String description;
 
     @Builder.Default

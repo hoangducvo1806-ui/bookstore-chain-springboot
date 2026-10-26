@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<html lang="vi" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -17,42 +17,115 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300..1000;1,300..1000&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Inter:ital,opsz,wght@0,14..32,300..800;1,14..32,300..800&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Nunito', sans-serif; }
+        :root, [data-bs-theme="dark"] {
+            --bs-body-bg: #0b0d11;
+            --bs-body-color: #f3f4f6;
+            --bs-tertiary-bg: #141720;
+            --bs-secondary-bg: #1a1e2a;
+            --bs-border-color: #272c3a;
+        }
+
+        html, body {
+            background-color: #0b0d11 !important;
+            color: #f3f4f6 !important;
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+        }
+
+        /* Dark background overrides for clean UI */
+        .bg-white {
+            background-color: #141720 !important;
+            color: #f3f4f6 !important;
+        }
+        .bg-light {
+            background-color: #0f1218 !important;
+            color: #f3f4f6 !important;
+        }
+        .bg-light-subtle {
+            background-color: #12151e !important;
+            color: #f3f4f6 !important;
+        }
+        .bg-primary-subtle {
+            background: linear-gradient(135deg, #181d2a 0%, #0e1117 100%) !important;
+            color: #f3f4f6 !important;
+        }
+        .bg-secondary-subtle {
+            background-color: #1c202d !important;
+            color: #e5e7eb !important;
+        }
+        .border, .border-bottom, .border-top, .border-start, .border-end {
+            border-color: #242937 !important;
+        }
+        .card {
+            background-color: #141720 !important;
+            border-color: #242937 !important;
+            color: #f3f4f6 !important;
+        }
+        .card-header, .card-footer {
+            background-color: #181c26 !important;
+            border-color: #242937 !important;
+            color: #f3f4f6 !important;
+        }
+        .text-dark {
+            color: #f3f4f6 !important;
+        }
+        .text-secondary {
+            color: #9ba3af !important;
+        }
+        .text-muted {
+            color: #8c96a5 !important;
+        }
+
+        /* Condition Badges */
         .condition-badge {
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
             font-weight: 600;
         }
-        .badge-like-new { background-color: #198754; color: #fff; }
-        .badge-very-good { background-color: #0d6efd; color: #fff; }
-        .badge-good { background-color: #0dcaf0; color: #000; }
-        .badge-acceptable { background-color: #ffc107; color: #000; }
-        .badge-old { background-color: #6c757d; color: #fff; }
-        .original-price { text-decoration: line-through; color: #999; font-size: 0.9rem; }
-        .selling-price { color: #d63384; font-weight: 700; font-size: 1.15rem; }
+        .badge-like-new { background-color: #059669; color: #fff; }
+        .badge-very-good { background-color: #2563eb; color: #fff; }
+        .badge-good { background-color: #0891b2; color: #fff; }
+        .badge-acceptable { background-color: #d97706; color: #fff; }
+        .badge-old { background-color: #4b5563; color: #fff; }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #6b7280 !important;
+            font-size: 0.9rem;
+        }
+        .selling-price {
+            color: #ff5277 !important;
+            font-weight: 700;
+            font-size: 1.15rem;
+        }
+
+        /* Book Card Dark Styling */
         .book-card {
-            border: 1px solid #f0f0f0;
-            border-radius: 8px;
+            border: 1px solid #242937 !important;
+            border-radius: 10px;
             transition: all 0.25s ease-in-out;
-            background: #fff;
+            background: #141720 !important;
             height: 100%;
             display: flex;
             flex-direction: column;
         }
         .book-card:hover {
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(0,0,0,0.6) !important;
+            transform: translateY(-4px);
+            border-color: #3b82f6 !important;
         }
         .book-img-wrap {
             position: relative;
             height: 260px;
             overflow: hidden;
             border-radius: 8px 8px 0 0;
-            background: #f8f9fa;
+            background: #0d0f15 !important;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -70,26 +143,119 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            background: rgba(255,255,255,0.85);
-            border: none;
+            background: rgba(20, 23, 32, 0.85) !important;
+            border: 1px solid #2e3547;
             border-radius: 50%;
             width: 36px;
             height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            color: #f3f4f6;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
         .btn-wishlist:hover {
-            background: #fff;
-            color: #dc3545;
+            background: #252b3b !important;
+            color: #ef4444 !important;
         }
+
+        /* Dropdown Menu Dark Theme, Positioning, Hover & Click Support */
+        .dropdown, .nav-item.dropdown {
+            position: relative !important;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute !important;
+            top: 100% !important;
+            margin-top: 4px !important;
+            background-color: #171b26 !important;
+            border: 1px solid #2d3345 !important;
+            color: #f3f4f6 !important;
+            box-shadow: 0 14px 35px rgba(0,0,0,0.7) !important;
+            border-radius: 10px !important;
+            z-index: 99999 !important;
+            min-width: 220px;
+        }
+
+        /* Invisible bridge so mouse hover doesn't break between button and menu */
+        .dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 0;
+            right: 0;
+            height: 8px;
+            display: block;
+        }
+
+        .dropdown-menu.dropdown-menu-end {
+            right: 0 !important;
+            left: auto !important;
+        }
+
+        /* Open on HOVER for desktop */
+        @media (min-width: 768px) {
+            .dropdown:hover > .dropdown-menu,
+            .nav-item.dropdown:hover > .dropdown-menu {
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+            }
+        }
+
+        /* Open on CLICK or programmatic .show */
+        .dropdown-menu.show {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+        }
+        .dropdown-item {
+            color: #e2e8f0 !important;
+            transition: background-color 0.15s, color 0.15s;
+        }
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: #232838 !important;
+            color: #38bdf8 !important;
+        }
+        .dropdown-divider {
+            border-top-color: #272d3b !important;
+        }
+
+        /* Form Controls Dark */
+        .form-control, .form-select {
+            background-color: #161924 !important;
+            border-color: #272d3b !important;
+            color: #f3f4f6 !important;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #1b1f2c !important;
+            border-color: #3b82f6 !important;
+            color: #f3f4f6 !important;
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+        }
+        .form-control::placeholder {
+            color: #6b7280 !important;
+        }
+
+        /* Tables Dark */
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: #f3f4f6;
+            --bs-table-border-color: #242937;
+        }
+        .table-light {
+            --bs-table-bg: #181c26 !important;
+            --bs-table-color: #f3f4f6 !important;
+        }
+
         .order-tab-link.active {
             font-weight: 700;
-            border-bottom: 3px solid #0d6efd !important;
-            color: #0d6efd !important;
+            border-bottom: 3px solid #3b82f6 !important;
+            color: #3b82f6 !important;
         }
     </style>
 </head>
@@ -124,6 +290,85 @@
     <script th:src="@{/js/jquery-1.11.0.min.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
-    <script th:src="@{/js/script.js}"></script>
+    <script th:src="@{/js/script.js(v='3.1')}"></script>
+
+    <!-- Dedicated Bulletproof Dropdown Script -->
+    <script>
+        (function() {
+            function bindDropdown(toggleId) {
+                var toggle = document.getElementById(toggleId);
+                if (!toggle) return;
+                var parent = toggle.closest('.dropdown, .nav-item.dropdown');
+                if (!parent) return;
+                var menu = parent.querySelector('.dropdown-menu');
+                if (!menu) return;
+
+                toggle.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var willOpen = !menu.classList.contains('show');
+
+                    // Close any other open dropdowns
+                    document.querySelectorAll('.dropdown-menu.show').forEach(function(m) {
+                        m.classList.remove('show');
+                        var p = m.closest('.dropdown, .nav-item.dropdown');
+                        if (p) {
+                            var t = p.querySelector('.dropdown-toggle');
+                            if (t) t.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+
+                    if (willOpen) {
+                        menu.classList.add('show');
+                        toggle.setAttribute('aria-expanded', 'true');
+                    } else {
+                        menu.classList.remove('show');
+                        toggle.setAttribute('aria-expanded', 'false');
+                    }
+                };
+            }
+
+            function initDropdowns() {
+                bindDropdown('userMenuDropdown');
+                bindDropdown('categoryDropdown');
+
+                // Fallback for other dropdown-toggles
+                document.querySelectorAll('.dropdown-toggle').forEach(function(btn) {
+                    if (btn.id === 'userMenuDropdown' || btn.id === 'categoryDropdown') return;
+                    btn.onclick = function(e) {
+                        var p = btn.closest('.dropdown, .nav-item.dropdown');
+                        if (!p) return;
+                        var m = p.querySelector('.dropdown-menu');
+                        if (!m) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        var open = !m.classList.contains('show');
+                        document.querySelectorAll('.dropdown-menu.show').forEach(function(el) { el.classList.remove('show'); });
+                        if (open) m.classList.add('show');
+                    };
+                });
+
+                // Close when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.dropdown, .nav-item.dropdown')) {
+                        document.querySelectorAll('.dropdown-menu.show').forEach(function(m) {
+                            m.classList.remove('show');
+                            var p = m.closest('.dropdown, .nav-item.dropdown');
+                            if (p) {
+                                var t = p.querySelector('.dropdown-toggle');
+                                if (t) t.setAttribute('aria-expanded', 'false');
+                            }
+                        });
+                    }
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initDropdowns);
+            } else {
+                initDropdowns();
+            }
+        })();
+    </script>
 </body>
 </html>

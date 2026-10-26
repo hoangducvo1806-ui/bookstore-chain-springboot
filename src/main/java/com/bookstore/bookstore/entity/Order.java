@@ -68,16 +68,16 @@ public class Order {
     private BigDecimal totalAmount; // Tổng tiền thanh toán cuối cùng
 
     // Thông tin nhận hàng (lưu cố định tại thời điểm đặt đơn)
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 100, columnDefinition = "NVARCHAR(100)")
     private String recipientName;
 
     @Column(nullable = false, length = 20)
     private String recipientPhone;
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, length = 500, columnDefinition = "NVARCHAR(500)")
     private String shippingAddress;
 
-    @Column(length = 500)
+    @Column(length = 500, columnDefinition = "NVARCHAR(500)")
     private String note;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

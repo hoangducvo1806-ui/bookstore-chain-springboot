@@ -27,7 +27,7 @@ public class AppCommission {
     @Column(nullable = false, precision = 5, scale = 2)
     private BigDecimal commissionRate; // % chiết khấu app thu (VD: 5.00%, 10.00%)
 
-    @Column(length = 255)
+    @Column(length = 255, columnDefinition = "NVARCHAR(255)")
     private String note;
 
     @CreationTimestamp
