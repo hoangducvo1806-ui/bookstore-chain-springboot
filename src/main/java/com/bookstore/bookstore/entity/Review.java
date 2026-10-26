@@ -37,7 +37,7 @@ public class Review {
     private Integer rating; // 1 -> 5 sao
 
     // Yêu cầu đề bài: text tối thiểu 50 ký tự
-    @Column(nullable = false, length = 2000)
+    @Column(nullable = false, length = 2000, columnDefinition = "NVARCHAR(2000)")
     private String comment;
 
     // Yêu cầu đề bài: hình ảnh/video sản phẩm đã mua (upload Cloudinary)

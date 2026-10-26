@@ -50,6 +50,10 @@ public class DataInitializer implements CommandLineRunner {
 
         // Admin
         User admin = userRepository.findByEmail("admin@gmail.com")
+                .map(u -> {
+                    u.setFullName("Quản Trị Viên (Admin)");
+                    return userRepository.save(u);
+                })
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("admin@gmail.com")
                         .fullName("Quản Trị Viên (Admin)")
@@ -61,6 +65,10 @@ public class DataInitializer implements CommandLineRunner {
 
         // Manager
         User manager = userRepository.findByEmail("manager@gmail.com")
+                .map(u -> {
+                    u.setFullName("Quản Lý Chuỗi Cửa Hàng (Manager)");
+                    return userRepository.save(u);
+                })
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("manager@gmail.com")
                         .fullName("Quản Lý Chuỗi Cửa Hàng (Manager)")
@@ -72,6 +80,10 @@ public class DataInitializer implements CommandLineRunner {
 
         // Shipper
         User shipper = userRepository.findByEmail("shipper@gmail.com")
+                .map(u -> {
+                    u.setFullName("Nhân Viên Giao Hàng (Shipper)");
+                    return userRepository.save(u);
+                })
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("shipper@gmail.com")
                         .fullName("Nhân Viên Giao Hàng (Shipper)")
@@ -83,6 +95,10 @@ public class DataInitializer implements CommandLineRunner {
 
         // Vendor (Chủ chi nhánh shop)
         User vendor = userRepository.findByEmail("vendor@gmail.com")
+                .map(u -> {
+                    u.setFullName("Chủ Chi Nhánh Cửa Hàng (Vendor)");
+                    return userRepository.save(u);
+                })
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("vendor@gmail.com")
                         .fullName("Chủ Chi Nhánh Cửa Hàng (Vendor)")
@@ -94,6 +110,10 @@ public class DataInitializer implements CommandLineRunner {
 
         // Khách hàng thông thường (User)
         User user = userRepository.findByEmail("user@gmail.com")
+                .map(u -> {
+                    u.setFullName("Khách Mua Sách (User)");
+                    return userRepository.save(u);
+                })
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("user@gmail.com")
                         .fullName("Khách Mua Sách (User)")

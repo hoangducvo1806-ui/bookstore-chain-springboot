@@ -27,7 +27,7 @@ public class ChatMessage {
     @JoinColumn(name = "receiver_id", nullable = false)
     private User receiver;
 
-    @Column(nullable = false, length = 2000)
+    @Column(nullable = false, length = 2000, columnDefinition = "NVARCHAR(2000)")
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
