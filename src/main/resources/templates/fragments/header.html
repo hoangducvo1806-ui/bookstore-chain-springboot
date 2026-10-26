@@ -5,28 +5,31 @@
 <div th:fragment="header">
 
     <!-- Top info bar -->
-    <div class="top-info border-bottom d-none d-md-block bg-light py-1">
+    <div class="top-info border-bottom d-none d-md-block py-1" style="background-color: #0b0d13 !important; border-color: #242937 !important; color: #cbd5e1 !important; font-size: 0.85rem;">
         <div class="container">
             <div class="row g-0 align-items-center">
                 <div class="col-md-4 text-start">
-                    <span class="fs-6 text-muted"><i class="bi bi-telephone me-1"></i> Hotline: <a href="tel:0900000004" class="text-decoration-none fw-bold">1900 6868</a></span>
+                    <span style="color: #cbd5e1;"><i class="bi bi-telephone text-primary me-1"></i> Hotline: <a href="tel:19006868" class="text-decoration-none fw-bold" style="color: #38bdf8 !important;">1900 6868</a></span>
                 </div>
                 <div class="col-md-4 text-center">
                     <span class="badge bg-warning text-dark me-2">HOT</span>
-                    <span class="fs-6 text-muted">Sách cũ tuyển chọn – Giảm tới 60% – Cam kết ảnh thật</span>
+                    <span style="color: #cbd5e1;">Sách cũ tuyển chọn – Giảm tới 60% – Cam kết ảnh thật</span>
                 </div>
                 <div class="col-md-4 text-end">
-                    <a th:if="${currentUser != null}" th:href="@{/vendor/register}" class="fs-6 text-decoration-none text-primary fw-semibold me-3">
+                    <a th:if="${currentUser != null}" th:href="@{/vendor/dashboard}" class="text-decoration-none fw-semibold me-3" style="color: #f59e0b !important;">
                         <i class="bi bi-shop me-1"></i> Kênh Người Bán
                     </a>
-                    <span class="fs-6 text-muted"><i class="bi bi-truck me-1"></i> Giao nhanh toàn quốc</span>
+                    <a th:if="${currentUser == null}" th:href="@{/login}" class="text-decoration-none fw-semibold me-3" style="color: #60a5fa !important;">
+                        <i class="bi bi-shop me-1"></i> Kênh Người Bán
+                    </a>
+                    <span style="color: #cbd5e1;"><i class="bi bi-truck text-success me-1"></i> Giao nhanh toàn quốc</span>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Main Navigation Bar -->
-    <nav id="header-nav" class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-2 shadow-sm">
+    <nav id="header-nav" class="navbar navbar-expand-lg navbar-dark border-bottom sticky-top py-2 shadow-sm" style="background-color: #141720 !important; border-color: #242937 !important;">
         <div class="container">
             <!-- Brand Logo -->
             <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
@@ -38,14 +41,15 @@
             <form class="d-none d-lg-flex mx-3 flex-grow-1" style="max-width: 480px;" th:action="@{/books}" method="get">
                 <div class="input-group">
                     <input type="text" name="keyword" class="form-control rounded-start-pill border-end-0 ps-3" 
+                           style="background-color: #0f121a !important; color: #f8fafc !important; border-color: #2e384d !important;"
                            placeholder="Tìm tên sách, tác giả, ISBN..." th:value="${param.keyword}">
-                    <button class="btn btn-outline-secondary rounded-end-pill border-start-0 pe-3 bg-white" type="submit">
-                        <i class="bi bi-search text-primary"></i>
+                    <button class="btn btn-primary rounded-end-pill border-start-0 pe-3" type="submit" style="background-color: #2563eb; border-color: #2563eb;">
+                        <i class="bi bi-search text-white"></i>
                     </button>
                 </div>
             </form>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+            <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
                     aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -54,44 +58,44 @@
                 <!-- Nav Links -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-uppercase fw-semibold" style="font-size: 0.9rem;">
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/}">Trang Chủ</a>
+                        <a class="nav-link text-light" th:href="@{/}">Trang Chủ</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle text-light" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Danh Mục Sách
                         </a>
-                        <ul class="dropdown-menu shadow-sm" aria-labelledby="categoryDropdown">
-                            <li><a class="dropdown-item" th:href="@{/books}">Tất cả sách cũ</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                        <ul class="dropdown-menu shadow-sm" aria-labelledby="categoryDropdown" style="background-color: #181d2a; border-color: #283347;">
+                            <li><a class="dropdown-item text-light" th:href="@{/books}">Tất cả sách cũ</a></li>
+                            <li><hr class="dropdown-divider border-secondary"></li>
                             <li th:each="cat : ${allCategories}">
-                                <a class="dropdown-item text-capitalize" th:href="@{'/categories/' + ${cat.slug}}" th:text="${cat.name}">Danh mục</a>
+                                <a class="dropdown-item text-capitalize text-light" th:href="@{'/categories/' + ${cat.slug}}" th:text="${cat.name}">Danh mục</a>
                             </li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/books}">Khám Phá Sách</a>
+                        <a class="nav-link text-light" th:href="@{/books}">Khám Phá Sách</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-warning fw-bold" th:href="@{/library}">
+                        <a class="nav-link fw-bold" style="color: #fbbf24 !important;" th:href="@{/library}">
                             <i class="bi bi-box-seam me-1"></i> Thư Viện 3D
                         </a>
                     </li>
                     <li class="nav-item" th:if="${currentUser != null}">
-                        <a class="nav-link" th:href="@{/user/viewed-books}">Sách Đã Xem</a>
+                        <a class="nav-link text-light" th:href="@{/user/viewed-books}">Sách Đã Xem</a>
                     </li>
                 </ul>
 
                 <!-- User actions (Search mobile, Wishlist, Cart, Profile/Auth) -->
                 <div class="d-flex align-items-center gap-3">
                     <!-- Wishlist icon -->
-                    <a th:href="@{/user/wishlist}" class="text-dark position-relative fs-5 text-decoration-none" title="Sách yêu thích">
+                    <a th:href="@{/user/wishlist}" class="text-light position-relative fs-5 text-decoration-none" title="Sách yêu thích">
                         <i class="bi bi-heart text-danger"></i>
                         <span th:if="${wishlistCount > 0}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
                               style="font-size: 0.65rem;" th:text="${wishlistCount}">0</span>
                     </a>
 
                     <!-- Cart icon -->
-                    <a th:href="@{/cart}" class="text-dark position-relative fs-5 text-decoration-none" title="Giỏ hàng">
+                    <a th:href="@{/cart}" class="text-light position-relative fs-5 text-decoration-none" title="Giỏ hàng">
                         <i class="bi bi-cart3 text-primary"></i>
                         <span th:if="${cartCount > 0}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" 
                               style="font-size: 0.65rem;" th:text="${cartCount}">0</span>
@@ -99,21 +103,21 @@
 
                     <!-- Guest vs User Login Dropdown -->
                     <div th:if="${currentUser == null}" class="d-flex gap-2">
-                        <a th:href="@{/login}" class="btn btn-outline-primary btn-sm px-3 rounded-pill">Đăng Nhập</a>
+                        <a th:href="@{/login}" class="btn btn-outline-primary btn-sm px-3 rounded-pill text-light">Đăng Nhập</a>
                         <a th:href="@{/register}" class="btn btn-primary btn-sm px-3 rounded-pill text-white">Đăng Ký</a>
                     </div>
 
                     <div th:if="${currentUser != null}" class="dropdown">
-                        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a href="#" class="d-flex align-items-center text-light text-decoration-none dropdown-toggle" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <img th:if="${currentUser.avatarUrl != null and !currentUser.avatarUrl.isEmpty()}" 
-                                 th:src="${currentUser.avatarUrl}" alt="Avatar" class="rounded-circle me-1" style="width: 32px; height: 32px; object-fit: cover;">
+                                 th:src="${currentUser.avatarUrl}" alt="Avatar" class="rounded-circle me-1 border border-secondary" style="width: 32px; height: 32px; object-fit: cover;">
                             <i th:unless="${currentUser.avatarUrl != null and !currentUser.avatarUrl.isEmpty()}" 
-                               class="bi bi-person-circle fs-4 me-1 text-primary"></i>
-                            <span class="d-none d-md-inline fw-semibold" style="font-size: 0.85rem;" th:text="${currentUser.fullName}">Người dùng</span>
+                                class="bi bi-person-circle fs-4 me-1 text-primary"></i>
+                            <span class="d-none d-md-inline fw-semibold text-white" style="font-size: 0.85rem;" th:text="${currentUser.fullName}">Người dùng</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userMenuDropdown">
-                            <li class="px-3 py-2 border-bottom">
-                                <div class="fw-bold text-truncate" style="max-width: 180px;" th:text="${currentUser.fullName}"></div>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userMenuDropdown" style="background-color: #181d2a; border-color: #283347; min-width: 220px;">
+                            <li class="px-3 py-2 border-bottom border-secondary">
+                                <div class="fw-bold text-white text-truncate" style="max-width: 180px;" th:text="${currentUser.fullName}"></div>
                                 <small class="text-muted text-truncate d-block" style="max-width: 180px;" th:text="${currentUser.email}"></small>
                             </li>
                             
@@ -128,14 +132,15 @@
                                     <i class="bi bi-truck me-2"></i> Kênh Giao Hàng (Shipper)
                                 </a>
                             </li>
-                            <li class="border-top my-1"></li>
+                            <li class="border-top border-secondary my-1"></li>
 
-                            <li><a class="dropdown-item py-2" th:href="@{/user/profile}"><i class="bi bi-person me-2"></i> Hồ sơ & Sổ địa chỉ</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{/user/orders}"><i class="bi bi-bag-check me-2"></i> Lịch sử đơn mua</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{/user/wishlist}"><i class="bi bi-heart me-2"></i> Sách yêu thích</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{/user/viewed-books}"><i class="bi bi-clock-history me-2"></i> Sách đã xem</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item py-2 text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
+                            <li><a class="dropdown-item py-2 text-light" th:href="@{/user/profile}"><i class="bi bi-person me-2 text-primary"></i> Hồ sơ & Sổ địa chỉ</a></li>
+                            <li><a class="dropdown-item py-2 text-light" th:href="@{/user/orders}"><i class="bi bi-bag-check me-2 text-success"></i> Lịch sử đơn mua</a></li>
+                            <li><a class="dropdown-item py-2 text-light" th:href="@{/chat}"><i class="bi bi-chat-dots me-2 text-info"></i> Tin nhắn shop</a></li>
+                            <li><a class="dropdown-item py-2 text-light" th:href="@{/user/wishlist}"><i class="bi bi-heart me-2 text-danger"></i> Sách yêu thích</a></li>
+                            <li><a class="dropdown-item py-2 text-light" th:href="@{/user/viewed-books}"><i class="bi bi-clock-history me-2 text-warning"></i> Sách đã xem</a></li>
+                            <li><hr class="dropdown-divider border-secondary"></li>
+                            <li><a class="dropdown-item py-2 text-danger fw-bold" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
                         </ul>
                     </div>
                 </div>

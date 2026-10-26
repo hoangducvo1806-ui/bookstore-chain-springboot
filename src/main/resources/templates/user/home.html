@@ -102,6 +102,7 @@
                  th:src="@{/images/product-item1.png}" th:alt="${book.title}">
 
             <span class="badge position-absolute top-0 start-0 m-2 condition-badge"
+                  th:if="${book.bookCondition != null}"
                   th:classappend="${book.bookCondition.name() == 'LIKE_NEW' ? 'badge-like-new' : 
                                    (book.bookCondition.name() == 'VERY_GOOD' ? 'badge-very-good' : 
                                    (book.bookCondition.name() == 'GOOD' ? 'badge-good' : 
@@ -129,21 +130,21 @@
 
             <div class="mt-auto">
                 <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <span class="selling-price" th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</span>
+                    <span class="selling-price" th:if="${book.price != null}" th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</span>
                     <span class="original-price" th:if="${book.originalPrice != null}" 
                           th:text="${#numbers.formatDecimal(book.originalPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}">120.000 đ</span>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3 text-muted" style="font-size: 0.8rem;">
-                    <span>Đã bán: <b class="text-danger" th:text="${book.soldQuantity}">25</b> cuốn</span>
-                    <span>Tồn: <b class="text-light" th:text="${book.stock}">5</b></span>
+                    <span>Đã bán: <b class="text-danger" th:text="${book.soldQuantity != null ? book.soldQuantity : 0}">25</b> cuốn</span>
+                    <span>Tồn: <b class="text-light" th:text="${book.stock != null ? book.stock : 0}">5</b></span>
                 </div>
 
                 <div class="d-grid gap-2">
                     <form th:action="@{/cart/add}" method="post">
                         <input type="hidden" name="bookId" th:value="${book.id}">
                         <input type="hidden" name="quantity" value="1">
-                        <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 text-white" th:disabled="${book.stock <= 0}">
-                            <i class="bi bi-cart-plus me-1"></i> <span th:text="${book.stock > 0 ? 'Thêm Giỏ Hàng' : 'Hết Hàng'}">Thêm Giỏ Hàng</span>
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 text-white" th:disabled="${book.stock != null and book.stock <= 0}">
+                            <i class="bi bi-cart-plus me-1"></i> <span th:text="${book.stock != null and book.stock > 0 ? 'Thêm Giỏ Hàng' : 'Hết Hàng'}">Thêm Giỏ Hàng</span>
                         </button>
                     </form>
                 </div>

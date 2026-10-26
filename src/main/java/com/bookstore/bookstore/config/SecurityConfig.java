@@ -48,7 +48,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/ws/**", "/api/**", "/payment/**"))
+            .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Công khai: Guest, Tài nguyên tĩnh, Auth, Upload API, Error page, Access Denied
@@ -56,7 +56,7 @@ public class SecurityConfig {
                         "/", "/home", "/books/**", "/categories/**", "/shops/**", "/search/**", "/payment/**",
                         "/auth/**", "/login", "/register", "/verify-otp", "/forgot-password", "/reset-password",
                         "/logout", "/access-denied",
-                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**", "/error", "/api/ai/**"
+                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**", "/error", "/api/ai/**", "/library", "/api/library/**"
                 ).permitAll()
 
                 // Phân quyền đặc biệt: User đã đăng nhập được vào form đăng ký Shop
@@ -78,7 +78,7 @@ public class SecurityConfig {
                         response.setContentType("application/json;charset=UTF-8");
                         response.getWriter().write("{\"ok\":false,\"code\":\"LOGIN_REQUIRED\",\"loginUrl\":\"/login\",\"message\":\"Vui lòng đăng nhập để thực hiện thao tác này.\"}");
                     } else {
-                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        response.sendRedirect("/login");
                     }
                 })
                 .accessDeniedHandler((request, response, accessDeniedException) -> {
