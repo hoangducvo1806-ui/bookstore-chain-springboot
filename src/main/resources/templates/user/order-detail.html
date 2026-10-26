@@ -80,7 +80,7 @@
                                     <td class="text-center" th:text="${#numbers.formatDecimal(it.price, 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</td>
                                     <td class="text-center" th:text="${it.quantity}">1</td>
                                     <td class="text-end fw-bold text-danger" 
-                                        th:text="${#numbers.formatDecimal(it.price.multiply(T(java.math.BigDecimal).valueOf(it.quantity)), 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</td>
+                                        th:text="${#numbers.formatDecimal(it.totalPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</td>
                                 </tr>
                             </tbody>
                         </table>

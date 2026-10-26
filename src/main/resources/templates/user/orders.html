@@ -102,7 +102,7 @@
                                 </div>
                             </div>
                             <div class="text-end">
-                                <span class="fw-bold text-dark" th:text="${#numbers.formatDecimal(item.price.multiply(T(java.math.BigDecimal).valueOf(item.quantity)), 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</span>
+                                <span class="fw-bold text-dark" th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}">65.000 đ</span>
                                 <!-- Nút Đánh giá sản phẩm nếu đơn đã giao -->
                                 <div class="mt-2" th:if="${order.status.name() == 'DELIVERED'}">
                                     <a th:href="@{/user/reviews/write(bookId=${item.book.id}, orderId=${order.id})}" 

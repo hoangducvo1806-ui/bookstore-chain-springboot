@@ -50,11 +50,11 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Công khai: Guest, Tài nguyên tĩnh, Auth, Upload API
+                // Công khai: Guest, Tài nguyên tĩnh, Auth, Upload API, Error page
                 .requestMatchers(
                         "/", "/home", "/books/**", "/categories/**", "/shops/**", "/search/**", "/payment/**",
                         "/auth/**", "/login", "/register", "/verify-otp", "/forgot-password", "/reset-password",
-                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**"
+                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**", "/error"
                 ).permitAll()
 
                 // Phân quyền theo role
@@ -65,6 +65,11 @@ public class SecurityConfig {
                 .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**").authenticated()
 
                 .anyRequest().authenticated()
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendRedirect("/login");
+                })
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

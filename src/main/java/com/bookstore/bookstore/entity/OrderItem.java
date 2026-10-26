@@ -31,4 +31,11 @@ public class OrderItem {
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price; // Giá tại thời điểm mua
+
+    public BigDecimal getTotalPrice() {
+        if (price == null || quantity == null) {
+            return BigDecimal.ZERO;
+        }
+        return price.multiply(BigDecimal.valueOf(quantity.longValue()));
+    }
 }
