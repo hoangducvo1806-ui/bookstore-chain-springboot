@@ -2,6 +2,8 @@ package com.bookstore.bookstore.config;
 
 import com.bookstore.bookstore.security.CustomUserDetailsService;
 import com.bookstore.bookstore.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,17 +56,32 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/", "/home", "/books/**", "/categories/**", "/shops/**", "/search/**", "/payment/**",
                         "/auth/**", "/login", "/register", "/verify-otp", "/forgot-password", "/reset-password",
-                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**"
+                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**",
+                        "/library", "/api/library/**"
                 ).permitAll()
+
+                // Phân quyền đặc biệt: User đã đăng nhập được vào form đăng ký Shop
+                .requestMatchers("/vendor/register").authenticated()
 
                 // Phân quyền theo role
                 .requestMatchers("/admin/users/**").hasRole("ADMIN")
                 .requestMatchers("/admin/**", "/manager/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/vendor/**").hasRole("VENDOR")
                 .requestMatchers("/shipper/**").hasRole("SHIPPER")
-                .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**").authenticated()
+                .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**", "/api/cart/add").authenticated()
 
                 .anyRequest().authenticated()
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    if (request.getRequestURI() != null && request.getRequestURI().startsWith("/api/")) {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().write("{\"ok\":false,\"code\":\"LOGIN_REQUIRED\",\"loginUrl\":\"/login\",\"message\":\"Vui lòng đăng nhập để thực hiện thao tác này.\"}");
+                    } else {
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    }
+                })
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

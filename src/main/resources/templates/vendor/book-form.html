@@ -5,32 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${pageTitle}">Thông tin sách</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body { background:#f5f7fb; }
-        .page-wrap { max-width:900px;margin:32px auto; }
-        .panel { background:white;border-radius:16px;padding:28px;box-shadow:0 4px 18px #18243b0b; }
-        label { font-weight:600;margin-bottom:6px; }
+        body { background:#f5f7fb; font-family: system-ui, -apple-system, sans-serif; }
+        .page-wrap { max-width:960px; margin:32px auto; }
+        .panel { background:white; border-radius:16px; padding:28px; box-shadow:0 4px 18px rgba(0,0,0,0.04); }
+        label { font-weight:600; margin-bottom:6px; font-size: 0.95rem; }
     </style>
 </head>
 <body>
+
+<div th:replace="~{vendor/fragments/nav :: vendorNav('books')}"></div>
+
 <div class="container page-wrap">
-    <div class="mb-4">
-        <h2 class="fw-bold" th:text="${pageTitle}"></h2>
-        <p class="text-secondary mb-0">Nhập thông tin sách bên dưới.</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0" th:text="${pageTitle}">Đăng Sách Mới</h2>
+            <p class="text-secondary mb-0">Cập nhật kho sách cũ của chi nhánh cửa hàng bạn.</p>
+        </div>
+        <a th:href="@{/vendor/books}" class="btn btn-outline-secondary btn-sm rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Về danh sách sách
+        </a>
     </div>
 
-    <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+    <div class="alert alert-danger alert-dismissible fade show" th:if="${errorMessage}">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
-    <form class="panel" method="post" th:action="@{/vendor/books/save}" th:object="${book}">
+    <form class="panel" method="post" th:action="@{/vendor/books/save}" th:object="${book}" enctype="multipart/form-data">
         <input type="hidden" th:field="*{id}">
 
-        <div class="row g-3">
+        <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">
+            <i class="bi bi-info-circle me-1"></i> 1. Thông Tin Cơ Bản Cuốn Sách
+        </h5>
+
+        <div class="row g-3 mb-4">
             <div class="col-md-8">
-                <label for="title">Tên sách *</label>
-                <input id="title" class="form-control" th:field="*{title}" required maxlength="255">
+                <label for="title">Tên sách cũ <span class="text-danger">*</span></label>
+                <input id="title" class="form-control" th:field="*{title}" required maxlength="255" placeholder="Ví dụ: Đắc Nhân Tâm - Dale Carnegie">
             </div>
             <div class="col-md-4">
-                <label for="categoryId">Danh mục *</label>
+                <label for="categoryId">Thể loại danh mục <span class="text-danger">*</span></label>
                 <select id="categoryId" name="categoryId" class="form-select" required>
                     <option value="">-- Chọn danh mục --</option>
                     <option th:each="cat : ${categories}" th:value="${cat.id}"
@@ -39,78 +56,122 @@
             </div>
 
             <div class="col-md-6">
-                <label for="author">Tác giả *</label>
-                <input id="author" class="form-control" th:field="*{author}" required maxlength="150">
+                <label for="author">Tác giả <span class="text-danger">*</span></label>
+                <input id="author" class="form-control" th:field="*{author}" required maxlength="150" placeholder="Nguyễn Nhật Ánh, Haruki Murakami...">
             </div>
             <div class="col-md-6">
                 <label for="publisher">Nhà xuất bản</label>
-                <input id="publisher" class="form-control" th:field="*{publisher}" maxlength="150">
+                <input id="publisher" class="form-control" th:field="*{publisher}" maxlength="150" placeholder="NXB Trẻ, NXB Kim Đồng...">
             </div>
 
             <div class="col-md-4">
-                <label for="isbn">ISBN</label>
-                <input id="isbn" class="form-control" th:field="*{isbn}" maxlength="50">
+                <label for="isbn">Mã ISBN</label>
+                <input id="isbn" class="form-control" th:field="*{isbn}" maxlength="50" placeholder="978-604-...">
             </div>
             <div class="col-md-4">
                 <label for="publishYear">Năm xuất bản</label>
                 <input id="publishYear" type="number" class="form-control"
-                       th:field="*{publishYear}" min="0" max="2100">
+                       th:field="*{publishYear}" min="1800" max="2100" placeholder="2020">
             </div>
             <div class="col-md-4">
-                <label for="bookCondition">Tình trạng sách *</label>
+                <label for="bookCondition">Tình trạng sách cũ <span class="text-danger">*</span></label>
                 <select id="bookCondition" class="form-select" th:field="*{bookCondition}" required>
                     <option value="">-- Chọn tình trạng --</option>
                     <option th:each="condition : ${conditions}" th:value="${condition}"
                             th:text="${condition.label}"></option>
                 </select>
             </div>
+        </div>
+
+        <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">
+            <i class="bi bi-tag me-1"></i> 2. Giá Bán, Giá Khuyến Mãi & Tồn Kho
+        </h5>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label for="originalPrice">Giá bìa gốc (VNĐ) <span class="text-danger">*</span></label>
+                <input id="originalPrice" type="number" step="1000" min="0"
+                       class="form-control" th:field="*{originalPrice}" required placeholder="120000">
+                <small class="text-muted">Giá niêm yết trên bìa sách</small>
+            </div>
+            <div class="col-md-4">
+                <label for="price">Giá bán sách cũ (VNĐ) <span class="text-danger">*</span></label>
+                <input id="price" type="number" step="1000" min="0"
+                       class="form-control" th:field="*{price}" required placeholder="75000">
+                <small class="text-muted">Giá bán thực tế của chi nhánh</small>
+            </div>
+            <div class="col-md-4">
+                <label for="promotionalPrice">Giá khuyến mãi (VNĐ - Tùy chọn)</label>
+                <input id="promotionalPrice" type="number" step="1000" min="0"
+                       class="form-control" th:field="*{promotionalPrice}" placeholder="60000">
+                <small class="text-muted">Giá ưu đãi Flash sale (nếu có)</small>
+            </div>
 
             <div class="col-md-4">
-                <label for="originalPrice">Giá bìa (VNĐ) *</label>
-                <input id="originalPrice" type="number" step="0.01" min="0"
-                       class="form-control" th:field="*{originalPrice}" required>
-            </div>
-            <div class="col-md-4">
-                <label for="price">Giá bán (VNĐ) *</label>
-                <input id="price" type="number" step="0.01" min="0"
-                       class="form-control" th:field="*{price}" required>
-            </div>
-            <div class="col-md-4">
-                <label for="stock">Số lượng tồn kho *</label>
+                <label for="stock">Số lượng tồn kho (Quantity) <span class="text-danger">*</span></label>
                 <input id="stock" type="number" min="0" class="form-control"
-                       th:field="*{stock}" required>
+                       th:field="*{stock}" required placeholder="1">
             </div>
-
-            <div class="col-12">
-                <label for="mainImageUrl">Ảnh bìa chính (URL)</label>
-                <input id="mainImageUrl" class="form-control" th:field="*{mainImageUrl}"
-                       maxlength="500" placeholder="https://...">
-            </div>
-            <div class="col-12">
-                <label for="imageUrls">URL ảnh bổ sung</label>
-                <textarea id="imageUrls" name="imageUrls" class="form-control" rows="3"
-                          th:text="${imageUrls}"
-                          placeholder="Mỗi URL một dòng hoặc phân cách bằng dấu phẩy"></textarea>
-                <small class="text-secondary">Nhập URL ảnh đã tải lên. Ô này chưa tự tải file lên Cloudinary.</small>
-            </div>
-
-            <div class="col-12">
-                <label for="conditionNote">Ghi chú tình trạng</label>
-                <textarea id="conditionNote" class="form-control" rows="2"
-                          th:field="*{conditionNote}"></textarea>
-            </div>
-            <div class="col-12">
-                <label for="description">Mô tả sách</label>
-                <textarea id="description" class="form-control" rows="4"
-                          th:field="*{description}"></textarea>
+            <div class="col-md-8">
+                <label for="conditionNote">Ghi chú chi tiết tình trạng</label>
+                <input id="conditionNote" class="form-control" th:field="*{conditionNote}" 
+                       placeholder="Ví dụ: Bìa có nếp gấp nhẹ, các trang trong sạch đẹp không viết vẽ, gáy chắc...">
             </div>
         </div>
 
-        <div class="d-flex justify-content-end gap-2 mt-4">
-            <a class="btn btn-outline-secondary" th:href="@{/vendor/books}">Hủy</a>
-            <button class="btn btn-primary" type="submit">Lưu sách</button>
+        <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">
+            <i class="bi bi-cloud-arrow-up me-1"></i> 3. Đăng Tải Hình Ảnh (Tải lên Cloudinary)
+        </h5>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label class="form-label">Tải lên Ảnh Bìa Chính (File)</label>
+                <input type="file" name="mainImageFile" class="form-control" accept="image/*">
+                <small class="text-muted d-block mt-1">Ảnh bìa trước cuốn sách chụp thực tế tại shop</small>
+                <div th:if="${book.mainImageUrl != null and !book.mainImageUrl.isEmpty()}" class="mt-2">
+                    <img th:src="${book.mainImageUrl}" class="rounded border p-1" style="width: 70px; height: 90px; object-fit: cover;">
+                    <span class="small text-muted ms-2">Ảnh bìa hiện tại</span>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Tải lên Nhiều Ảnh Chi Tiết (File)</label>
+                <input type="file" name="imageFiles" class="form-control" accept="image/*" multiple>
+                <small class="text-muted d-block mt-1">Ảnh chụp gáy sách, mép giấy, bìa sau...</small>
+            </div>
+
+            <div class="col-12">
+                <label for="mainImageUrl">Hoặc nhập URL ảnh bìa chính (Dự phòng)</label>
+                <input id="mainImageUrl" class="form-control" th:field="*{mainImageUrl}"
+                       maxlength="500" placeholder="https://res.cloudinary.com/...">
+            </div>
+
+            <div class="col-12">
+                <label for="imageUrls">Hoặc nhập URL ảnh bổ sung (Mỗi URL một dòng)</label>
+                <textarea id="imageUrls" name="imageUrls" class="form-control" rows="2"
+                          th:text="${imageUrls}"
+                          placeholder="https://..."></textarea>
+            </div>
+        </div>
+
+        <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">
+            <i class="bi bi-text-paragraph me-1"></i> 4. Giới Thiệu & Tóm Tắt Nội Dung
+        </h5>
+
+        <div class="mb-4">
+            <textarea id="description" class="form-control" rows="5"
+                      th:field="*{description}" placeholder="Tóm tắt nội dung cuốn sách, lời bình..."></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+            <a class="btn btn-outline-secondary rounded-pill px-4" th:href="@{/vendor/books}">Hủy</a>
+            <button class="btn btn-primary rounded-pill px-5 fw-bold text-white shadow-sm" type="submit">
+                <i class="bi bi-check-circle me-1"></i> Lưu Sách
+            </button>
         </div>
     </form>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

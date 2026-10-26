@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng Ký Mở Cửa Hàng Bán Sách - Chuỗi Sách Cũ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background: #f4f6fa; font-family: system-ui, -apple-system, sans-serif; }
+        .register-card { max-width: 760px; margin: 40px auto; border-radius: 18px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+        .hero-banner { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border-radius: 18px 18px 0 0; padding: 36px 30px; }
+    </style>
+</head>
+<body>
+
+<div class="container py-4">
+    <div class="card register-card bg-white">
+        <!-- Hero Header -->
+        <div class="hero-banner text-center">
+            <i class="bi bi-shop-window display-4 mb-2 d-block text-warning"></i>
+            <h2 class="fw-bold mb-1">Mở Gian Hàng Bán Sách Cũ</h2>
+            <p class="mb-0 text-white-50">Gia nhập mạng lưới chuỗi cửa hàng sách cũ toàn quốc – Tiếp cận hàng ngàn độc giả</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${infoMessage}" class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <span th:text="${infoMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <form th:action="@{/vendor/register}" th:object="${shopRegisterDto}" method="post" enctype="multipart/form-data">
+                
+                <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                    <i class="bi bi-info-circle me-1"></i> Thông Tin Chi Nhánh / Cửa Hàng
+                </h5>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-7">
+                        <label for="name" class="form-label fw-semibold">Tên Cửa Hàng / Chi Nhánh <span class="text-danger">*</span></label>
+                        <input type="text" id="name" th:field="*{name}" class="form-control" 
+                               placeholder="Ví dụ: Hiệu Sách Cũ Tràng Tiền" required maxlength="150">
+                        <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="phone" class="form-label fw-semibold">Hotline Cửa Hàng <span class="text-danger">*</span></label>
+                        <input type="text" id="phone" th:field="*{phone}" class="form-control" 
+                               placeholder="0901234567" required maxlength="20">
+                        <div class="text-danger small" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="address" class="form-label fw-semibold">Địa Chỉ Chi Nhánh Cửa Hàng <span class="text-danger">*</span></label>
+                        <input type="text" id="address" th:field="*{address}" class="form-control" 
+                               placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" required maxlength="255">
+                        <div class="text-danger small" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="bio" class="form-label fw-semibold">Tiểu Sử / Khẩu Hiệu Ngắn (Bio)</label>
+                        <input type="text" id="bio" th:field="*{bio}" class="form-control" 
+                               placeholder="Chuyên sách văn học kinh điển, giáo trình đại học, truyện tranh sưu tầm..." maxlength="500">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label fw-semibold">Giới Thiệu Chi Tiết Cửa Hàng</label>
+                        <textarea id="description" th:field="*{description}" class="form-control" rows="3" 
+                                  placeholder="Mô tả về nguồn gốc sách, cam kết chất lượng, chính sách kiểm tra sách..."></textarea>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                    <i class="bi bi-images me-1"></i> Hình Ảnh Nhận Diện Thương Hiệu
+                </h5>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Logo Cửa Hàng (Ảnh đại diện vuông)</label>
+                        <input type="file" name="logoFile" class="form-control" accept="image/*">
+                        <small class="text-muted">Được tự động tải lên và tối ưu bởi Cloudinary</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Ảnh Bìa / Banner Cửa Hàng (Tỷ lệ 16:9)</label>
+                        <input type="file" name="bannerFile" class="form-control" accept="image/*">
+                        <small class="text-muted">Ảnh không gian hiệu sách hoặc banner khuyến mãi</small>
+                    </div>
+                </div>
+
+                <div class="alert alert-light border p-3 rounded-3 mb-4 small text-muted">
+                    <i class="bi bi-shield-check text-success fs-5 me-2 align-middle"></i>
+                    Bằng việc nhấn "Hoàn Tất Đăng Ký", bạn đồng ý với Điều khoản đối tác bán sách và chính sách chiết khấu hoa hồng của chuỗi (mặc định 5%).
+                </div>
+
+                <div class="d-flex gap-3 justify-content-end">
+                    <a th:href="@{/}" class="btn btn-outline-secondary px-4 py-2 rounded-pill">Quay Lại</a>
+                    <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill fw-bold text-white shadow-sm">
+                        <i class="bi bi-check-circle me-1"></i> Hoàn Tất Đăng Ký Mở Shop
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -8,9 +8,15 @@ import com.bookstore.bookstore.enums.PaymentStatus;
 import com.bookstore.bookstore.repository.*;
 import com.bookstore.bookstore.service.AddressService;
 import com.bookstore.bookstore.service.CartService;
+import com.bookstore.bookstore.service.NotificationService;
 import com.bookstore.bookstore.service.OrderService;
 import com.bookstore.bookstore.service.VoucherService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +28,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -30,9 +37,11 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentRepository paymentRepository;
     private final BookRepository bookRepository;
     private final ShippingCarrierRepository shippingCarrierRepository;
+    private final ShopRepository shopRepository;
     private final CartService cartService;
     private final AddressService addressService;
     private final VoucherService voucherService;
+    private final NotificationService notificationService;
 
     @Override
     public List<Order> checkout(User customer, CheckoutForm form) {
@@ -176,6 +185,9 @@ public class OrderServiceImpl implements OrderService {
                     .build();
             paymentRepository.save(payment);
 
+            // Bắn WebSocket thông báo đơn hàng mới cho Shop và hệ thống
+            notificationService.sendOrderNotification(order, "ORDER_CREATED", "Có đơn hàng mới " + orderCode + " cần xử lý!");
+
             createdOrders.add(order);
         }
 
@@ -225,6 +237,11 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("Chỉ có thể hủy đơn khi đơn hàng đang ở trạng thái 'Đơn mới'!");
         }
 
+        // Kiểm tra điều kiện thời gian 1 tiếng theo đặc tả
+        if (order.getCreatedAt() != null && order.getCreatedAt().plusHours(1).isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Đã quá thời hạn 1 giờ kể từ khi đặt hàng, bạn không thể tự hủy đơn!");
+        }
+
         // Hoàn lại tồn kho
         for (OrderItem item : order.getItems()) {
             Book book = item.getBook();
@@ -243,6 +260,8 @@ public class OrderServiceImpl implements OrderService {
                 .updatedBy(customer)
                 .build();
         orderStatusHistoryRepository.save(history);
+
+        notificationService.sendOrderNotification(order, "ORDER_CANCELLED", "Khách hàng đã hủy đơn " + order.getOrderCode());
     }
 
     @Override
@@ -263,6 +282,8 @@ public class OrderServiceImpl implements OrderService {
                 .updatedBy(customer)
                 .build();
         orderStatusHistoryRepository.save(history);
+
+        notificationService.sendOrderNotification(order, "ORDER_RETURN_REQUESTED", "Khách hàng yêu cầu hoàn trả đơn " + order.getOrderCode());
     }
 
     @Override
@@ -282,6 +303,191 @@ public class OrderServiceImpl implements OrderService {
                 paymentRepository.save(payment);
             }
         }
+    }
+
+    // =========================================================================
+    // PHÂN HỆ VENDOR / SHOP QUẢN LÝ ĐƠN HÀNG (TV2)
+    // =========================================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Order> getOrdersByShopAndTab(User vendor, String tab, int page, int size) {
+        Shop shop = shopRepository.findByOwner(vendor)
+                .orElseThrow(() -> new IllegalArgumentException("Bạn chưa sở hữu cửa hàng nào!"));
+
+        Pageable pageable = PageRequest.of(Math.max(0, page), size > 0 ? size : 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        if (tab == null || tab.isBlank() || "all".equalsIgnoreCase(tab)) {
+            return orderRepository.findByShopOrderByCreatedAtDesc(shop, pageable);
+        }
+
+        return switch (tab.toLowerCase()) {
+            case "new", "not_processed" -> orderRepository.findByShopAndStatusOrderByCreatedAtDesc(shop, OrderStatus.NEW, pageable);
+            case "confirmed", "processing" -> orderRepository.findByShopAndStatusOrderByCreatedAtDesc(shop, OrderStatus.CONFIRMED, pageable);
+            case "picked_up" -> orderRepository.findByShopAndStatusOrderByCreatedAtDesc(shop, OrderStatus.PICKED_UP, pageable);
+            case "shipping", "shipped" -> orderRepository.findByShopAndStatusOrderByCreatedAtDesc(shop, OrderStatus.SHIPPING, pageable);
+            case "delivered" -> orderRepository.findByShopAndStatusOrderByCreatedAtDesc(shop, OrderStatus.DELIVERED, pageable);
+            case "cancelled" -> orderRepository.findByShopAndStatusOrderByCreatedAtDesc(shop, OrderStatus.CANCELLED, pageable);
+            case "returned" -> orderRepository.findByShopAndStatusInOrderByCreatedAtDesc(shop, 
+                    List.of(OrderStatus.RETURN_REQUESTED, OrderStatus.RETURNED_REFUNDED), pageable);
+            default -> orderRepository.findByShopOrderByCreatedAtDesc(shop, pageable);
+        };
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Order getOrderByShopAndId(User vendor, Long orderId) {
+        Shop shop = shopRepository.findByOwner(vendor)
+                .orElseThrow(() -> new IllegalArgumentException("Bạn chưa sở hữu cửa hàng nào!"));
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng ID: " + orderId));
+
+        if (!order.getShop().getId().equals(shop.getId())) {
+            throw new IllegalArgumentException("Bạn không có quyền truy cập đơn hàng của chi nhánh khác!");
+        }
+
+        return order;
+    }
+
+    @Override
+    public void updateOrderStatusByVendor(User vendor, Long orderId, OrderStatus newStatus, String note) {
+        Order order = getOrderByShopAndId(vendor, orderId);
+        OrderStatus currentStatus = order.getStatus();
+
+        if (currentStatus == OrderStatus.CANCELLED || currentStatus == OrderStatus.DELIVERED) {
+            throw new IllegalArgumentException("Đơn hàng đã kết thúc ở trạng thái '" + currentStatus.getLabel() + "', không thể thay đổi nữa!");
+        }
+
+        // Quy trình State Machine hợp lệ cho Vendor:
+        // NEW -> CONFIRMED (Đã xác nhận / Processing)
+        // CONFIRMED -> PICKED_UP (Đã đóng gói, sẵn sàng lấy hàng)
+        // NEW/CONFIRMED -> CANCELLED (Shop hủy đơn)
+        // RETURN_REQUESTED -> RETURNED_REFUNDED (Shop chấp thuận hoàn tiền)
+        if (newStatus == OrderStatus.CONFIRMED && currentStatus != OrderStatus.NEW) {
+            throw new IllegalArgumentException("Chỉ đơn 'Mới' mới có thể chuyển sang 'Đã xác nhận'!");
+        } else if (newStatus == OrderStatus.PICKED_UP && currentStatus != OrderStatus.CONFIRMED) {
+            throw new IllegalArgumentException("Chỉ đơn 'Đã xác nhận' mới có thể chuyển sang 'Đã lấy hàng / Đóng gói xong'!");
+        } else if (newStatus == OrderStatus.CANCELLED) {
+            if (currentStatus != OrderStatus.NEW && currentStatus != OrderStatus.CONFIRMED) {
+                throw new IllegalArgumentException("Không thể hủy đơn hàng khi đã bàn giao vận chuyển!");
+            }
+            // Hoàn lại tồn kho sách
+            for (OrderItem item : order.getItems()) {
+                Book book = item.getBook();
+                book.setStock(book.getStock() + item.getQuantity());
+                book.setSoldQuantity(Math.max(0, (book.getSoldQuantity() != null ? book.getSoldQuantity() : 0) - item.getQuantity()));
+                bookRepository.save(book);
+            }
+        } else if (newStatus == OrderStatus.RETURNED_REFUNDED && currentStatus != OrderStatus.RETURN_REQUESTED) {
+            throw new IllegalArgumentException("Chỉ đơn có yêu cầu trả hàng mới có thể chuyển sang 'Hoàn tiền'!");
+        }
+
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .order(order)
+                .status(newStatus)
+                .note(note != null && !note.trim().isEmpty() ? note.trim() : "Shop cập nhật trạng thái đơn sang: " + newStatus.getLabel())
+                .updatedBy(vendor)
+                .build();
+        orderStatusHistoryRepository.save(history);
+
+        notificationService.sendOrderNotification(order, "Shop " + order.getShop().getName() + " đã cập nhật trạng thái đơn " 
+                + order.getOrderCode() + " thành: " + newStatus.getLabel());
+    }
+
+    // =========================================================================
+    // PHÂN HỆ SHIPPER GIAO NHẬN ĐƠN HÀNG (TV2)
+    // =========================================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Order> getOrdersByShipperAndTab(User shipper, String tab, int page, int size) {
+        Pageable pageable = PageRequest.of(Math.max(0, page), size > 0 ? size : 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        if (tab == null || tab.isBlank() || "all".equalsIgnoreCase(tab)) {
+            return orderRepository.findByShipperOrderByCreatedAtDesc(shipper, pageable);
+        }
+
+        return switch (tab.toLowerCase()) {
+            case "picked_up" -> orderRepository.findByShipperAndStatusOrderByCreatedAtDesc(shipper, OrderStatus.PICKED_UP, pageable);
+            case "shipping" -> orderRepository.findByShipperAndStatusOrderByCreatedAtDesc(shipper, OrderStatus.SHIPPING, pageable);
+            case "delivered" -> orderRepository.findByShipperAndStatusOrderByCreatedAtDesc(shipper, OrderStatus.DELIVERED, pageable);
+            case "returned" -> orderRepository.findByShipperAndStatusOrderByCreatedAtDesc(shipper, OrderStatus.RETURN_REQUESTED, pageable);
+            default -> orderRepository.findByShipperOrderByCreatedAtDesc(shipper, pageable);
+        };
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Order> getAvailableOrdersForShipper(int page, int size) {
+        Pageable pageable = PageRequest.of(Math.max(0, page), size > 0 ? size : 10, Sort.by(Sort.Direction.ASC, "createdAt"));
+        // Lấy các đơn đã đóng gói / lấy hàng xong (PICKED_UP) hoặc CONFIRMED mà chưa có shipper
+        return orderRepository.findByStatusAndShipperIsNullOrderByCreatedAtDesc(OrderStatus.CONFIRMED, pageable);
+    }
+
+    @Override
+    public void claimOrder(User shipper, Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng: " + orderId));
+
+        if (order.getShipper() != null) {
+            throw new IllegalArgumentException("Đơn hàng này đã có shipper khác phụ trách!");
+        }
+
+        order.setShipper(shipper);
+        order.setStatus(OrderStatus.PICKED_UP);
+        orderRepository.save(order);
+
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .order(order)
+                .status(OrderStatus.PICKED_UP)
+                .note("Shipper " + shipper.getFullName() + " đã nhận đơn giao")
+                .updatedBy(shipper)
+                .build();
+        orderStatusHistoryRepository.save(history);
+
+        notificationService.sendOrderNotification(order, "Shipper " + shipper.getFullName() + " đã tiếp nhận đơn " + order.getOrderCode());
+    }
+
+    @Override
+    public void updateOrderStatusByShipper(User shipper, Long orderId, OrderStatus newStatus, String note) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng: " + orderId));
+
+        if (order.getShipper() == null || !order.getShipper().getId().equals(shipper.getId())) {
+            throw new IllegalArgumentException("Bạn không phải shipper được phân công cho đơn hàng này!");
+        }
+
+        OrderStatus currentStatus = order.getStatus();
+
+        // Shipper State Machine:
+        // PICKED_UP -> SHIPPING (Đang giao hàng)
+        // SHIPPING -> DELIVERED (Đã giao thành công)
+        // SHIPPING -> RETURN_REQUESTED (Giao không thành công / Hoàn hàng)
+        if (newStatus == OrderStatus.SHIPPING && currentStatus != OrderStatus.PICKED_UP) {
+            throw new IllegalArgumentException("Chỉ đơn 'Đã lấy hàng' mới có thể chuyển sang 'Đang giao'!");
+        } else if (newStatus == OrderStatus.DELIVERED && currentStatus != OrderStatus.SHIPPING) {
+            throw new IllegalArgumentException("Chỉ đơn 'Đang giao' mới có thể chuyển sang 'Đã giao'!");
+        }
+
+        order.setStatus(newStatus);
+        if (newStatus == OrderStatus.DELIVERED && order.getPaymentMethod() == PaymentMethod.COD) {
+            order.setPaymentStatus(PaymentStatus.COMPLETED);
+        }
+        orderRepository.save(order);
+
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .order(order)
+                .status(newStatus)
+                .note(note != null && !note.trim().isEmpty() ? note.trim() : "Shipper cập nhật trạng thái đơn: " + newStatus.getLabel())
+                .updatedBy(shipper)
+                .build();
+        orderStatusHistoryRepository.save(history);
+
+        notificationService.sendOrderNotification(order, "Đơn hàng " + order.getOrderCode() + " đã được cập nhật: " + newStatus.getLabel());
     }
 
     private String generateOrderCode() {

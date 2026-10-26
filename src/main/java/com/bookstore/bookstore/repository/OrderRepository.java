@@ -1,12 +1,14 @@
 package com.bookstore.bookstore.repository;
 
 import com.bookstore.bookstore.entity.Order;
+import com.bookstore.bookstore.entity.Shop;
 import com.bookstore.bookstore.entity.User;
 import com.bookstore.bookstore.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -41,4 +43,32 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByOrderCode(String orderCode);
 
     Optional<Order> findByOrderCodeAndCustomer(String orderCode, User customer);
+
+    // Vendor / Shop Queries (TV2)
+    List<Order> findTop5ByShopOrderByCreatedAtDesc(Shop shop);
+
+    Page<Order> findByShopOrderByCreatedAtDesc(Shop shop, Pageable pageable);
+
+    Page<Order> findByShopAndStatusOrderByCreatedAtDesc(Shop shop, OrderStatus status, Pageable pageable);
+
+    Page<Order> findByShopAndStatusInOrderByCreatedAtDesc(Shop shop, List<OrderStatus> statuses, Pageable pageable);
+
+    long countByShop(Shop shop);
+
+    long countByShopAndStatus(Shop shop, OrderStatus status);
+
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.shop = :shop AND o.status = com.bookstore.bookstore.enums.OrderStatus.DELIVERED")
+    BigDecimal calculateShopDeliveredRevenue(@Param("shop") Shop shop);
+
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.shop = :shop")
+    BigDecimal calculateShopTotalRevenue(@Param("shop") Shop shop);
+
+    // Shipper Queries (TV2)
+    Page<Order> findByShipperOrderByCreatedAtDesc(User shipper, Pageable pageable);
+
+    Page<Order> findByShipperAndStatusOrderByCreatedAtDesc(User shipper, OrderStatus status, Pageable pageable);
+
+    Page<Order> findByStatusAndShipperIsNullOrderByCreatedAtDesc(OrderStatus status, Pageable pageable);
+
+    long countByShipperAndStatus(User shipper, OrderStatus status);
 }

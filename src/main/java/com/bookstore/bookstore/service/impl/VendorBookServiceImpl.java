@@ -2,22 +2,28 @@ package com.bookstore.bookstore.service.impl;
 
 import com.bookstore.bookstore.entity.*;
 import com.bookstore.bookstore.repository.*;
+import com.bookstore.bookstore.service.CloudinaryService;
 import com.bookstore.bookstore.service.VendorBookService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class VendorBookServiceImpl implements VendorBookService {
 
     private final BookRepository bookRepository;
     private final ShopRepository shopRepository;
     private final CategoryRepository categoryRepository;
+    private final CloudinaryService cloudinaryService;
 
     private Shop getShop(User vendor) {
         return shopRepository.findByOwner(vendor)
@@ -33,7 +39,7 @@ public class VendorBookServiceImpl implements VendorBookService {
         );
 
         return bookRepository.findAll((root, query, cb) -> {
-            var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+            var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
             predicates.add(cb.equal(root.get("shop").get("id"), shop.getId()));
 
             if (keyword != null && !keyword.isBlank()) {
@@ -65,7 +71,8 @@ public class VendorBookServiceImpl implements VendorBookService {
     }
 
     @Override
-    public Book saveBook(User vendor, Book input, Long categoryId, List<String> imageUrls) {
+    public Book saveBook(User vendor, Book input, Long categoryId, List<String> imageUrls,
+                         MultipartFile mainImageFile, List<MultipartFile> imageFiles) {
         Shop shop = getShop(vendor);
         Category category = categoryRepository.findById(categoryId)
             .orElseThrow(() -> new IllegalArgumentException("Danh mục không tồn tại."));
@@ -77,33 +84,63 @@ public class VendorBookServiceImpl implements VendorBookService {
             book = new Book();
             book.setShop(shop);
             book.setActive(true);
-            book.setStock(1);
             book.setSoldQuantity(0);
         }
 
         book.setCategory(category);
-        book.setTitle(input.getTitle());
-        book.setIsbn(input.getIsbn());
-        book.setAuthor(input.getAuthor());
+        book.setTitle(input.getTitle().trim());
+        book.setIsbn(input.getIsbn() != null ? input.getIsbn().trim() : null);
+        book.setAuthor(input.getAuthor().trim());
         book.setPublisher(input.getPublisher());
         book.setPublishYear(input.getPublishYear());
         book.setBookCondition(input.getBookCondition());
         book.setConditionNote(input.getConditionNote());
         book.setOriginalPrice(input.getOriginalPrice());
         book.setPrice(input.getPrice());
-        book.setStock(input.getStock());
+        book.setPromotionalPrice(input.getPromotionalPrice());
+        book.setStock(input.getStock() != null && input.getStock() >= 0 ? input.getStock() : 1);
         book.setDescription(input.getDescription());
 
-        if (imageUrls != null && !imageUrls.isEmpty()) {
-            book.setMainImageUrl(imageUrls.get(0));
-            book.getImages().clear();
+        // 1. Upload ảnh bìa chính lên Cloudinary nếu có file
+        if (mainImageFile != null && !mainImageFile.isEmpty()) {
+            try {
+                String uploadedMainUrl = cloudinaryService.uploadImage(mainImageFile, "books/main");
+                book.setMainImageUrl(uploadedMainUrl);
+            } catch (Exception e) {
+                log.warn("Lỗi upload ảnh bìa chính lên Cloudinary: {}", e.getMessage());
+            }
+        } else if (input.getMainImageUrl() != null && !input.getMainImageUrl().isBlank()) {
+            book.setMainImageUrl(input.getMainImageUrl().trim());
+        }
 
-            for (String url : imageUrls) {
-                BookImage image = BookImage.builder()
-                    .book(book)
-                    .imageUrl(url)
-                    .build();
-                book.getImages().add(image);
+        // 2. Upload các ảnh bổ sung từ file
+        List<String> finalUrls = new ArrayList<>();
+        if (imageUrls != null) {
+            finalUrls.addAll(imageUrls);
+        }
+
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            try {
+                List<String> uploadedMoreUrls = cloudinaryService.uploadMultipleImages(imageFiles, "books/gallery");
+                finalUrls.addAll(uploadedMoreUrls);
+            } catch (Exception e) {
+                log.warn("Lỗi upload ảnh thư viện lên Cloudinary: {}", e.getMessage());
+            }
+        }
+
+        if (!finalUrls.isEmpty()) {
+            book.getImages().clear();
+            for (String url : finalUrls) {
+                if (url != null && !url.isBlank()) {
+                    BookImage image = BookImage.builder()
+                        .book(book)
+                        .imageUrl(url.trim())
+                        .build();
+                    book.getImages().add(image);
+                }
+            }
+            if (book.getMainImageUrl() == null || book.getMainImageUrl().isBlank()) {
+                book.setMainImageUrl(finalUrls.get(0));
             }
         }
 
@@ -115,5 +152,11 @@ public class VendorBookServiceImpl implements VendorBookService {
         Book book = getMyBook(vendor, bookId);
         book.setActive(!Boolean.TRUE.equals(book.getActive()));
         bookRepository.save(book);
+    }
+
+    @Override
+    public void deleteBook(User vendor, Long bookId) {
+        Book book = getMyBook(vendor, bookId);
+        bookRepository.delete(book);
     }
 }

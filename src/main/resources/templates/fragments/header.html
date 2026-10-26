@@ -16,7 +16,10 @@
                     <span class="fs-6 text-muted">Sách cũ tuyển chọn – Giảm tới 60% – Cam kết ảnh thật</span>
                 </div>
                 <div class="col-md-4 text-end">
-                    <span class="fs-6 text-muted"><i class="bi bi-truck me-1"></i> Giao nhanh toàn quốc – Cho kiểm tra sách</span>
+                    <a th:if="${currentUser != null}" th:href="@{/vendor/register}" class="fs-6 text-decoration-none text-primary fw-semibold me-3">
+                        <i class="bi bi-shop me-1"></i> Kênh Người Bán
+                    </a>
+                    <span class="fs-6 text-muted"><i class="bi bi-truck me-1"></i> Giao nhanh toàn quốc</span>
                 </div>
             </div>
         </div>
@@ -68,6 +71,11 @@
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/books}">Khám Phá Sách</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-warning fw-bold" th:href="@{/library}">
+                            <i class="bi bi-box-seam me-1"></i> Thư Viện 3D
+                        </a>
+                    </li>
                     <li class="nav-item" th:if="${currentUser != null}">
                         <a class="nav-link" th:href="@{/user/viewed-books}">Sách Đã Xem</a>
                     </li>
@@ -108,6 +116,20 @@
                                 <div class="fw-bold text-truncate" style="max-width: 180px;" th:text="${currentUser.fullName}"></div>
                                 <small class="text-muted text-truncate d-block" style="max-width: 180px;" th:text="${currentUser.email}"></small>
                             </li>
+                            
+                            <!-- Kênh phân quyền -->
+                            <li>
+                                <a class="dropdown-item py-2 fw-bold text-primary" th:href="@{/vendor/dashboard}">
+                                    <i class="bi bi-shop me-2"></i> Kênh Người Bán (Vendor)
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 fw-bold text-info" th:href="@{/shipper/orders}">
+                                    <i class="bi bi-truck me-2"></i> Kênh Giao Hàng (Shipper)
+                                </a>
+                            </li>
+                            <li class="border-top my-1"></li>
+
                             <li><a class="dropdown-item py-2" th:href="@{/user/profile}"><i class="bi bi-person me-2"></i> Hồ sơ & Sổ địa chỉ</a></li>
                             <li><a class="dropdown-item py-2" th:href="@{/user/orders}"><i class="bi bi-bag-check me-2"></i> Lịch sử đơn mua</a></li>
                             <li><a class="dropdown-item py-2" th:href="@{/user/wishlist}"><i class="bi bi-heart me-2"></i> Sách yêu thích</a></li>

@@ -1,6 +1,7 @@
 package com.bookstore.bookstore.repository;
 
 import com.bookstore.bookstore.entity.Book;
+import com.bookstore.bookstore.entity.Shop;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,7 +21,15 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
 
     boolean existsByIsbn(String isbn);
 
+    java.util.Optional<Book> findByIsbn(String isbn);
+
     long countByActive(Boolean active);
+
+    long countByCategoryIdAndActiveTrue(Long categoryId);
+
+    long countByShop(Shop shop);
+
+    long countByShopAndStockLessThanEqual(Shop shop, Integer stock);
 
     Page<Book> findByActiveTrue(Pageable pageable);
 
