@@ -40,4 +40,9 @@ public class HomeController {
         model.addAttribute("isUserLoggedIn", false);
         return "guest/index";
     }
+
+    @GetMapping("/access-denied")
+    public String accessDenied() {
+        return "error/access-denied";
+    }
 }

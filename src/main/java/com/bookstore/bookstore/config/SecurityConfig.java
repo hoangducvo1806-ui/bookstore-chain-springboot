@@ -50,10 +50,11 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Công khai: Guest, Tài nguyên tĩnh, Auth, Upload API, Error page
+                // Công khai: Guest, Tài nguyên tĩnh, Auth, Upload API, Error page, Access Denied
                 .requestMatchers(
                         "/", "/home", "/books/**", "/categories/**", "/shops/**", "/search/**", "/payment/**",
                         "/auth/**", "/login", "/register", "/verify-otp", "/forgot-password", "/reset-password",
+                        "/logout", "/access-denied",
                         "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**", "/error"
                 ).permitAll()
 
@@ -69,6 +70,9 @@ public class SecurityConfig {
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {
                     response.sendRedirect("/login");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.sendRedirect("/access-denied");
                 })
             )
             .authenticationProvider(authenticationProvider())

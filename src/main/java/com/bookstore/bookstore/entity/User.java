@@ -60,4 +60,14 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public boolean hasRole(String roleName) {
+        if (roles == null) return false;
+        return roles.stream().anyMatch(r -> r.getName() != null && r.getName().name().equalsIgnoreCase(roleName));
+    }
+
+    public boolean isVendor() { return hasRole("VENDOR"); }
+    public boolean isAdmin() { return hasRole("ADMIN"); }
+    public boolean isManager() { return hasRole("MANAGER"); }
+    public boolean isShipper() { return hasRole("SHIPPER"); }
 }
