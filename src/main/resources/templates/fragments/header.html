@@ -34,7 +34,7 @@
             <!-- Brand Logo -->
             <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
                 <img th:src="@{/images/main-logo.png}" alt="Bookly Logo" class="logo" style="height: 44px;">
-                <span class="ms-2 fw-bold text-primary d-none d-sm-inline" style="font-size: 1.25rem; letter-spacing: -0.5px;">SÁCH CŨ CHUỖI</span>
+                <span class="ms-2 fw-bold text-primary d-none d-sm-inline" style="font-size: 1.25rem; letter-spacing: -0.5px;">ONLINE</span>
             </a>
 
             <!-- Search Bar form directly in navbar -->
@@ -74,11 +74,6 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-light" th:href="@{/books}">Khám Phá Sách</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-bold" style="color: #fbbf24 !important;" th:href="@{/library}">
-                            <i class="bi bi-box-seam me-1"></i> Thư Viện 3D
-                        </a>
                     </li>
                     <li class="nav-item" th:if="${currentUser != null}">
                         <a class="nav-link text-light" th:href="@{/user/viewed-books}">Sách Đã Xem</a>
