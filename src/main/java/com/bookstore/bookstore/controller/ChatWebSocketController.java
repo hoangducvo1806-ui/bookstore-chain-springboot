@@ -10,17 +10,11 @@ import com.bookstore.bookstore.service.NotificationService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -68,18 +62,5 @@ public class ChatWebSocketController {
         } catch (Exception e) {
             log.error("Lỗi gửi tin nhắn qua WebSocket: {}", e.getMessage(), e);
         }
-    }
-
-    @GetMapping("/api/chat/history")
-    @ResponseBody
-    public ResponseEntity<?> getChatHistory(@RequestParam Long user1, @RequestParam Long user2) {
-        User u1 = userRepository.findById(user1).orElse(null);
-        User u2 = userRepository.findById(user2).orElse(null);
-        if (u1 == null || u2 == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Người dùng không tồn tại"));
-        }
-
-        List<ChatMessage> messages = chatMessageRepository.findConversation(u1, u2);
-        return ResponseEntity.ok(messages);
     }
 }

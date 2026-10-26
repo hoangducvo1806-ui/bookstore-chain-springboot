@@ -47,6 +47,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // Vendor / Shop Queries (TV2)
     List<Order> findTop5ByShopOrderByCreatedAtDesc(Shop shop);
 
+    List<Order> findByShopOrderByCreatedAtDesc(Shop shop);
+
+    List<Order> findByShopAndStatusOrderByCreatedAtDesc(Shop shop, OrderStatus status);
+
     Page<Order> findByShopOrderByCreatedAtDesc(Shop shop, Pageable pageable);
 
     Page<Order> findByShopAndStatusOrderByCreatedAtDesc(Shop shop, OrderStatus status, Pageable pageable);
@@ -60,10 +64,23 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.shop = :shop AND o.status = com.bookstore.bookstore.enums.OrderStatus.DELIVERED")
     BigDecimal calculateShopDeliveredRevenue(@Param("shop") Shop shop);
 
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.shop = :shop AND o.status = com.bookstore.bookstore.enums.OrderStatus.DELIVERED")
+    BigDecimal calculateDeliveredRevenueByShop(@Param("shop") Shop shop);
+
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.shop = :shop")
     BigDecimal calculateShopTotalRevenue(@Param("shop") Shop shop);
 
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.shop = :shop")
+    BigDecimal calculateTotalRevenueByShop(@Param("shop") Shop shop);
+
     // Shipper Queries (TV2)
+    List<Order> findByShipperOrderByCreatedAtDesc(User shipper);
+
+    List<Order> findByStatusInOrderByCreatedAtDesc(List<OrderStatus> statuses);
+
+    @Query("SELECT o FROM Order o WHERE o.shipper = :shipper OR (o.shipper IS NULL AND o.status IN :statuses) ORDER BY o.createdAt DESC")
+    List<Order> findAvailableForShipper(@Param("shipper") User shipper, @Param("statuses") List<OrderStatus> statuses);
+
     Page<Order> findByShipperOrderByCreatedAtDesc(User shipper, Pageable pageable);
 
     Page<Order> findByShipperAndStatusOrderByCreatedAtDesc(User shipper, OrderStatus status, Pageable pageable);
