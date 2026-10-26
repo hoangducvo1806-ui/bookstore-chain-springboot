@@ -2,6 +2,7 @@ package com.bookstore.bookstore.config;
 
 import com.bookstore.bookstore.security.CustomUserDetailsService;
 import com.bookstore.bookstore.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +48,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/ws/**", "/api/**", "/payment/**"))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Công khai: Guest, Tài nguyên tĩnh, Auth, Upload API, Error page, Access Denied
@@ -58,18 +59,27 @@ public class SecurityConfig {
                         "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**", "/error", "/api/ai/**"
                 ).permitAll()
 
+                // Phân quyền đặc biệt: User đã đăng nhập được vào form đăng ký Shop
+                .requestMatchers("/vendor/register").authenticated()
+
                 // Phân quyền theo role
                 .requestMatchers("/admin/users/**").hasRole("ADMIN")
                 .requestMatchers("/admin/**", "/manager/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/vendor/**").hasRole("VENDOR")
                 .requestMatchers("/shipper/**").hasRole("SHIPPER")
-                .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**", "/chat", "/chat/**", "/api/chat/**").authenticated()
+                .requestMatchers("/user/**", "/cart/**", "/checkout/**", "/orders/**", "/chat", "/chat/**", "/api/chat/**", "/api/cart/add").authenticated()
 
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {
-                    response.sendRedirect("/login");
+                    if (request.getRequestURI() != null && request.getRequestURI().startsWith("/api/")) {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().write("{\"ok\":false,\"code\":\"LOGIN_REQUIRED\",\"loginUrl\":\"/login\",\"message\":\"Vui lòng đăng nhập để thực hiện thao tác này.\"}");
+                    } else {
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    }
                 })
                 .accessDeniedHandler((request, response, accessDeniedException) -> {
                     response.sendRedirect("/access-denied");

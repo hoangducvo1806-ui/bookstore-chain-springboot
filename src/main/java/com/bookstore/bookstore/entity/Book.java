@@ -64,13 +64,16 @@ public class Book {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price; // Giá bán sách cũ
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer stock = 1; // Số lượng tồn kho
+    @Column(precision = 12, scale = 2)
+    private BigDecimal promotionalPrice; // Giá khuyến mãi (nếu có)
 
     @Builder.Default
     @Column(nullable = false)
-    private Integer soldQuantity = 0; // Đã bán (để phục vụ hiển thị sách bán > 10 cuốn cho Guest)
+    private Integer stock = 1; // Số lượng tồn kho (quantity)
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer soldQuantity = 0; // Đã bán
 
     @Nationalized
     @Column(columnDefinition = "NVARCHAR(MAX)")

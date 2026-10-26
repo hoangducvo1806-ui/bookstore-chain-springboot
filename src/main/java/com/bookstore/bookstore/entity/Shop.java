@@ -33,6 +33,9 @@ public class Shop {
     private String description;
 
     @Column(length = 500)
+    private String bio; // Tiểu sử ngắn của cửa hàng
+
+    @Column(length = 500)
     private String logoUrl;
 
     @Column(length = 500)

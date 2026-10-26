@@ -3,108 +3,90 @@ package com.bookstore.bookstore.controller;
 import com.bookstore.bookstore.entity.Order;
 import com.bookstore.bookstore.entity.User;
 import com.bookstore.bookstore.enums.OrderStatus;
-import com.bookstore.bookstore.enums.PaymentStatus;
-import com.bookstore.bookstore.repository.OrderRepository;
+import com.bookstore.bookstore.service.OrderService;
 import com.bookstore.bookstore.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-
 @Controller
 @RequestMapping("/shipper")
 @RequiredArgsConstructor
+@Slf4j
 public class ShipperController {
 
-    private final OrderRepository orderRepository;
+    private final OrderService orderService;
     private final SecurityUtils securityUtils;
 
     @GetMapping({"", "/", "/orders"})
-    public String orders(Model model) {
-        User shipper = securityUtils.getCurrentUser()
-                .orElseThrow(() -> new IllegalStateException("Vui lòng đăng nhập với tài khoản Shipper."));
+    public String ordersPage(
+            @RequestParam(value = "tab", defaultValue = "available") String tab,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
-        List<Order> availableOrders = orderRepository.findAvailableForShipper(
-                shipper,
-                List.of(OrderStatus.CONFIRMED, OrderStatus.PICKED_UP, OrderStatus.SHIPPING)
-        );
+        User shipper = securityUtils.getCurrentUser().orElse(null);
+        if (shipper == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập với tài khoản Shipper!");
+            return "redirect:/login";
+        }
 
-        List<Order> myDeliveries = orderRepository.findByShipperOrderByCreatedAtDesc(shipper);
-        long deliveredCount = myDeliveries.stream()
-                .filter(o -> o.getStatus() == OrderStatus.DELIVERED)
-                .count();
+        Page<Order> orderPage;
+        if ("available".equalsIgnoreCase(tab)) {
+            orderPage = orderService.getAvailableOrdersForShipper(page, size);
+        } else {
+            orderPage = orderService.getOrdersByShipperAndTab(shipper, tab, page, size);
+        }
 
-        model.addAttribute("orders", availableOrders);
-        model.addAttribute("myDeliveries", myDeliveries);
-        model.addAttribute("deliveredCount", deliveredCount);
         model.addAttribute("shipper", shipper);
+        model.addAttribute("orderPage", orderPage);
+        model.addAttribute("orders", orderPage.getContent());
+        model.addAttribute("currentTab", tab);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", orderPage.getTotalPages());
+        model.addAttribute("totalOrders", orderPage.getTotalElements());
 
         return "shipper/orders";
     }
 
-    @PostMapping("/orders/{id}/deliver")
-    public String startDelivery(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            User shipper = securityUtils.getCurrentUser()
-                    .orElseThrow(() -> new IllegalStateException("Vui lòng đăng nhập."));
-
-            Order order = orderRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng."));
-
-            order.setShipper(shipper);
-            order.setStatus(OrderStatus.SHIPPING);
-            orderRepository.save(order);
-
-            redirectAttributes.addFlashAttribute("successMessage", "Bạn đã nhận giao đơn " + order.getOrderCode() + "!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
-        return "redirect:/shipper/orders";
-    }
-
-    @PostMapping("/orders/{id}/delivered")
-    public String completeDelivery(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            User shipper = securityUtils.getCurrentUser()
-                    .orElseThrow(() -> new IllegalStateException("Vui lòng đăng nhập."));
-
-            Order order = orderRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng."));
-
-            order.setStatus(OrderStatus.DELIVERED);
-            order.setPaymentStatus(PaymentStatus.COMPLETED);
-            orderRepository.save(order);
-
-            redirectAttributes.addFlashAttribute("successMessage", "Giao thành công đơn " + order.getOrderCode() + "! Tiền hàng đã được ghi nhận.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
-        return "redirect:/shipper/orders";
-    }
-
-    @PostMapping("/orders/{id}/failed")
-    public String failDelivery(
-            @PathVariable Long id,
-            @RequestParam(required = false, defaultValue = "Khách không nghe máy / hẹn lại sau") String reason,
+    @PostMapping("/orders/{id}/claim")
+    public String claimOrder(
+            @PathVariable("id") Long id,
             RedirectAttributes redirectAttributes) {
+
+        User shipper = securityUtils.getCurrentUser().orElseThrow();
         try {
-            User shipper = securityUtils.getCurrentUser()
-                    .orElseThrow(() -> new IllegalStateException("Vui lòng đăng nhập."));
-
-            Order order = orderRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng."));
-
-            order.setStatus(OrderStatus.CANCELLED);
-            order.setNote((order.getNote() != null ? order.getNote() + " | " : "") + "Lý do giao thất bại: " + reason);
-            orderRepository.save(order);
-
-            redirectAttributes.addFlashAttribute("successMessage", "Đã ghi nhận giao thất bại cho đơn " + order.getOrderCode());
+            orderService.claimOrder(shipper, id);
+            redirectAttributes.addFlashAttribute("successMessage", "Bạn đã nhận giao đơn hàng này thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
-        return "redirect:/shipper/orders";
+
+        return "redirect:/shipper/orders?tab=picked_up";
+    }
+
+    @PostMapping("/orders/{id}/status")
+    public String updateStatus(
+            @PathVariable("id") Long id,
+            @RequestParam("status") OrderStatus newStatus,
+            @RequestParam(value = "note", required = false) String note,
+            @RequestParam(value = "redirectTab", defaultValue = "shipping") String redirectTab,
+            RedirectAttributes redirectAttributes) {
+
+        User shipper = securityUtils.getCurrentUser().orElseThrow();
+        try {
+            orderService.updateOrderStatusByShipper(shipper, id, newStatus, note);
+            redirectAttributes.addFlashAttribute("successMessage", 
+                    "Cập nhật trạng thái giao hàng thành công: " + newStatus.getLabel());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/shipper/orders?tab=" + redirectTab;
     }
 }
