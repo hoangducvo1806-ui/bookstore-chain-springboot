@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AuthController {
 
     private final AuthService authService;
+    private final com.bookstore.bookstore.repository.UserRepository userRepository;
 
     // --- ĐĂNG NHẬP ---
     @GetMapping("/login")
@@ -47,6 +48,18 @@ public class AuthController {
             cookie.setPath("/");
             cookie.setMaxAge(7 * 24 * 60 * 60); // 7 ngày
             response.addCookie(cookie);
+
+            // Điều hướng thông minh theo Vai trò (Role)
+            var userOpt = userRepository.findByEmail(request.getEmail().toLowerCase().trim());
+            if (userOpt.isPresent()) {
+                com.bookstore.bookstore.entity.User user = userOpt.get();
+                if (user.isAdmin() || user.isManager()) {
+                    return "redirect:/admin/dashboard";
+                }
+                if (user.isVendor()) {
+                    return "redirect:/vendor/books";
+                }
+            }
 
             return "redirect:/";
         } catch (Exception e) {

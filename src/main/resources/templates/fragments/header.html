@@ -5,6 +5,37 @@
 </head>
 <body>
 <div th:fragment="header">
+    <!-- Top Role Notification Bar (Hiển thị phân quyền trực quan khi đăng nhập) -->
+    <div th:if="${currentUser != null and currentUser.admin}" class="bg-danger text-white py-1 px-3 d-flex justify-content-between align-items-center" style="font-size: 0.85rem; z-index: 1050;">
+        <div>
+            <i class="bi bi-shield-lock-fill me-1"></i>
+            <strong>TÀI KHOẢN ADMIN:</strong> Bạn đang đăng nhập quyền Quản trị viên hệ thống.
+        </div>
+        <a th:href="@{/admin/dashboard}" class="btn btn-light btn-sm py-0 px-2 fw-bold text-danger text-decoration-none shadow-sm">
+            <i class="bi bi-speedometer2 me-1"></i> Mở Bảng Điều Khiển Admin &rarr;
+        </a>
+    </div>
+
+    <div th:if="${currentUser != null and currentUser.manager and !currentUser.admin}" class="bg-primary text-white py-1 px-3 d-flex justify-content-between align-items-center" style="font-size: 0.85rem; z-index: 1050;">
+        <div>
+            <i class="bi bi-kanban-fill me-1"></i>
+            <strong>TÀI KHOẢN MANAGER:</strong> Bạn đang đăng nhập quyền Quản lý chuỗi cửa hàng.
+        </div>
+        <a th:href="@{/manager/dashboard}" class="btn btn-light btn-sm py-0 px-2 fw-bold text-primary text-decoration-none shadow-sm">
+            <i class="bi bi-speedometer2 me-1"></i> Mở Trang Quản Lý Chuỗi &rarr;
+        </a>
+    </div>
+
+    <div th:if="${currentUser != null and currentUser.vendor}" class="bg-warning text-dark py-1 px-3 d-flex justify-content-between align-items-center" style="font-size: 0.85rem; z-index: 1050;">
+        <div>
+            <i class="bi bi-shop me-1"></i>
+            <strong>TÀI KHOẢN VENDOR:</strong> Bạn đang đăng nhập quyền Chủ gian hàng / Chi nhánh sách cũ.
+        </div>
+        <a th:href="@{/vendor/books}" class="btn btn-dark btn-sm py-0 px-2 fw-bold text-decoration-none shadow-sm">
+            <i class="bi bi-box-seam me-1"></i> Mở Kênh Quản Lý Sách (Vendor) &rarr;
+        </a>
+    </div>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top border-bottom border-secondary">
         <div class="container">
             <!-- Brand Logo -->
@@ -52,6 +83,23 @@
                             </li>
                         </ul>
                     </li>
+
+                    <!-- Nút tắt phân quyền trực quan trên Navbar -->
+                    <li class="nav-item" th:if="${currentUser != null and currentUser.admin}">
+                        <a class="btn btn-danger btn-sm text-white fw-bold px-3 py-1 my-1 ms-lg-2 rounded-pill shadow-sm" th:href="@{/admin/dashboard}">
+                            <i class="bi bi-shield-lock me-1"></i> Quản Trị Hệ Thống
+                        </a>
+                    </li>
+                    <li class="nav-item" th:if="${currentUser != null and currentUser.manager and !currentUser.admin}">
+                        <a class="btn btn-primary btn-sm text-white fw-bold px-3 py-1 my-1 ms-lg-2 rounded-pill shadow-sm" th:href="@{/manager/dashboard}">
+                            <i class="bi bi-kanban me-1"></i> Quản Lý Chuỗi
+                        </a>
+                    </li>
+                    <li class="nav-item" th:if="${currentUser != null and currentUser.vendor}">
+                        <a class="btn btn-warning btn-sm text-dark fw-bold px-3 py-1 my-1 ms-lg-2 rounded-pill shadow-sm" th:href="@{/vendor/books}">
+                            <i class="bi bi-shop me-1"></i> Kênh Người Bán
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- Right Action Icons: Cart, Wishlist, Auth -->
@@ -86,10 +134,21 @@
                             <i th:unless="${currentUser.avatarUrl != null and !currentUser.avatarUrl.isEmpty()}" 
                                class="bi bi-person-circle fs-4 me-1 text-primary"></i>
                             <span class="d-none d-md-inline fw-semibold text-white" style="font-size: 0.85rem;" th:text="${currentUser.fullName}">Người dùng</span>
+                            <span th:if="${currentUser.admin}" class="badge bg-danger ms-1" style="font-size: 0.65rem;">ADMIN</span>
+                            <span th:if="${currentUser.manager and !currentUser.admin}" class="badge bg-primary ms-1" style="font-size: 0.65rem;">MANAGER</span>
+                            <span th:if="${currentUser.vendor}" class="badge bg-warning text-dark ms-1" style="font-size: 0.65rem;">VENDOR</span>
+                            <span th:if="${currentUser.shipper}" class="badge bg-info text-dark ms-1" style="font-size: 0.65rem;">SHIPPER</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenuDropdown" style="min-width: 220px;">
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenuDropdown" style="min-width: 230px;">
                             <li class="px-3 py-2 border-bottom">
-                                <div class="fw-bold text-white text-truncate" style="max-width: 190px;" th:text="${currentUser.fullName}"></div>
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span class="fw-bold text-white text-truncate" style="max-width: 130px;" th:text="${currentUser.fullName}"></span>
+                                    <span th:if="${currentUser.admin}" class="badge bg-danger">ADMIN</span>
+                                    <span th:if="${currentUser.manager and !currentUser.admin}" class="badge bg-primary">MANAGER</span>
+                                    <span th:if="${currentUser.vendor}" class="badge bg-warning text-dark">VENDOR</span>
+                                    <span th:if="${currentUser.shipper}" class="badge bg-info text-dark">SHIPPER</span>
+                                    <span th:if="${!currentUser.admin and !currentUser.manager and !currentUser.vendor and !currentUser.shipper}" class="badge bg-secondary">KHÁCH</span>
+                                </div>
                                 <small class="text-muted text-truncate d-block" style="max-width: 190px;" th:text="${currentUser.email}"></small>
                             </li>
                             <li><a class="dropdown-item py-2" th:href="@{/user/profile}"><i class="bi bi-person me-2 text-primary"></i> Hồ sơ & Sổ địa chỉ</a></li>
