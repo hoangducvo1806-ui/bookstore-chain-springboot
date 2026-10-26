@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="aiChatbot">
+    <!-- AI Chatbot FAB Button -->
+    <div id="booklyAiFab" class="bookly-ai-fab" title="Trợ lý AI Bookly tư vấn">
+        <div class="ai-fab-pulse"></div>
+        <button class="ai-fab-btn" id="aiFabToggleBtn" aria-label="Mở Trợ lý AI Bookly">
+            <svg class="ai-fab-icon" xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
+                <path d="M4 11v4a8 8 0 0 0 16 0v-4"/>
+                <rect x="2" y="9" width="20" height="8" rx="4"/>
+                <circle cx="8" cy="13" r="1.5" fill="currentColor"/>
+                <circle cx="16" cy="13" r="1.5" fill="currentColor"/>
+                <path d="M9 17v1a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-1"/>
+            </svg>
+            <span class="ai-fab-badge">AI</span>
+        </button>
+        <div class="ai-fab-tooltip">
+            <span>Hỏi trợ lý AI Bookly! ✨</span>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Window -->
+    <div id="booklyAiWindow" class="bookly-ai-window d-none" aria-live="polite">
+        <!-- Header -->
+        <div class="bookly-ai-header">
+            <div class="ai-header-info">
+                <div class="ai-avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
+                        <rect x="2" y="9" width="20" height="8" rx="4"/>
+                        <circle cx="8" cy="13" r="1.5" fill="currentColor"/>
+                        <circle cx="16" cy="13" r="1.5" fill="currentColor"/>
+                    </svg>
+                    <span class="ai-status-indicator"></span>
+                </div>
+                <div>
+                    <h6 class="ai-title mb-0">Trợ Lý AI Bookly</h6>
+                    <small class="ai-subtitle">Tư vấn chọn sách & chính sách 24/7</small>
+                </div>
+            </div>
+            <div class="ai-header-actions">
+                <button id="aiResetBtn" class="ai-action-btn" title="Làm mới đoạn hội thoại" aria-label="Xoá lịch sử chat">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                </button>
+                <button id="aiCloseBtn" class="ai-action-btn" title="Thu nhỏ" aria-label="Đóng cửa sổ">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Body -->
+        <div class="bookly-ai-body" id="aiChatBody">
+            <div class="ai-intro-banner">
+                <div class="ai-intro-badge">✨ Trợ lý sách thông minh</div>
+                <p class="ai-intro-desc">Chào bạn! Bạn cần tìm sách gì, tầm giá bao nhiêu hoặc cần giải đáp về chính sách Bookly?</p>
+            </div>
+
+            <!-- Messages Container -->
+            <div id="aiMessagesContainer" class="ai-messages-container"></div>
+
+            <!-- Typing Indicator -->
+            <div id="aiTypingIndicator" class="ai-typing-indicator d-none">
+                <div class="ai-avatar-tiny">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="9" width="20" height="8" rx="4"/>
+                        <circle cx="8" cy="13" r="1"/>
+                        <circle cx="16" cy="13" r="1"/>
+                    </svg>
+                </div>
+                <div class="ai-typing-bubble">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Suggestions Carousel -->
+        <div class="bookly-ai-prompts" id="aiQuickPromptsContainer">
+            <!-- Dynamic prompt chips -->
+        </div>
+
+        <!-- Input Box -->
+        <div class="bookly-ai-footer">
+            <form id="aiChatForm" class="ai-input-form" onsubmit="return false;">
+                <input type="text" id="aiUserInput" class="ai-input" placeholder="Hỏi tên sách, tác giả, giá, phí ship..." autocomplete="off" maxlength="300" />
+                <button type="submit" id="aiSendBtn" class="ai-send-btn" aria-label="Gửi tin nhắn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Styling -->
+    <style>
+        /* FAB Styling */
+        .bookly-ai-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1040;
+            display: flex;
+            align-items: center;
+        }
+        .ai-fab-pulse {
+            position: absolute;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.4);
+            animation: aiPulse 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+            pointer-events: none;
+        }
+        @keyframes aiPulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.35); opacity: 0; }
+            100% { transform: scale(0.95); opacity: 0; }
+        }
+        .ai-fab-btn {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+        .ai-fab-btn:hover {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 12px 30px rgba(124, 58, 237, 0.6);
+        }
+        .ai-fab-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid #0b0d13;
+            letter-spacing: 0.5px;
+        }
+        .ai-fab-tooltip {
+            position: absolute;
+            right: 68px;
+            background: #1e2433;
+            color: #f3f4f6;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            white-space: nowrap;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            border: 1px solid #2e3547;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateX(10px);
+            transition: all 0.25s ease-out;
+        }
+        .bookly-ai-fab:hover .ai-fab-tooltip {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Chat Window */
+        .bookly-ai-window {
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            width: 380px;
+            max-width: calc(100vw - 32px);
+            height: 570px;
+            max-height: calc(100vh - 120px);
+            background: #11141c;
+            border: 1px solid #242937;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1050;
+            font-family: inherit;
+            animation: aiSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes aiSlideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Window Header */
+        .bookly-ai-header {
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #161b26 0%, #1c2233 100%);
+            border-bottom: 1px solid #242937;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .ai-header-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ai-avatar {
+            position: relative;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.4);
+        }
+        .ai-status-indicator {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            border: 2px solid #161b26;
+        }
+        .ai-title {
+            color: #f3f4f6;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        .ai-subtitle {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            display: block;
+        }
+        .ai-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ai-action-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ai-action-btn:hover {
+            color: #f3f4f6;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Chat Body */
+        .bookly-ai-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background: #0d0f15;
+            scroll-behavior: smooth;
+        }
+        .bookly-ai-body::-webkit-scrollbar {
+            width: 5px;
+        }
+        .bookly-ai-body::-webkit-scrollbar-thumb {
+            background: #242937;
+            border-radius: 4px;
+        }
+
+        .ai-intro-banner {
+            background: #141824;
+            border: 1px dashed #2b3347;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .ai-intro-badge {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+        }
+        .ai-intro-desc {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Message Bubbles */
+        .ai-msg-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+        .ai-msg-row.user {
+            justify-content: flex-end;
+        }
+        .ai-msg-row.bot {
+            justify-content: flex-start;
+        }
+        .ai-avatar-tiny {
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .ai-bubble {
+            max-width: 82%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 0.86rem;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .ai-msg-row.user .ai-bubble {
+            background: #2563eb;
+            color: #ffffff;
+            border-bottom-right-radius: 3px;
+        }
+        .ai-msg-row.bot .ai-bubble {
+            background: #181c28;
+            color: #e2e8f0;
+            border: 1px solid #273044;
+            border-bottom-left-radius: 3px;
+        }
+        .ai-bubble p {
+            margin-bottom: 6px;
+        }
+        .ai-bubble p:last-child {
+            margin-bottom: 0;
+        }
+        .ai-bubble code {
+            background: rgba(0, 0, 0, 0.35);
+            color: #fbbf24;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+        }
+
+        /* Suggested Book Cards in Chat */
+        .ai-books-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .ai-mini-card {
+            display: flex;
+            gap: 10px;
+            background: #11141e;
+            border: 1px solid #232a3d;
+            border-radius: 10px;
+            padding: 8px;
+            transition: all 0.2s;
+        }
+        .ai-mini-card:hover {
+            border-color: #3b82f6;
+            background: #141824;
+            transform: translateX(2px);
+        }
+        .ai-mini-thumb {
+            width: 54px;
+            height: 72px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: #080a0f;
+            flex-shrink: 0;
+        }
+        .ai-mini-details {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .ai-mini-title {
+            color: #f3f4f6;
+            font-size: 0.82rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+            text-decoration: none;
+            display: block;
+        }
+        .ai-mini-title:hover {
+            color: #60a5fa;
+        }
+        .ai-mini-meta {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .ai-condition-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            font-size: 0.68rem;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .ai-mini-pricing {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+        .ai-mini-price {
+            color: #ff5277;
+            font-weight: 700;
+            font-size: 0.84rem;
+        }
+        .ai-mini-old-price {
+            color: #64748b;
+            text-decoration: line-through;
+            font-size: 0.72rem;
+        }
+        .ai-mini-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            background: rgba(59, 130, 246, 0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 0.72rem;
+            text-decoration: none;
+            margin-top: 4px;
+            align-self: flex-start;
+            transition: all 0.2s;
+        }
+        .ai-mini-action:hover {
+            background: #2563eb;
+            color: #fff;
+            border-color: #2563eb;
+        }
+
+        /* Typing Dots */
+        .ai-typing-indicator {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .ai-typing-bubble {
+            background: #181c28;
+            border: 1px solid #273044;
+            padding: 8px 14px;
+            border-radius: 14px;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #94a3b8;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Quick Suggestions Chips */
+        .bookly-ai-prompts {
+            padding: 8px 12px;
+            background: #131722;
+            border-top: 1px solid #1f2536;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+        }
+        .bookly-ai-prompts::-webkit-scrollbar {
+            display: none;
+        }
+        .ai-prompt-pill {
+            background: #1a2030;
+            border: 1px solid #2d374f;
+            color: #cbd5e1;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .ai-prompt-pill:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        /* Footer Input */
+        .bookly-ai-footer {
+            padding: 10px 12px;
+            background: #161b26;
+            border-top: 1px solid #242937;
+        }
+        .ai-input-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .ai-input {
+            flex: 1;
+            background: #0d0f15;
+            border: 1px solid #293246;
+            border-radius: 20px;
+            color: #f3f4f6;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .ai-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        .ai-send-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #2563eb;
+            border: none;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .ai-send-btn:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+        }
+        .ai-send-btn:disabled {
+            background: #334155;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .bookly-ai-window {
+                right: 8px;
+                bottom: 80px;
+                width: calc(100vw - 16px);
+                height: 80vh;
+            }
+            .bookly-ai-fab {
+                bottom: 16px;
+                right: 16px;
+            }
+        }
+    </style>
+
+    <!-- AI Chatbot Logic -->
+    <script>
+        (function() {
+            var fab = document.getElementById('booklyAiFab');
+            var fabBtn = document.getElementById('aiFabToggleBtn');
+            var windowEl = document.getElementById('booklyAiWindow');
+            var closeBtn = document.getElementById('aiCloseBtn');
+            var resetBtn = document.getElementById('aiResetBtn');
+            var chatForm = document.getElementById('aiChatForm');
+            var inputEl = document.getElementById('aiUserInput');
+            var sendBtn = document.getElementById('aiSendBtn');
+            var msgContainer = document.getElementById('aiMessagesContainer');
+            var promptsContainer = document.getElementById('aiQuickPromptsContainer');
+            var typingIndicator = document.getElementById('aiTypingIndicator');
+            var chatBody = document.getElementById('aiChatBody');
+
+            var STORAGE_KEY = 'bookly_ai_chat_history_v1';
+            var chatHistory = [];
+
+            // Toggle Open/Close
+            function toggleChat(open) {
+                var isHidden = windowEl.classList.contains('d-none');
+                var shouldOpen = (open !== undefined) ? open : isHidden;
+                if (shouldOpen) {
+                    windowEl.classList.remove('d-none');
+                    inputEl.focus();
+                    scrollToBottom();
+                } else {
+                    windowEl.classList.add('d-none');
+                }
+            }
+
+            if (fabBtn) {
+                fabBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleChat();
+                });
+            }
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleChat(false);
+                });
+            }
+
+            // Scroll helper
+            function scrollToBottom() {
+                setTimeout(function() {
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }, 50);
+            }
+
+            // Render Markdown text simply
+            function formatText(text) {
+                if (!text) return '';
+                var formatted = text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`([^`]+)`/g, '<code>$1</code>')
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/\n/g, '<br/>');
+                return '<p>' + formatted + '</p>';
+            }
+
+            // Format VND
+            function formatVnd(val) {
+                if (!val && val !== 0) return '';
+                return Number(val).toLocaleString('vi-VN') + ' đ';
+            }
+
+            // Render a message row
+            function appendMessage(sender, text, books) {
+                var row = document.createElement('div');
+                row.className = 'ai-msg-row ' + sender;
+
+                if (sender === 'bot') {
+                    var avatar = document.createElement('div');
+                    avatar.className = 'ai-avatar-tiny';
+                    avatar.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="9" width="20" height="8" rx="4"/><circle cx="8" cy="13" r="1"/><circle cx="16" cy="13" r="1"/></svg>';
+                    row.appendChild(avatar);
+                }
+
+                var bubble = document.createElement('div');
+                bubble.className = 'ai-bubble';
+                bubble.innerHTML = formatText(text);
+
+                // If suggested books are present, render interactive cards
+                if (books && books.length > 0) {
+                    var grid = document.createElement('div');
+                    grid.className = 'ai-books-grid';
+
+                    books.forEach(function(b) {
+                        var card = document.createElement('div');
+                        card.className = 'ai-mini-card';
+
+                        var imgUrl = b.imageUrl || '/images/default-book.png';
+                        var oldPriceHtml = (b.originalPrice && b.originalPrice > b.price)
+                            ? '<span class="ai-mini-old-price">' + formatVnd(b.originalPrice) + '</span>'
+                            : '';
+
+                        card.innerHTML =
+                            '<img class="ai-mini-thumb" src="' + imgUrl + '" alt="' + (b.title || '') + '" onerror="this.src=\'/images/default-book.png\'" />' +
+                            '<div class="ai-mini-details">' +
+                                '<div>' +
+                                    '<a class="ai-mini-title" href="/books/' + b.id + '" target="_blank">' + (b.title || 'Sách Bookly') + '</a>' +
+                                    '<div class="ai-mini-meta">' +
+                                        '<span>' + (b.author || 'Tác giả') + '</span> &bull; ' +
+                                        '<span class="ai-condition-badge">' + (b.conditionLabel || 'Tốt') + '</span>' +
+                                    '</div>' +
+                                    '<div class="ai-mini-pricing">' +
+                                        '<span class="ai-mini-price">' + formatVnd(b.price) + '</span>' +
+                                        oldPriceHtml +
+                                    '</div>' +
+                                '</div>' +
+                                '<a class="ai-mini-action" href="/books/' + b.id + '" target="_blank">' +
+                                    '<span>Xem chi tiết</span>' +
+                                    '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>' +
+                                '</a>' +
+                            '</div>';
+                        grid.appendChild(card);
+                    });
+
+                    bubble.appendChild(grid);
+                }
+
+                row.appendChild(bubble);
+                msgContainer.appendChild(row);
+                scrollToBottom();
+            }
+
+            // Render Quick Prompts
+            function renderQuickPrompts(prompts) {
+                if (!promptsContainer) return;
+                promptsContainer.innerHTML = '';
+                if (!prompts || prompts.length === 0) return;
+
+                prompts.forEach(function(p) {
+                    var pill = document.createElement('button');
+                    pill.type = 'button';
+                    pill.className = 'ai-prompt-pill';
+                    pill.textContent = p;
+                    pill.onclick = function() {
+                        var cleanText = p.replace(/^[^\p{L}\p{N}]+/u, '').trim(); // Remove leading emoji
+                        sendUserQuery(cleanText);
+                    };
+                    promptsContainer.appendChild(pill);
+                });
+            }
+
+            // Load Quick Prompts from Server
+            function fetchQuickPrompts() {
+                fetch('/api/ai/quick-prompts')
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (Array.isArray(data)) {
+                            renderQuickPrompts(data);
+                        }
+                    })
+                    .catch(function(err) {
+                        console.warn('Cannot load quick prompts', err);
+                    });
+            }
+
+            // Send message to AI backend
+            function sendUserQuery(message) {
+                var text = (message || '').trim();
+                if (!text) return;
+
+                // Append user message to UI
+                appendMessage('user', text);
+                chatHistory.push({ sender: 'user', text: text });
+                saveHistory();
+
+                // Clear input
+                if (inputEl) inputEl.value = '';
+
+                // Show typing indicator
+                if (typingIndicator) typingIndicator.classList.remove('d-none');
+                if (sendBtn) sendBtn.disabled = true;
+                scrollToBottom();
+
+                fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ message: text })
+                })
+                .then(function(res) {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(function(data) {
+                    if (typingIndicator) typingIndicator.classList.add('d-none');
+                    if (sendBtn) sendBtn.disabled = false;
+
+                    var replyText = data.reply || 'Dạ em có thể hỗ trợ gì thêm cho bạn không ạ?';
+                    var books = data.suggestedBooks || [];
+                    appendMessage('bot', replyText, books);
+
+                    chatHistory.push({ sender: 'bot', text: replyText, books: books });
+                    saveHistory();
+
+                    if (data.quickReplies && data.quickReplies.length > 0) {
+                        renderQuickPrompts(data.quickReplies);
+                    }
+                })
+                .catch(function(err) {
+                    console.error('AI chat error:', err);
+                    if (typingIndicator) typingIndicator.classList.add('d-none');
+                    if (sendBtn) sendBtn.disabled = false;
+
+                    var errMsg = 'Dạ hệ thống đang bận một chút, bạn vui lòng thử lại sau giây lát nhé!';
+                    appendMessage('bot', errMsg);
+                    chatHistory.push({ sender: 'bot', text: errMsg });
+                    saveHistory();
+                });
+            }
+
+            // Form Submit handler
+            if (chatForm) {
+                chatForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    if (inputEl) {
+                        sendUserQuery(inputEl.value);
+                    }
+                });
+            }
+
+            // Reset conversation
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Bạn có muốn làm mới đoạn hội thoại với Trợ lý AI Bookly không?')) {
+                        chatHistory = [];
+                        sessionStorage.removeItem(STORAGE_KEY);
+                        msgContainer.innerHTML = '';
+                        initWelcome();
+                    }
+                });
+            }
+
+            // Storage helpers
+            function saveHistory() {
+                try {
+                    // Save max last 20 messages to keep storage light
+                    var slice = chatHistory.slice(-20);
+                    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(slice));
+                } catch(e) {}
+            }
+
+            function loadHistory() {
+                try {
+                    var saved = sessionStorage.getItem(STORAGE_KEY);
+                    if (saved) {
+                        var parsed = JSON.parse(saved);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            chatHistory = parsed;
+                            chatHistory.forEach(function(msg) {
+                                appendMessage(msg.sender, msg.text, msg.books);
+                            });
+                            return true;
+                        }
+                    }
+                } catch(e) {}
+                return false;
+            }
+
+            function initWelcome() {
+                var welcomeText = "Xin chào bạn! 👋 Mình là **Trợ lý AI của Chuỗi Sách Cũ Bookly**.\n\nMình có thể hỗ trợ bạn tìm sách theo thể loại, tác giả, mức giá, giải đáp tình trạng sách cũ (99%, 90%...) hoặc tra cứu phí ship nhanh chóng. Bạn cần mình gợi ý gì hôm nay?";
+                appendMessage('bot', welcomeText);
+                chatHistory.push({ sender: 'bot', text: welcomeText });
+                saveHistory();
+            }
+
+            // Init on load
+            function init() {
+                var hasHistory = loadHistory();
+                if (!hasHistory) {
+                    initWelcome();
+                }
+                fetchQuickPrompts();
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+</div>
+</body>
+</html>

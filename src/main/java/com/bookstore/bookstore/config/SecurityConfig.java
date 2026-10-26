@@ -55,7 +55,7 @@ public class SecurityConfig {
                         "/", "/home", "/books/**", "/categories/**", "/shops/**", "/search/**", "/payment/**",
                         "/auth/**", "/login", "/register", "/verify-otp", "/forgot-password", "/reset-password",
                         "/logout", "/access-denied",
-                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**", "/error"
+                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**", "/error", "/api/ai/**"
                 ).permitAll()
 
                 // Phân quyền theo role
