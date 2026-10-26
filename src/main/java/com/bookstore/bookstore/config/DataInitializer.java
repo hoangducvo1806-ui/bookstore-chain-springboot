@@ -167,6 +167,14 @@ public class DataInitializer implements CommandLineRunner {
     private void saveOrUpdateCarrier(String name, BigDecimal fee, String desc) {
         ShippingCarrier carrier = shippingCarrierRepository.findByName(name).orElse(null);
         if (carrier == null) {
+            carrier = shippingCarrierRepository.findAll().stream()
+                    .filter(c -> c.getName() != null && (c.getName().equalsIgnoreCase(name)
+                            || c.getName().replace("?", "").equalsIgnoreCase(name.replace("?", ""))
+                            || (name.contains("Hỏa Tốc") && c.getName().contains("Giao trong 2h"))))
+                    .findFirst()
+                    .orElse(null);
+        }
+        if (carrier == null) {
             carrier = ShippingCarrier.builder()
                     .name(name)
                     .shippingFee(fee)
@@ -174,6 +182,7 @@ public class DataInitializer implements CommandLineRunner {
                     .active(true)
                     .build();
         } else {
+            carrier.setName(name);
             carrier.setShippingFee(fee);
             carrier.setDescription(desc);
             carrier.setActive(true);
