@@ -116,7 +116,7 @@ public class SecurityConfig {
                     response.addCookie(sessionCookie);
 
                     SecurityContextHolder.clearContext();
-                    response.sendRedirect("/login?logout");
+                    response.sendRedirect("/?logout");
                 })
                 .deleteCookies("jwt_token", "JSESSIONID")
                 .invalidateHttpSession(true)

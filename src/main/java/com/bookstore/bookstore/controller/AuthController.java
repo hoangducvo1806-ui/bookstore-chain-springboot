@@ -142,7 +142,7 @@ public class AuthController {
         if (request.getSession(false) != null) {
             request.getSession(false).invalidate();
         }
-        return "redirect:/login?logout";
+        return "redirect:/?logout";
     }
 
     // --- QUÊN MẬT KHẨU ---
