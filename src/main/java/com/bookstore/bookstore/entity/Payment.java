@@ -36,7 +36,8 @@ public class Payment {
     @Column(length = 100)
     private String transactionId; // Mã giao dịch cổng thanh toán (VNPAY/MOMO)
 
-    @Column(length = 255)
+    @org.hibernate.annotations.Nationalized
+    @Column(length = 255, columnDefinition = "NVARCHAR(255)")
     private String paymentInfo;
 
     @Enumerated(EnumType.STRING)

@@ -28,7 +28,8 @@ public class OrderStatusHistory {
     @Column(nullable = false, length = 30)
     private OrderStatus status;
 
-    @Column(length = 255)
+    @org.hibernate.annotations.Nationalized
+    @Column(length = 500, columnDefinition = "NVARCHAR(500)")
     private String note; // Lý do hủy, ghi chú của shipper...
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -32,7 +32,8 @@ public class Shop {
     @Column(length = 1000, columnDefinition = "NVARCHAR(1000)")
     private String description;
 
-    @Column(length = 500)
+    @Nationalized
+    @Column(length = 500, columnDefinition = "NVARCHAR(500)")
     private String bio; // Tiểu sử ngắn của cửa hàng
 
     @Column(length = 500)
