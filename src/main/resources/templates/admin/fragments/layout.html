@@ -28,10 +28,13 @@
 
 <!-- SIDEBAR FRAGMENT -->
 <div th:fragment="sidebar(activeTab)" class="sidebar d-flex flex-column flex-shrink-0 p-3">
-    <a th:href="@{/admin/dashboard}" class="d-flex align-items-center mb-4 text-white text-decoration-none px-2">
-        <i class="bi bi-book-half fs-3 text-primary me-2"></i>
-        <span class="fs-5 fw-bold">SÁCH CŨ PORTAL</span>
-    </a>
+    <div class="d-flex align-items-center mb-3 text-white px-2">
+        <i class="bi fs-3 me-2" th:classappend="${currentUser != null and currentUser.admin ? 'bi-shield-shaded text-danger' : 'bi-kanban text-primary'}"></i>
+        <div>
+            <span class="fs-6 fw-bold d-block text-white" th:text="${currentUser != null and currentUser.admin ? 'QUẢN TRỊ HỆ THỐNG' : 'QUẢN LÝ CHUỖI'}">PORTAL</span>
+            <span class="badge" th:classappend="${currentUser != null and currentUser.admin ? 'bg-danger text-white' : 'bg-primary text-white'}" style="font-size: 0.65rem;" th:text="${currentUser != null and currentUser.admin ? 'CẤP TỐI CAO: ADMIN' : 'VẬN HÀNH: MANAGER'}">ROLE</span>
+        </div>
+    </div>
     <hr class="text-secondary my-1">
     <ul class="nav nav-pills flex-column mb-auto mt-2">
         <li class="nav-item">
@@ -39,9 +42,10 @@
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
         </li>
-        <li class="nav-item">
+        <!-- CHỈ ADMIN MỚI THẤY VÀ CÓ QUYỀN VÀO QUẢN LÝ NGƯỜI DÙNG & PHÂN QUYỀN -->
+        <li class="nav-item" th:if="${currentUser != null and currentUser.admin}">
             <a th:href="@{/admin/users}" class="nav-link" th:classappend="${activeTab == 'users' ? 'active' : ''}">
-                <i class="bi bi-people"></i> Quản lý Người dùng
+                <i class="bi bi-people text-warning"></i> Quản lý Người dùng
             </a>
         </li>
         <li class="nav-item">
@@ -98,10 +102,11 @@
             <i class="bi bi-globe me-1"></i> Xem Trang Khách
         </a>
         <div class="d-flex align-items-center text-dark text-decoration-none">
-            <i class="bi bi-person-circle fs-4 text-primary me-2"></i>
+            <i class="bi bi-person-circle fs-4 me-2" th:classappend="${currentUser != null and currentUser.admin ? 'text-danger' : 'text-primary'}"></i>
             <div>
-                <span class="fw-semibold small d-block" th:text="${currentUser != null ? currentUser.fullName : 'Quản Trị Viên'}">Admin / Manager</span>
-                <span class="badge bg-danger text-white" style="font-size: 0.7rem;">Quản Trị Viên</span>
+                <span class="fw-semibold small d-block" th:text="${currentUser != null ? currentUser.fullName : 'Nhân Sự'}">Admin / Manager</span>
+                <span th:if="${currentUser != null and currentUser.admin}" class="badge bg-danger text-white" style="font-size: 0.7rem;">🛡️ Quản Trị Viên (Admin)</span>
+                <span th:if="${currentUser != null and !currentUser.admin and currentUser.manager}" class="badge bg-primary text-white" style="font-size: 0.7rem;">👔 Quản Lý Chuỗi (Manager)</span>
             </div>
         </div>
     </div>
