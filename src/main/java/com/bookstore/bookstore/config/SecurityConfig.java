@@ -2,6 +2,7 @@ package com.bookstore.bookstore.config;
 
 import com.bookstore.bookstore.security.CustomUserDetailsService;
 import com.bookstore.bookstore.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -84,6 +86,42 @@ public class SecurityConfig {
                 .accessDeniedHandler((request, response, accessDeniedException) -> {
                     response.sendRedirect("/access-denied");
                 })
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .addLogoutHandler((request, response, authentication) -> {
+                    Cookie cookie = new Cookie("jwt_token", "");
+                    cookie.setPath("/");
+                    cookie.setMaxAge(0);
+                    cookie.setHttpOnly(true);
+                    response.addCookie(cookie);
+
+                    Cookie sessionCookie = new Cookie("JSESSIONID", "");
+                    sessionCookie.setPath("/");
+                    sessionCookie.setMaxAge(0);
+                    response.addCookie(sessionCookie);
+
+                    SecurityContextHolder.clearContext();
+                })
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    Cookie cookie = new Cookie("jwt_token", "");
+                    cookie.setPath("/");
+                    cookie.setMaxAge(0);
+                    cookie.setHttpOnly(true);
+                    response.addCookie(cookie);
+
+                    Cookie sessionCookie = new Cookie("JSESSIONID", "");
+                    sessionCookie.setPath("/");
+                    sessionCookie.setMaxAge(0);
+                    response.addCookie(sessionCookie);
+
+                    SecurityContextHolder.clearContext();
+                    response.sendRedirect("/login?logout");
+                })
+                .deleteCookies("jwt_token", "JSESSIONID")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .permitAll()
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

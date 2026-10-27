@@ -125,14 +125,24 @@ public class AuthController {
     }
 
     // --- ĐĂNG XUẤT ---
-    @GetMapping("/logout")
-    public String handleLogout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("jwt_token", null);
+    @GetMapping({"/logout", "/auth/logout"})
+    public String handleLogout(jakarta.servlet.http.HttpServletRequest request, HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwt_token", "");
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(0); // Xóa cookie
+        cookie.setMaxAge(0); // Xóa cookie JWT
         response.addCookie(cookie);
-        return "redirect:/login";
+
+        Cookie jsessionCookie = new Cookie("JSESSIONID", "");
+        jsessionCookie.setPath("/");
+        jsessionCookie.setMaxAge(0);
+        response.addCookie(jsessionCookie);
+
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        if (request.getSession(false) != null) {
+            request.getSession(false).invalidate();
+        }
+        return "redirect:/login?logout";
     }
 
     // --- QUÊN MẬT KHẨU ---
