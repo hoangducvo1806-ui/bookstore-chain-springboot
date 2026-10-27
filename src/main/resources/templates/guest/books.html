@@ -20,28 +20,94 @@
         </div>
     </div>
 
+    <style>
+        /* Styling for Filter Sidebar */
+        .filter-card {
+            background-color: #141720 !important;
+            border: 1px solid #242937 !important;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            scrollbar-width: thin;
+            scrollbar-color: #374151 #0b0d11;
+        }
+        .filter-card::-webkit-scrollbar {
+            width: 5px;
+        }
+        .filter-card::-webkit-scrollbar-track {
+            background: #0b0d11;
+            border-radius: 4px;
+        }
+        .filter-card::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        .filter-card::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+        .price-chip {
+            cursor: pointer;
+            font-size: 0.72rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            border: 1px solid #283347;
+            background-color: #181d2a;
+            color: #94a3b8;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.15s ease-in-out;
+        }
+        .price-chip:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+            color: #ffffff;
+        }
+        .price-chip.active {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            color: #ffffff;
+            font-weight: 600;
+        }
+    </style>
+
     <div class="container pb-5">
         <div class="row g-4">
             <!-- Sidebar Bộ Lọc -->
             <div class="col-lg-3">
-                <div class="card shadow-sm rounded-4 p-3 sticky-top" style="top: 80px; background-color: #141720 !important; border: 1px solid #242937 !important;">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0 text-white"><i class="bi bi-funnel me-1 text-primary"></i> Bộ Lọc Tìm Kiếm</h5>
-                        <a th:href="@{/books}" class="text-muted small text-decoration-none">Đặt lại</a>
+                <div class="card shadow-sm rounded-4 p-3 sticky-lg-top filter-card" style="top: 80px;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center gap-1">
+                            <h6 class="fw-bold mb-0 text-white"><i class="bi bi-funnel-fill me-1 text-primary"></i> Bộ Lọc Sách</h6>
+                            <span th:if="${(filter.keyword != null and !filter.keyword.isEmpty()) or filter.categoryId != null or filter.shopId != null or filter.condition != null or filter.minPrice != null or filter.maxPrice != null or (filter.sort != null and filter.sort != 'newest')}" 
+                                  class="badge bg-primary text-white" style="font-size: 0.65rem;">Đang lọc</span>
+                        </div>
+                        <a th:href="@{/books}" class="text-danger small text-decoration-none fw-semibold" title="Xóa tất cả bộ lọc">
+                            <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
+                        </a>
                     </div>
 
                     <form th:action="@{/books}" method="get" id="filterForm">
+                        <!-- Nút Lọc Trên Cùng -->
+                        <button type="submit" class="btn btn-primary btn-sm w-100 rounded-pill text-white fw-bold mb-3 shadow-sm py-2">
+                            <i class="bi bi-search me-1"></i> Áp Dụng Bộ Lọc
+                        </button>
+
                         <!-- Từ khóa -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-light">Từ khóa (Tên/Tác giả/ISBN)</label>
-                            <input type="text" name="keyword" class="form-control form-control-sm" 
-                                   placeholder="Nhập từ khóa..." th:value="${filter.keyword}">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-light mb-1">Từ khóa (Tên/Tác giả/ISBN)</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" name="keyword" class="form-control form-control-sm" 
+                                       placeholder="Nhập tên sách, tác giả..." th:value="${filter.keyword}">
+                                <button class="btn btn-outline-secondary" type="submit" title="Tìm kiếm">
+                                    <i class="bi bi-search text-light"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Danh mục -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-light">Danh mục sách</label>
-                            <select name="categoryId" class="form-select form-select-sm">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-light mb-1">Danh mục sách</label>
+                            <select name="categoryId" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
                                 <option value="">-- Tất cả danh mục --</option>
                                 <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"
                                         th:selected="${filter.categoryId == c.id}">Danh mục</option>
@@ -49,9 +115,9 @@
                         </div>
 
                         <!-- Chi nhánh cửa hàng -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-light">Chi nhánh bán</label>
-                            <select name="shopId" class="form-select form-select-sm">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-light mb-1">Chi nhánh bán</label>
+                            <select name="shopId" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
                                 <option value="">-- Tất cả chi nhánh --</option>
                                 <option th:each="s : ${shops}" th:value="${s.id}" th:text="${s.name}"
                                         th:selected="${filter.shopId == s.id}">Chi nhánh</option>
@@ -59,9 +125,9 @@
                         </div>
 
                         <!-- Tình trạng sách cũ -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-light">Tình trạng sách cũ</label>
-                            <select name="condition" class="form-select form-select-sm">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-light mb-1">Tình trạng sách cũ</label>
+                            <select name="condition" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
                                 <option value="">-- Mọi tình trạng --</option>
                                 <option th:each="cond : ${conditions}" th:value="${cond}" th:text="${cond.label}"
                                         th:selected="${filter.condition == cond}">Tình trạng</option>
@@ -69,30 +135,48 @@
                         </div>
 
                         <!-- Khoảng giá -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-light">Khoảng giá (VNĐ)</label>
-                            <div class="d-flex gap-2 align-items-center">
-                                <input type="number" name="minPrice" class="form-control form-control-sm" 
-                                       placeholder="Từ" th:value="${filter.minPrice}">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-light mb-1">Khoảng giá (VNĐ)</label>
+                            <div class="d-flex gap-2 align-items-center mb-1">
+                                <input type="number" name="minPrice" id="minPriceInput" class="form-control form-control-sm" 
+                                       placeholder="Từ: 50.000" th:value="${filter.minPrice}" step="1000">
                                 <span class="text-muted">-</span>
-                                <input type="number" name="maxPrice" class="form-control form-control-sm" 
-                                       placeholder="Đến" th:value="${filter.maxPrice}">
+                                <input type="number" name="maxPrice" id="maxPriceInput" class="form-control form-control-sm" 
+                                       placeholder="Đến: 200.000" th:value="${filter.maxPrice}" step="1000">
+                            </div>
+                            <small class="text-muted d-block mb-1" style="font-size: 0.7rem;">* Giá tính theo VNĐ (VD: 50000 - 150000)</small>
+
+                            <!-- Quick Price Chips -->
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                <button type="button" class="price-chip border-0" 
+                                        th:classappend="${filter.minPrice == 0 and filter.maxPrice == 50000} ? 'active' : ''"
+                                        onclick="setPrice(0, 50000)">&lt; 50k</button>
+                                <button type="button" class="price-chip border-0" 
+                                        th:classappend="${filter.minPrice == 50000 and filter.maxPrice == 100000} ? 'active' : ''"
+                                        onclick="setPrice(50000, 100000)">50k-100k</button>
+                                <button type="button" class="price-chip border-0" 
+                                        th:classappend="${filter.minPrice == 100000 and filter.maxPrice == 200000} ? 'active' : ''"
+                                        onclick="setPrice(100000, 200000)">100k-200k</button>
+                                <button type="button" class="price-chip border-0" 
+                                        th:classappend="${filter.minPrice == 200000 and filter.maxPrice == null} ? 'active' : ''"
+                                        onclick="setPrice(200000, null)">&gt; 200k</button>
                             </div>
                         </div>
 
                         <!-- Sắp xếp -->
                         <div class="mb-3">
-                            <label class="form-label small fw-bold text-light">Sắp xếp theo</label>
-                            <select name="sort" class="form-select form-select-sm">
-                                <option value="newest" th:selected="${filter.sort == 'newest'}">Mới nhất</option>
+                            <label class="form-label small fw-bold text-light mb-1">Sắp xếp theo</label>
+                            <select name="sort" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
+                                <option value="newest" th:selected="${filter.sort == 'newest' or filter.sort == null}">Mới nhất</option>
                                 <option value="best_seller" th:selected="${filter.sort == 'best_seller'}">Bán chạy nhất</option>
                                 <option value="price_asc" th:selected="${filter.sort == 'price_asc'}">Giá tăng dần</option>
                                 <option value="price_desc" th:selected="${filter.sort == 'price_desc'}">Giá giảm dần</option>
                             </select>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-sm w-100 rounded-pill text-white fw-bold">
-                            <i class="bi bi-search me-1"></i> Áp Dụng Bộ Lọc
+                        <!-- Nút Lọc Dưới Cùng -->
+                        <button type="submit" class="btn btn-primary btn-sm w-100 rounded-pill text-white fw-bold py-2">
+                            <i class="bi bi-funnel-fill me-1"></i> Áp Dụng Bộ Lọc
                         </button>
                     </form>
                 </div>
@@ -202,6 +286,16 @@
         </div>
     </div>
 
+    <script>
+        function setPrice(min, max) {
+            const minInput = document.getElementById('minPriceInput');
+            const maxInput = document.getElementById('maxPriceInput');
+            if (minInput) minInput.value = (min !== null && min !== undefined) ? min : '';
+            if (maxInput) maxInput.value = (max !== null && max !== undefined) ? max : '';
+            const form = document.getElementById('filterForm');
+            if (form) form.submit();
+        }
+    </script>
 </div>
 </body>
 </html>
