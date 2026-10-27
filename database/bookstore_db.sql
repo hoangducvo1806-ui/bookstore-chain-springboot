@@ -188,7 +188,7 @@ BEGIN
         id BIGINT IDENTITY(1,1) PRIMARY KEY,
         shop_id BIGINT NOT NULL UNIQUE,
         commission_rate DECIMAL(5,2) NOT NULL DEFAULT 10.00,
-        note NVARCHAR(255) NULL,
+        note NVARCHAR(500) NULL,
         updated_at DATETIME2 NOT NULL DEFAULT GETDATE(),
         CONSTRAINT FK_app_commissions_shop FOREIGN KEY (shop_id) REFERENCES dbo.shops(id) ON DELETE CASCADE
     );
@@ -278,7 +278,7 @@ BEGIN
         id BIGINT IDENTITY(1,1) PRIMARY KEY,
         order_id BIGINT NOT NULL,
         status NVARCHAR(30) NOT NULL,
-        note NVARCHAR(255) NULL,
+        note NVARCHAR(500) NULL,
         changed_by NVARCHAR(100) NULL,
         created_at DATETIME2 NOT NULL DEFAULT GETDATE(),
         CONSTRAINT FK_order_status_histories_order FOREIGN KEY (order_id) REFERENCES dbo.orders(id) ON DELETE CASCADE

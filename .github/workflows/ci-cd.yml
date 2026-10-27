@@ -1,0 +1,134 @@
+name: Bookstore Chain CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================================
+  # JOB 1: CONTINUOUS INTEGRATION (BUILD, LINT & TEST VỚI SQL SERVER CONTAINER)
+  # ============================================================================
+  build-and-test:
+    name: Build, Test & Code Quality
+    runs-on: ubuntu-latest
+
+    services:
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "Password123@"
+          MSSQL_PID: "Developer"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Password123@' -C -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: 1. Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 2. Set up Java JDK 21 (Eclipse Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: 3. Cấp quyền thực thi cho Maven Wrapper
+        run: chmod +x mvnw
+
+      - name: 4. Khởi tạo Database 'bookstore_db' trên SQL Server Service
+        run: |
+          docker exec ${{ job.services.mssql.id }} /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Password123@" -C -Q "
+          IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'bookstore_db')
+          BEGIN
+              CREATE DATABASE bookstore_db COLLATE Latin1_General_100_CI_AS_SC_UTF8;
+              PRINT 'Database bookstore_db created successfully.';
+          END
+          "
+
+      - name: 5. Chạy Kiểm thử Đơn vị & Tích hợp (Unit & Integration Tests)
+        env:
+          SPRING_PROFILES_ACTIVE: docker
+          SPRING_DATASOURCE_URL: jdbc:sqlserver://localhost:1433;databaseName=bookstore_db;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true
+          SPRING_DATASOURCE_USERNAME: sa
+          SPRING_DATASOURCE_PASSWORD: Password123@
+        run: ./mvnw clean test -B
+
+      - name: 6. Đóng gói Artifact JAR
+        run: ./mvnw package -DskipTests -B
+
+      - name: 7. Lưu trữ báo cáo kiểm thử (Surefire Test Reports)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-test-reports
+          path: target/surefire-reports/
+          if-no-files-found: ignore
+
+  # ============================================================================
+  # JOB 2: CONTINUOUS DELIVERY (DOCKER MULTI-STAGE BUILD & SMOKE TEST)
+  # ============================================================================
+  docker-delivery:
+    name: Docker Multi-stage Build & Smoke Test
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 2. Thiết lập Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 3. Kiểm tra tính hợp lệ của cấu hình Docker Compose
+        run: docker compose config
+
+      - name: 4. Build Docker Image với Multi-stage Dockerfile
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: bookstore-chain-app:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 5. Kiểm thử vận hành hệ thống container (Smoke Test với Docker Compose)
+        run: |
+          echo ">> Khởi động toàn bộ stack hệ thống qua docker compose..."
+          docker compose up -d --build
+
+          echo ">> Chờ các container đạt trạng thái healthy..."
+          timeout 120 bash -c 'until curl -sf http://localhost:8080/ > /dev/null; do sleep 3; echo "Đang chờ Spring Boot khởi động..."; done'
+
+          echo ">> Kiểm tra phản hồi HTTP từ cổng 8080..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/)
+          echo "HTTP Status nhận được: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -eq 200 ] || [ "$HTTP_STATUS" -eq 302 ]; then
+              echo ">> Smoke Test THÀNH CÔNG: Ứng dụng phản hồi hoàn hảo trong container!"
+          else
+              echo ">> Lỗi: Phản hồi không mong đợi $HTTP_STATUS"
+              docker compose logs
+              exit 1
+          fi
+
+      - name: 6. Dọn dẹp tài nguyên container sau khi test
+        if: always()
+        run: docker compose down -v

@@ -1,0 +1,76 @@
+services:
+  # ============================================================================
+  # 1. DỊCH VỤ CƠ SỞ DỮ LIỆU MICROSOFT SQL SERVER 2022
+  # ============================================================================
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: bookstore-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password123@
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Password123@' -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - bookstore-net
+    restart: unless-stopped
+
+  # ============================================================================
+  # 2. HELPER SERVICE: TỰ ĐỘNG TẠO DATABASE 'bookstore_db' CHUẨN UTF-8
+  # ============================================================================
+  init-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: bookstore-init-db
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      - MSSQL_SA_PASSWORD=Password123@
+    volumes:
+      - ./database/init-db.sh:/init-db.sh
+    entrypoint: ["/bin/bash", "/init-db.sh"]
+    networks:
+      - bookstore-net
+    restart: "no"
+
+  # ============================================================================
+  # 3. DỊCH VỤ ỨNG DỤNG SPRING BOOT WEB (MULTI-STAGE BUILD)
+  # ============================================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bookstore-app
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      init-db:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://sqlserver:1433;databaseName=bookstore_db;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=true
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=Password123@
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    networks:
+      - bookstore-net
+    restart: unless-stopped
+
+volumes:
+  mssql_data:
+    name: bookstore_mssql_data
+
+networks:
+  bookstore-net:
+    name: bookstore_network
+    driver: bridge

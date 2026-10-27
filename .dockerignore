@@ -1,0 +1,30 @@
+# Git & IDEs
+.git
+.gitignore
+.gitattributes
+.idea
+.vscode
+.vs
+*.iml
+
+# Build artifacts
+target/
+*.jar
+*.war
+
+# Logs & temp files
+logs/
+*.log
+tmp/
+temp/
+
+# Environment files with sensitive credentials
+application-local.properties
+.env
+.env.local
+
+# Documentation & helper scripts
+*.md
+database/*.bak
+database/*.ldf
+database/*.mdf

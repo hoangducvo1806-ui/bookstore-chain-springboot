@@ -32,8 +32,19 @@ src/main/resources/
  └─ application-local.properties.example   (file mẫu cấu hình bí mật)
 ```
 
-## ⚙️ Hướng dẫn cài đặt
+## ⚙️ Hướng dẫn cài đặt & Khởi chạy
 
+### Cách 1: Khởi chạy siêu tốc bằng Docker Compose (Khuyên dùng - Chuẩn DevOps)
+Không cần cài đặt thủ công Java, Maven hay SQL Server trên máy:
+```bash
+docker compose up -d --build
+```
+Mở trình duyệt truy cập: `http://localhost:8080`  
+Xem chi tiết kiến trúc Docker Multi-Stage và quy trình GitHub Actions CI/CD tại [DEVOPS.md](DEVOPS.md).
+
+---
+
+### Cách 2: Chạy thủ công trên Local
 1. Cài **JDK 21+**, **SQL Server** + SSMS, **Git**, IntelliJ IDEA.
 2. Clone & chuyển sang nhánh `develop`:
    ```bash
