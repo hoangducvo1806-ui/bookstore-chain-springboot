@@ -38,7 +38,8 @@
     <hr class="text-secondary my-1">
     <ul class="nav nav-pills flex-column mb-auto mt-2">
         <li class="nav-item">
-            <a th:href="@{/admin/dashboard}" class="nav-link" th:classappend="${activeTab == 'dashboard' ? 'active' : ''}">
+            <a th:href="${currentUser != null and currentUser.admin ? '/admin/dashboard' : '/manager/dashboard'}" 
+               class="nav-link" th:classappend="${activeTab == 'dashboard' ? 'active' : ''}">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
         </li>

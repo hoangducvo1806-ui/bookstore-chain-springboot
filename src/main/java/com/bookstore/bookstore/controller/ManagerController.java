@@ -1,20 +1,36 @@
 package com.bookstore.bookstore.controller;
 
+import com.bookstore.bookstore.repository.CategoryRepository;
+import com.bookstore.bookstore.repository.VoucherRepository;
+import com.bookstore.bookstore.service.AdminService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Controller cho Role MANAGER (Quản lý chuỗi cửa hàng).
- * Sử dụng chung các view quản trị với Admin theo đúng mô hình 3 tầng (tránh trùng lặp mã nguồn).
+ * Controller chuyên biệt cho Role MANAGER (Quản lý vận hành chuỗi cửa hàng sách cũ).
+ * Trọng tâm: Điều hành chi nhánh, kiểm duyệt sách cũ, điều phối đơn hàng và chương trình khuyến mãi.
  */
 @Controller
 @RequestMapping("/manager")
+@RequiredArgsConstructor
 public class ManagerController {
 
+    private final AdminService adminService;
+    private final CategoryRepository categoryRepository;
+    private final VoucherRepository voucherRepository;
+
     @GetMapping({"", "/", "/dashboard"})
-    public String dashboard() {
-        return "redirect:/admin/dashboard";
+    public String dashboard(Model model) {
+        model.addAttribute("stats", adminService.getDashboardStats());
+        model.addAttribute("recentOrders", adminService.getRecentOrders());
+        model.addAttribute("shopRevenues", adminService.getShopRevenueStats());
+        model.addAttribute("totalCategories", categoryRepository.count());
+        model.addAttribute("totalVouchers", voucherRepository.count());
+        model.addAttribute("activeTab", "dashboard");
+        return "manager/dashboard";
     }
 
     @GetMapping("/shops")

@@ -117,6 +117,16 @@
                             </li>
                             
                             <!-- Kênh phân quyền -->
+                            <li th:if="${currentUser.admin}">
+                                <a class="dropdown-item py-2 fw-bold text-danger" th:href="@{/admin/dashboard}">
+                                    <i class="bi bi-shield-shaded me-2"></i> Quản Trị Hệ Thống (Admin)
+                                </a>
+                            </li>
+                            <li th:if="${currentUser.manager}">
+                                <a class="dropdown-item py-2 fw-bold text-warning" th:href="@{/manager/dashboard}">
+                                    <i class="bi bi-kanban me-2"></i> Vận Hành Chuỗi (Manager)
+                                </a>
+                            </li>
                             <li>
                                 <a class="dropdown-item py-2 fw-bold text-primary" th:href="@{/vendor/dashboard}">
                                     <i class="bi bi-shop me-2"></i> Kênh Người Bán (Vendor)

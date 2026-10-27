@@ -53,8 +53,11 @@ public class AuthController {
             var userOpt = userRepository.findByEmail(request.getEmail().toLowerCase().trim());
             if (userOpt.isPresent()) {
                 com.bookstore.bookstore.entity.User user = userOpt.get();
-                if (user.isAdmin() || user.isManager()) {
+                if (user.isAdmin()) {
                     return "redirect:/admin/dashboard";
+                }
+                if (user.isManager()) {
+                    return "redirect:/manager/dashboard";
                 }
                 if (user.isVendor()) {
                     return "redirect:/vendor/books";
