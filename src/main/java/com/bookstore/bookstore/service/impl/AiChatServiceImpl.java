@@ -89,100 +89,210 @@ public class AiChatServiceImpl implements AiChatService {
     @Override
     public List<String> getQuickPrompts() {
         return List.of(
+                "💻 Sách về lập trình & code",
                 "🔥 Sách bán chạy nhất",
                 "📚 Gợi ý sách văn học hay",
                 "💰 Sách giá rẻ dưới 60k",
                 "✨ Sách tình trạng như mới 99%",
                 "🚚 Chính sách vận chuyển",
-                "📖 Giải thích các cấp độ sách cũ",
                 "🎟️ Có mã giảm giá nào không?"
         );
+    }
+
+    // ==========================================
+    // BẢNG TỪ ĐỒNG NGHĨA & ALIAS THEO CHUYÊN MỤC
+    // ==========================================
+    private static final Map<String, List<String>> CATEGORY_ALIASES = new LinkedHashMap<>();
+    static {
+        CATEGORY_ALIASES.put("cong-nghe-thong-tin", List.of(
+                "công nghệ thông tin", "cong nghe thong tin", "lập trình viên", "lập trình", "lap trinh",
+                "clean architecture", "clean code", "cấu trúc dữ liệu", "cau truc du lieu", "kiến trúc phần mềm",
+                "trí tuệ nhân tạo", "tri tue nhan tao", "machine learning", "deep learning", "design pattern",
+                "the pragmatic programmer", "head first", "phần mềm", "phan mem", "thuật toán", "thuat toan",
+                "algorithm", "database", "cơ sở dữ liệu", "co so du lieu", "backend", "frontend", "fullstack",
+                "coding", "coder", "code", "developer", "dev", "cntt", "it", "python", "java", "c++", "c#",
+                "javascript", "golang", "sql", "clrs", "web", "ai"
+        ));
+
+        CATEGORY_ALIASES.put("kinh-te-tai-chinh", List.of(
+                "kinh tế & tài chính", "kinh tế", "kinh te", "tài chính", "tai chinh", "chứng khoán", "chung khoan",
+                "khởi nghiệp", "khoi nghiep", "startup", "đầu tư", "dau tu", "kinh doanh", "quản trị", "quan tri",
+                "marketing", "bán hàng", "ban hang", "sales", "làm giàu", "lam giau", "tiền tệ", "quản lý tài chính",
+                "warren buffett", "người giàu có nhất thành babylon", "quốc gia khởi nghiệp", "từ tốt đến vĩ đại",
+                "cha giàu cha nghèo", "tư duy triệu phú", "dốc hết trái tim"
+        ));
+
+        CATEGORY_ALIASES.put("tam-ly-ky-nang", List.of(
+                "tâm lý & kỹ năng", "tâm lý học", "tâm lý", "tam ly", "kỹ năng sống", "kỹ năng", "ky nang",
+                "phát triển bản thân", "giao tiếp", "giao tiep", "thói quen nguyên tử", "thói quen", "thoi quen",
+                "atomic habits", "đắc nhân tâm", "dac nhan tam", "tư duy nhanh và chậm", "tư duy", "tu duy",
+                "chữa lành", "chua lanh", "hạnh phúc", "thành đạt", "self help", "sống tích cực", "kỷ luật",
+                "dám bị ghét", "hiểu về trái tim", "quẳng gánh lo", "hành trình về phương đông", "sức mạnh của hiện tại"
+        ));
+
+        CATEGORY_ALIASES.put("truyen-tranh-thieu-nhi", List.of(
+                "truyện tranh & thiếu nhi", "truyện tranh", "truyen tranh", "thiếu nhi", "thieu nhi", "manga",
+                "doraemon", "conan", "dế mèn phiêu lưu ký", "dế mèn", "de men", "hoạt hình", "anime",
+                "one piece", "naruto", "dragon ball", "thần đồng đất việt", "truyện màu", "cổ tích", "truyện thiếu nhi"
+        ));
+
+        CATEGORY_ALIASES.put("van-hoc-viet-nam", List.of(
+                "văn học việt nam", "van hoc viet nam", "văn học việt", "van hoc viet",
+                "văn học", "van hoc", "tiểu thuyết", "tieu thuyet", "truyện ngắn", "truyen ngan",
+                "thơ ca", "tho ca", "thơ", "vũ trọng phụng", "nam cao", "ngô tất tố", "nguyễn nhật ánh",
+                "tô hoài", "xuân diệu", "số đỏ", "chí phèo", "tắt đèn", "lão hạc", "truyện kiều", "vợ nhặt",
+                "nguyễn du", "nguyễn bính", "thơ mới", "đoàn giỏi", "đất rừng phương nam"
+        ));
+
+        CATEGORY_ALIASES.put("van-hoc-nuoc-ngoai", List.of(
+                "văn học nước ngoài", "van hoc nuoc ngoai", "tiểu thuyết nước ngoài", "văn học dịch",
+                "tiểu thuyết kinh điển", "kinh điển", "trinh thám", "trinh tham", "sherlock holmes",
+                "haruki murakami", "nobel văn học", "văn học phương tây", "tiểu thuyết lãng mạn",
+                "ông già và biển cả", "trăm năm cô đơn", "chiến tranh và hòa bình", "tội ác và hình phạt",
+                "đại gia gatsby", "không gia đình", "chuông nguyện hồn ai", "hoàng tử bé"
+        ));
+
+        CATEGORY_ALIASES.put("khoa-hoc-lich-su", List.of(
+                "khoa học - vũ trụ - lịch sử", "khoa học", "khoa hoc", "vũ trụ", "vu tru", "lịch sử việt nam",
+                "lịch sử", "lich su", "vật lý", "vat ly", "thiên văn", "thien van", "tiến hóa", "tien hoa",
+                "sử việt", "việt nam sử lược", "sapiens", "lược sử loài người", "lược sử vạn vật", "khảo cổ",
+                "sinh học", "vũ trụ trong vỏ hạt dẻ", "stephen hawking"
+        ));
     }
 
     // ==========================================
     // TƯ VẤN & GỢI Ý SÁCH (Book Recommendation)
     // ==========================================
     private AiChatResponse handleBookRecommendation(String originalQuery, String lower) {
-        List<Book> matchedBooks = new ArrayList<>();
         StringBuilder replyBuilder = new StringBuilder();
 
-        // Kiểm tra ngân sách (VD: "dưới 50k", "dưới 100000", "tầm 70k")
+        // 1. Kiểm tra ngân sách (VD: "dưới 50k", "dưới 100000", "tầm 70k")
         BigDecimal maxPrice = extractMaxPrice(lower);
 
-        // Kiểm tra điều kiện sách (như mới, 90%, sưu tầm)
+        // 2. Kiểm tra điều kiện sách (như mới, 90%, sưu tầm)
         BookCondition targetCondition = extractCondition(lower);
 
-        // Kiểm tra sách bán chạy
+        // 3. Kiểm tra mong muốn sách bán chạy / mới nhất
         boolean wantBestSellers = lower.contains("bán chạy") || lower.contains("hot") || lower.contains("mua nhiều") || lower.contains("top sách");
-
-        // Kiểm tra sách mới về
         boolean wantNewArrivals = lower.contains("mới nhất") || lower.contains("vừa về") || lower.contains("mới nhập");
 
-        // Tìm kiếm theo danh mục (Category)
+        // 4. Nhận diện danh mục sách thông minh qua danh sách & từ đồng nghĩa/alias
         List<Category> allCategories = categoryRepository.findAll();
-        Category matchedCategory = null;
-        for (Category cat : allCategories) {
-            if (lower.contains(cat.getName().toLowerCase()) || (cat.getSlug() != null && lower.contains(cat.getSlug()))) {
-                matchedCategory = cat;
-                break;
+        Category matchedCategory = detectCategory(lower, allCategories);
+
+        // 5. Trích xuất từ khóa tìm kiếm có ý nghĩa
+        List<String> meaningfulTokens = extractMeaningfulTokens(lower, matchedCategory);
+
+        // 6. Lấy toàn bộ sách đang hoạt động để chấm điểm độ tương đồng
+        List<Book> allActiveBooks = bookRepository.findByActiveTrue(PageRequest.of(0, 200)).getContent();
+        List<ScoredBook> scoredBooks = new ArrayList<>();
+
+        for (Book b : allActiveBooks) {
+            int score = 0;
+            String title = b.getTitle() != null ? b.getTitle().toLowerCase() : "";
+            String author = b.getAuthor() != null ? b.getAuthor().toLowerCase() : "";
+            String desc = b.getDescription() != null ? b.getDescription().toLowerCase() : "";
+            Category bCat = b.getCategory();
+
+            // Lọc ngân sách (nếu có yêu cầu)
+            if (maxPrice != null && b.getPrice() != null && b.getPrice().compareTo(maxPrice) > 0) {
+                continue;
+            }
+
+            // Lọc tình trạng sách (nếu có yêu cầu)
+            if (targetCondition != null && b.getBookCondition() != targetCondition) {
+                continue;
+            }
+
+            // Độ phù hợp danh mục
+            if (matchedCategory != null) {
+                boolean catMatch = (bCat != null && (bCat.getId().equals(matchedCategory.getId())
+                        || (matchedCategory.getSlug() != null && matchedCategory.getSlug().startsWith("van-hoc")
+                            && bCat.getSlug() != null && bCat.getSlug().startsWith("van-hoc"))));
+                if (catMatch) {
+                    score += 60; // Thưởng điểm rất cao cho chuyên mục phù hợp
+                } else {
+                    // Nếu người dùng đã chỉ định chuyên mục rõ ràng (như code/lập trình), sách khác chuyên mục BỊ LOẠI TRỪ TUYỆT ĐỐI
+                    continue;
+                }
+            }
+
+            // Tách các từ riêng biệt trong tiêu đề, tác giả, mô tả để so khớp chuẩn xác (tránh lỗi substring "căn" khớp "ăn")
+            String[] titleWords = title.split("[^\\p{L}0-9\\+\\#]+");
+            String[] authorWords = author.split("[^\\p{L}0-9\\+\\#]+");
+            String[] descWords = desc.split("[^\\p{L}0-9\\+\\#]+");
+
+            // Khớp các từ khóa tìm kiếm
+            for (String token : meaningfulTokens) {
+                if (token.contains(" ")) {
+                    if (title.contains(token)) score += 40;
+                    if (author.contains(token)) score += 25;
+                    if (desc.contains(token)) score += 15;
+                } else {
+                    if (matchWord(titleWords, token)) score += 40;
+                    if (matchWord(authorWords, token)) score += 25;
+                    if (matchWord(descWords, token)) score += 15;
+                }
+            }
+
+            // Khớp trọn vẹn cụm từ trong tiêu đề
+            if (!meaningfulTokens.isEmpty()) {
+                String fullPhrase = String.join(" ", meaningfulTokens);
+                if (title.contains(fullPhrase)) {
+                    score += 35;
+                }
+            }
+
+            // Nếu người dùng chỉ muốn xem sách bán chạy hoặc sách mới về mà không có từ khóa
+            if (wantBestSellers && score >= 0) {
+                score += 30;
+            }
+            if (wantNewArrivals && score >= 0) {
+                score += 30;
+            }
+
+            // Điểm cộng theo độ bán chạy (soldQuantity)
+            if (score > 0 && b.getSoldQuantity() != null) {
+                score += Math.min(b.getSoldQuantity() / 4, 15);
+            }
+
+            if (score > 0) {
+                scoredBooks.add(new ScoredBook(b, score));
             }
         }
 
-        // Lọc danh sách sách từ database
-        List<Book> allActiveBooks = bookRepository.findByActiveTrue(PageRequest.of(0, 100)).getContent();
-        final Category finalCategory = matchedCategory;
-
-        matchedBooks = allActiveBooks.stream()
-                .filter(b -> {
-                    // Lọc theo giá
-                    if (maxPrice != null && b.getPrice() != null && b.getPrice().compareTo(maxPrice) > 0) {
-                        return false;
-                    }
-                    // Lọc theo tình trạng
-                    if (targetCondition != null && b.getBookCondition() != targetCondition) {
-                        return false;
-                    }
-                    // Lọc theo danh mục
-                    if (finalCategory != null && b.getCategory() != null && !b.getCategory().getId().equals(finalCategory.getId())) {
-                        return false;
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
-
-        // Nếu người dùng có từ khóa tự do (tên sách, tác giả cụ thể)
-        String cleanedKeywords = extractSearchKeywords(lower, matchedCategory);
-        if (!cleanedKeywords.isEmpty() && matchedBooks.size() > 0) {
-            List<Book> keywordMatched = matchedBooks.stream()
-                    .filter(b -> (b.getTitle() != null && b.getTitle().toLowerCase().contains(cleanedKeywords))
-                            || (b.getAuthor() != null && b.getAuthor().toLowerCase().contains(cleanedKeywords))
-                            || (b.getDescription() != null && b.getDescription().toLowerCase().contains(cleanedKeywords)))
-                    .collect(Collectors.toList());
-
-            if (!keywordMatched.isEmpty()) {
-                matchedBooks = keywordMatched;
-            }
-        }
-
-        // Sắp xếp
-        if (wantBestSellers) {
-            matchedBooks.sort((a, b) -> Integer.compare(
-                    b.getSoldQuantity() != null ? b.getSoldQuantity() : 0,
-                    a.getSoldQuantity() != null ? a.getSoldQuantity() : 0));
-        } else if (wantNewArrivals) {
-            matchedBooks.sort((a, b) -> {
-                LocalDateTime timeA = a.getCreatedAt() != null ? a.getCreatedAt() : LocalDateTime.MIN;
-                LocalDateTime timeB = b.getCreatedAt() != null ? b.getCreatedAt() : LocalDateTime.MIN;
+        // Sắp xếp theo điểm tương đồng cao nhất
+        if (wantNewArrivals) {
+            scoredBooks.sort((a, b) -> {
+                LocalDateTime timeA = a.book.getCreatedAt() != null ? a.book.getCreatedAt() : LocalDateTime.MIN;
+                LocalDateTime timeB = b.book.getCreatedAt() != null ? b.book.getCreatedAt() : LocalDateTime.MIN;
                 return timeB.compareTo(timeA);
+            });
+        } else {
+            scoredBooks.sort((a, b) -> {
+                int cmp = Integer.compare(b.score, a.score);
+                if (cmp != 0) return cmp;
+                int soldA = a.book.getSoldQuantity() != null ? a.book.getSoldQuantity() : 0;
+                int soldB = b.book.getSoldQuantity() != null ? b.book.getSoldQuantity() : 0;
+                return Integer.compare(soldB, soldA);
             });
         }
 
-        // Giới hạn hiển thị 4-6 cuốn đẹp nhất
-        List<Book> topBooks = matchedBooks.stream().limit(6).collect(Collectors.toList());
+        List<Book> finalBooks = scoredBooks.stream()
+                .map(sb -> sb.book)
+                .limit(6)
+                .collect(Collectors.toList());
 
         // Tạo câu trả lời thông minh
-        if (!topBooks.isEmpty()) {
-            replyBuilder.append("Dạ, em đã tìm thấy các tựa sách rất phù hợp với yêu cầu của bạn nè:\n\n");
+        if (!finalBooks.isEmpty()) {
+            replyBuilder.append("Dạ, em đã tìm thấy các tựa sách ");
+            if (matchedCategory != null) {
+                replyBuilder.append("về **").append(matchedCategory.getName()).append("** ");
+            } else if (!meaningfulTokens.isEmpty()) {
+                replyBuilder.append("phù hợp với từ khóa **\"").append(String.join(" ", meaningfulTokens)).append("\"** ");
+            }
+            replyBuilder.append("rất chuẩn xác theo yêu cầu của bạn nè:\n\n");
+
             if (matchedCategory != null) {
                 replyBuilder.append("📚 **Chuyên mục:** ").append(matchedCategory.getName()).append("\n");
             }
@@ -192,25 +302,31 @@ public class AiChatServiceImpl implements AiChatService {
             if (targetCondition != null) {
                 replyBuilder.append("✨ **Tình trạng tuyển chọn:** ").append(targetCondition.getLabel()).append("\n");
             }
-            replyBuilder.append("\nCác cuốn sách này đều đang có sẵn tại các chi nhánh Bookly, đã được kiểm duyệt chất lượng từng trang bìa và nội dung. Bạn có thể bấm vào sách bên dưới để xem ảnh chụp thực tế hoặc thêm vào giỏ nhé!");
+            replyBuilder.append("\nCác cuốn sách này đều đang có sẵn tại các chi nhánh chuỗi Bookly, được kiểm định kỹ lưỡng từng trang bìa và nội dung. Bạn có thể bấm vào từng cuốn sách bên dưới để xem ảnh chụp thật hoặc thêm vào giỏ nhé!");
         } else {
-            // Không tìm thấy theo tiêu chí gắt gao -> Gợi ý các cuốn sách bán chạy nổi bật nhất
+            // Không tìm thấy theo tiêu chí gắt gao -> Báo rõ và gợi ý sách bán chạy toàn chuỗi
             List<Book> fallbacks = bookRepository.findTop8ByActiveTrueOrderBySoldQuantityDesc();
-            topBooks = fallbacks.stream().limit(4).collect(Collectors.toList());
+            finalBooks = fallbacks.stream().limit(4).collect(Collectors.toList());
 
-            replyBuilder.append("Rất tiếc là hiện tại chi nhánh Bookly chưa có cuốn sách chính xác theo từ khóa **\"").append(originalQuery).append("\"**.\n\n");
-            replyBuilder.append("💡 **Gợi ý dành cho bạn:**\n");
-            replyBuilder.append("- Bạn có thể thử tìm bằng tên tác giả, tên chuyên mục chung chung hơn (như *Văn học, Kinh tế, Kỹ năng, Lịch sử...*).\n");
-            replyBuilder.append("- Hoặc tham khảo một số tựa sách **bán chạy & được độc giả đánh giá rất cao** dưới đây nhé:");
+            replyBuilder.append("Rất tiếc là hiện tại chuỗi cửa hàng Bookly chưa có cuốn sách nào khớp với yêu cầu **\"").append(originalQuery).append("\"** của bạn.\n\n");
+            replyBuilder.append("💡 **Các chuyên mục sách đang có sẵn phong phú tại Bookly:**\n");
+            replyBuilder.append("- 💻 **Công nghệ thông tin & Lập trình** (*Clean Code, Kiến trúc sạch, Thuật toán, Python, SQL...*)\n");
+            replyBuilder.append("- 📈 **Kinh tế & Đầu tư - Tài chính** (*Khởi nghiệp, Quản trị, Chứng khoán...*)\n");
+            replyBuilder.append("- 🧠 **Tâm lý & Kỹ năng sống** (*Đắc nhân tâm, Atomic Habits, Tư duy nhanh & chậm...*)\n");
+            replyBuilder.append("- 📖 **Văn học Việt Nam & Kinh điển nước ngoài** (*Số Đỏ, Dế Mèn, Trinh thám...*)\n");
+            replyBuilder.append("- 🌌 **Khoa học - Vũ trụ - Lịch sử** (*Sapiens, Lược sử vạn vật...*)\n");
+            replyBuilder.append("- 🎨 **Truyện tranh & Thiếu nhi** (*Manga, Doraemon, Conan...*)\n\n");
+            replyBuilder.append("Bạn có thể tham khảo một số tựa sách **bán chạy nhất toàn chuỗi** dưới đây nhé:");
         }
 
-        List<AiBookSuggestionDto> suggestionDtos = topBooks.stream()
+        List<AiBookSuggestionDto> suggestionDtos = finalBooks.stream()
                 .map(this::mapToSuggestionDto)
                 .collect(Collectors.toList());
 
         List<String> nextPrompts = List.of(
+                "💻 Sách về lập trình & code",
                 "🔥 Xem sách bán chạy",
-                "💰 Sách dưới 50k",
+                "💰 Sách dưới 60k",
                 "✨ Sách như mới 99%",
                 "🚚 Phí vận chuyển thế nào?"
         );
@@ -467,14 +583,80 @@ public class AiChatServiceImpl implements AiChatService {
         return null;
     }
 
-    private String extractSearchKeywords(String lower, Category matchedCategory) {
+    private Category detectCategory(String lower, List<Category> allCategories) {
+        // 1. So khớp trực tiếp tên hoặc slug
+        for (Category cat : allCategories) {
+            if (lower.contains(cat.getName().toLowerCase()) || (cat.getSlug() != null && lower.contains(cat.getSlug()))) {
+                return cat;
+            }
+        }
+
+        // 2. So khớp từ khóa / alias mở rộng
+        for (Map.Entry<String, List<String>> entry : CATEGORY_ALIASES.entrySet()) {
+            String slug = entry.getKey();
+            for (String alias : entry.getValue()) {
+                if (containsKeyword(lower, alias)) {
+                    for (Category cat : allCategories) {
+                        if (slug.equalsIgnoreCase(cat.getSlug())) {
+                            return cat;
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private boolean containsKeyword(String text, String keyword) {
+        if (text == null || keyword == null || keyword.isEmpty()) return false;
+        if (keyword.length() <= 3) {
+            String regex = "(?i).*\\b" + Pattern.quote(keyword) + "\\b.*";
+            return text.matches(regex);
+        }
+        return text.contains(keyword);
+    }
+
+    private List<String> extractMeaningfulTokens(String lower, Category matchedCategory) {
         String res = lower;
         if (matchedCategory != null) {
-            res = res.replace(matchedCategory.getName().toLowerCase(), "");
+            res = res.replace(matchedCategory.getName().toLowerCase(), " ");
+            if (matchedCategory.getSlug() != null) {
+                res = res.replace(matchedCategory.getSlug().replace("-", " "), " ");
+            }
         }
-        res = res.replaceAll("(gợi ý|tư vấn|sách|tìm|cho tôi|mình muốn mua|cuốn|bộ|dưới|khoảng|giá|rẻ|nhất|hay|có|không|ở|nhé|nè|nào|đi|được)", "");
-        res = res.replaceAll("[0-9]+k?", "");
-        res = res.replaceAll("[^\\p{L}\\s]", " ").trim();
-        return res;
+
+        // Loại bỏ từ dừng tiếng Việt thông dụng
+        res = res.replaceAll("(?i)\\b(gợi ý|tư vấn|sách|cuốn|bộ|tập|tìm|cho tôi|cho mình|mình|tôi|em|anh|chị|bạn|muốn|cần|mua|bán|có|không|về|của|ở|tại|thể loại|loại|chuyên mục|danh mục|giá|bao nhiêu|tầm|khoảng|dưới|trên|rẻ|nhất|hay|nhé|nè|nào|đi|được|ạ|giúp|với|hỏi|cho ra|ra)\\b", " ");
+        res = res.replaceAll("[0-9]+k?", " ");
+        res = res.replaceAll("[^\\p{L}0-9\\+\\#\\s]", " ").trim();
+
+        String[] parts = res.split("\\s+");
+        List<String> tokens = new ArrayList<>();
+        for (String p : parts) {
+            p = p.trim();
+            if (p.length() >= 2 && !tokens.contains(p)) {
+                tokens.add(p);
+            }
+        }
+        return tokens;
+    }
+
+    private boolean matchWord(String[] words, String token) {
+        if (words == null || token == null) return false;
+        for (String w : words) {
+            if (w.equalsIgnoreCase(token)) return true;
+        }
+        return false;
+    }
+
+    private static class ScoredBook {
+        final Book book;
+        final int score;
+
+        ScoredBook(Book book, int score) {
+            this.book = book;
+            this.score = score;
+        }
     }
 }
