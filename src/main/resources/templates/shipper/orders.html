@@ -125,10 +125,10 @@
                         <small th:if="${order.note != null and !order.note.isEmpty()}" class="badge bg-light text-secondary border mt-1" th:text="'Ghi chú: ' + ${order.note}">Ghi chú</small>
                     </td>
                     <td>
-                        <div class="fw-bold fs-6 text-danger" th:if="${order.paymentMethod.name() == 'COD' and order.paymentStatus.name() != 'COMPLETED'}"
-                             th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">100,000 đ</div>
-                        <div class="fw-bold text-success small" th:unless="${order.paymentMethod.name() == 'COD' and order.paymentStatus.name() != 'COMPLETED'}">
-                            <i class="bi bi-check-all"></i> Đã Thanh Toán (<span th:text="${order.paymentMethod}">VNPAY</span>)
+                        <div class="fw-bold fs-6 text-danger" th:if="${order.paymentMethod != null and order.paymentMethod.name() == 'COD' and (order.paymentStatus == null or order.paymentStatus.name() != 'COMPLETED')}"
+                             th:text="${order.totalAmount != null ? #numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">100,000 đ</div>
+                        <div class="fw-bold text-success small" th:unless="${order.paymentMethod != null and order.paymentMethod.name() == 'COD' and (order.paymentStatus == null or order.paymentStatus.name() != 'COMPLETED')}">
+                            <i class="bi bi-check-all"></i> Đã Thanh Toán (<span th:text="${order.paymentMethod != null ? order.paymentMethod.name() : 'Online'}">VNPAY</span>)
                         </div>
                     </td>
                     <td>

@@ -148,6 +148,39 @@ public class VendorController {
         return "vendor/dashboard";
     }
 
+    @GetMapping("/revenue")
+    public String revenuePage(Model model, RedirectAttributes redirectAttributes) {
+        User vendor = securityUtils.getCurrentUser().orElse(null);
+        if (vendor == null) return "redirect:/login";
+
+        if (!shopService.hasShop(vendor)) {
+            redirectAttributes.addFlashAttribute("infoMessage", "Vui lòng hoàn tất đăng ký thông tin cửa hàng trước.");
+            return "redirect:/vendor/register";
+        }
+
+        Shop shop = shopService.getShopByOwner(vendor);
+        java.math.BigDecimal deliveredRevenue = orderRepository.calculateDeliveredRevenueByShop(shop);
+        if (deliveredRevenue == null) deliveredRevenue = java.math.BigDecimal.ZERO;
+
+        long totalOrders = orderRepository.countByShop(shop);
+        long deliveredOrders = orderRepository.countByShopAndStatus(shop, OrderStatus.DELIVERED);
+        long preparingOrders = orderRepository.countByShopAndStatus(shop, OrderStatus.CONFIRMED);
+        long shippingOrders = orderRepository.countByShopAndStatus(shop, OrderStatus.SHIPPING);
+
+        List<Order> deliveredList = orderRepository.findByShopAndStatusOrderByCreatedAtDesc(shop, OrderStatus.DELIVERED);
+
+        model.addAttribute("shop", shop);
+        model.addAttribute("deliveredRevenue", deliveredRevenue);
+        model.addAttribute("totalOrders", totalOrders);
+        model.addAttribute("deliveredOrders", deliveredOrders);
+        model.addAttribute("preparingOrders", preparingOrders);
+        model.addAttribute("shippingOrders", shippingOrders);
+        model.addAttribute("deliveredList", deliveredList);
+        model.addAttribute("activeNav", "revenue");
+
+        return "vendor/revenue";
+    }
+
     // =========================================================================
     // 3. CẤU HÌNH THÔNG TIN SHOP (/vendor/shop/profile)
     // =========================================================================

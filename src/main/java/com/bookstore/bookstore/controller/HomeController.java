@@ -45,4 +45,9 @@ public class HomeController {
     public String accessDenied() {
         return "error/access-denied";
     }
+
+    @GetMapping("/orders")
+    public String ordersRedirect() {
+        return "redirect:/user/orders";
+    }
 }

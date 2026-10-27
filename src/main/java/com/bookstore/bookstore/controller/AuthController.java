@@ -59,6 +59,9 @@ public class AuthController {
                 if (user.isVendor()) {
                     return "redirect:/vendor/books";
                 }
+                if (user.isShipper()) {
+                    return "redirect:/shipper/orders";
+                }
             }
 
             return "redirect:/";

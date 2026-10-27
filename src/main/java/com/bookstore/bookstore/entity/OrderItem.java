@@ -38,4 +38,12 @@ public class OrderItem {
         }
         return price.multiply(BigDecimal.valueOf(quantity.longValue()));
     }
+
+    public String getBookTitle() {
+        return (book != null && book.getTitle() != null) ? book.getTitle() : "Sách";
+    }
+
+    public String getMainImageUrl() {
+        return (book != null && book.getMainImageUrl() != null) ? book.getMainImageUrl() : "/images/product-item1.png";
+    }
 }

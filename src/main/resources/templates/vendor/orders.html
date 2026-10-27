@@ -133,7 +133,8 @@
                     </td>
                     <td>
                         <div class="small" th:each="it : ${order.items}">
-                            <span class="fw-semibold text-truncate d-inline-block" style="max-width: 200px;" th:text="${it.bookTitle}">Tên sách</span>
+                            <span class="fw-semibold text-truncate d-inline-block" style="max-width: 200px;" 
+                                  th:text="${it.book != null ? it.book.title : it.bookTitle}">Tên sách</span>
                             <span class="text-muted">x<span th:text="${it.quantity}">1</span></span>
                         </div>
                     </td>

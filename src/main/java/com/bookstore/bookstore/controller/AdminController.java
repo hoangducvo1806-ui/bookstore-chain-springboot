@@ -32,7 +32,7 @@ public class AdminController {
         return "admin/dashboard";
     }
 
-    @GetMapping("/revenue/export-excel")
+    @GetMapping({"/revenue/export-excel", "/revenue/export"})
     public void exportRevenueExcel(jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
         response.setContentType("text/csv; charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"bao-cao-doanh-thu-chuoi-sach.csv\"");

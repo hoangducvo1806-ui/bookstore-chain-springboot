@@ -315,7 +315,7 @@ public class OrderServiceImpl implements OrderService {
         Shop shop = shopRepository.findByOwner(vendor)
                 .orElseThrow(() -> new IllegalArgumentException("Bạn chưa sở hữu cửa hàng nào!"));
 
-        Pageable pageable = PageRequest.of(Math.max(0, page), size > 0 ? size : 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(Math.max(0, page), size > 0 ? size : 10);
 
         if (tab == null || tab.isBlank() || "all".equalsIgnoreCase(tab)) {
             return orderRepository.findByShopOrderByCreatedAtDesc(shop, pageable);
@@ -405,7 +405,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public Page<Order> getOrdersByShipperAndTab(User shipper, String tab, int page, int size) {
-        Pageable pageable = PageRequest.of(Math.max(0, page), size > 0 ? size : 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(Math.max(0, page), size > 0 ? size : 10);
 
         if (tab == null || tab.isBlank() || "all".equalsIgnoreCase(tab)) {
             return orderRepository.findByShipperOrderByCreatedAtDesc(shipper, pageable);
@@ -423,7 +423,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public Page<Order> getAvailableOrdersForShipper(int page, int size) {
-        Pageable pageable = PageRequest.of(Math.max(0, page), size > 0 ? size : 10, Sort.by(Sort.Direction.ASC, "createdAt"));
+        Pageable pageable = PageRequest.of(Math.max(0, page), size > 0 ? size : 10);
         // Lấy các đơn đã đóng gói / lấy hàng xong (PICKED_UP) hoặc CONFIRMED mà chưa có shipper
         return orderRepository.findByStatusAndShipperIsNullOrderByCreatedAtDesc(OrderStatus.CONFIRMED, pageable);
     }
