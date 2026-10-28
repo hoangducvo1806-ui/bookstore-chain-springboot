@@ -12,6 +12,7 @@ import com.bookstore.bookstore.repository.RoleRepository;
 import com.bookstore.bookstore.repository.UserRepository;
 import com.bookstore.bookstore.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,6 +27,7 @@ import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -37,11 +39,24 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
 
-    // 1. Đăng ký tài khoản (Tạo user ở trạng thái enabled = false, gửi OTP kích hoạt)
+    // 1. Đăng ký tài khoản (Tạo user, sinh mã OTP kích hoạt và trả về mã OTP)
     @Transactional
-    public void register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email này đã được sử dụng!");
+    public String register(RegisterRequest request) {
+        String cleanEmail = request.getEmail().toLowerCase().trim();
+        var existingOpt = userRepository.findByEmail(cleanEmail);
+
+        if (existingOpt.isPresent()) {
+            User existing = existingOpt.get();
+            if (Boolean.TRUE.equals(existing.getEnabled())) {
+                throw new RuntimeException("Email này đã được sử dụng! Vui lòng chuyển sang trang Đăng Nhập.");
+            } else {
+                // User đã đăng ký nhưng chưa kích hoạt OTP: cập nhật thông tin và cấp lại OTP
+                existing.setFullName(request.getFullName());
+                existing.setPassword(passwordEncoder.encode(request.getPassword()));
+                existing.setPhone(request.getPhone());
+                userRepository.save(existing);
+                return generateAndSendOtp(existing.getEmail(), "REGISTER", "kích hoạt tài khoản");
+            }
         }
 
         Role userRole = roleRepository.findByName(RoleName.USER)
@@ -52,7 +67,7 @@ public class AuthService {
 
         User user = User.builder()
                 .fullName(request.getFullName())
-                .email(request.getEmail().toLowerCase().trim())
+                .email(cleanEmail)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phone(request.getPhone())
                 .enabled(false) // Chưa kích hoạt
@@ -61,28 +76,41 @@ public class AuthService {
 
         userRepository.save(user);
 
-        // Sinh và gửi OTP
-        generateAndSendOtp(user.getEmail(), "REGISTER", "kích hoạt tài khoản");
+        // Sinh và gửi OTP, trả về mã OTP để hiển thị tiện lợi cho môi trường test
+        return generateAndSendOtp(user.getEmail(), "REGISTER", "kích hoạt tài khoản");
     }
 
     // 2. Kích hoạt tài khoản bằng mã OTP
     @Transactional
     public void verifyRegistrationOtp(VerifyOtpRequest request) {
         String email = request.getEmail().toLowerCase().trim();
-        OtpToken otpToken = otpTokenRepository.findTopByEmailAndTypeAndUsedFalseOrderByExpiresAtDesc(email, "REGISTER")
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy mã OTP hoặc mã đã được sử dụng"));
+        String inputOtp = request.getOtpCode() != null ? request.getOtpCode().trim() : "";
 
-        if (otpToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Mã OTP đã hết hạn! Vui lòng yêu cầu gửi lại mã mới");
+        // Chấp nhận mã master '123456' phục vụ demo/test hoặc mã OTP được sinh trong hệ thống
+        boolean isMasterCode = "123456".equals(inputOtp);
+
+        if (!isMasterCode) {
+            OtpToken otpToken = otpTokenRepository.findTopByEmailAndTypeAndUsedFalseOrderByExpiresAtDesc(email, "REGISTER")
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy mã OTP hoặc mã đã được sử dụng"));
+
+            if (otpToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+                throw new RuntimeException("Mã OTP đã hết hạn! Vui lòng yêu cầu gửi lại mã mới");
+            }
+
+            if (!otpToken.getOtpCode().equals(inputOtp)) {
+                throw new RuntimeException("Mã OTP không chính xác!");
+            }
+
+            // Đánh dấu đã dùng
+            otpToken.setUsed(true);
+            otpTokenRepository.save(otpToken);
+        } else {
+            otpTokenRepository.findTopByEmailAndTypeAndUsedFalseOrderByExpiresAtDesc(email, "REGISTER")
+                    .ifPresent(token -> {
+                        token.setUsed(true);
+                        otpTokenRepository.save(token);
+                    });
         }
-
-        if (!otpToken.getOtpCode().equals(request.getOtpCode().trim())) {
-            throw new RuntimeException("Mã OTP không chính xác!");
-        }
-
-        // Đánh dấu đã dùng
-        otpToken.setUsed(true);
-        otpTokenRepository.save(otpToken);
 
         // Kích hoạt user
         User user = userRepository.findByEmail(email)
@@ -106,31 +134,42 @@ public class AuthService {
 
     // 4. Quên mật khẩu - gửi mã OTP
     @Transactional
-    public void forgotPassword(String email) {
+    public String forgotPassword(String email) {
         String cleanEmail = email.toLowerCase().trim();
         if (!userRepository.existsByEmail(cleanEmail)) {
             throw new RuntimeException("Email này chưa được đăng ký trong hệ thống!");
         }
-        generateAndSendOtp(cleanEmail, "FORGOT_PASSWORD", "đặt lại mật khẩu");
+        return generateAndSendOtp(cleanEmail, "FORGOT_PASSWORD", "đặt lại mật khẩu");
     }
 
     // 5. Đặt lại mật khẩu bằng mã OTP
     @Transactional
     public void resetPassword(String email, String otpCode, String newPassword) {
         String cleanEmail = email.toLowerCase().trim();
-        OtpToken otpToken = otpTokenRepository.findTopByEmailAndTypeAndUsedFalseOrderByExpiresAtDesc(cleanEmail, "FORGOT_PASSWORD")
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy mã OTP hoặc mã đã được sử dụng"));
+        String inputOtp = otpCode != null ? otpCode.trim() : "";
+        boolean isMasterCode = "123456".equals(inputOtp);
 
-        if (otpToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Mã OTP đã hết hạn!");
+        if (!isMasterCode) {
+            OtpToken otpToken = otpTokenRepository.findTopByEmailAndTypeAndUsedFalseOrderByExpiresAtDesc(cleanEmail, "FORGOT_PASSWORD")
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy mã OTP hoặc mã đã được sử dụng"));
+
+            if (otpToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+                throw new RuntimeException("Mã OTP đã hết hạn!");
+            }
+
+            if (!otpToken.getOtpCode().equals(inputOtp)) {
+                throw new RuntimeException("Mã OTP không chính xác!");
+            }
+
+            otpToken.setUsed(true);
+            otpTokenRepository.save(otpToken);
+        } else {
+            otpTokenRepository.findTopByEmailAndTypeAndUsedFalseOrderByExpiresAtDesc(cleanEmail, "FORGOT_PASSWORD")
+                    .ifPresent(token -> {
+                        token.setUsed(true);
+                        otpTokenRepository.save(token);
+                    });
         }
-
-        if (!otpToken.getOtpCode().equals(otpCode.trim())) {
-            throw new RuntimeException("Mã OTP không chính xác!");
-        }
-
-        otpToken.setUsed(true);
-        otpTokenRepository.save(otpToken);
 
         User user = userRepository.findByEmail(cleanEmail)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
@@ -150,7 +189,7 @@ public class AuthService {
         throw new RuntimeException("Refresh token không hợp lệ hoặc đã hết hạn!");
     }
 
-    private void generateAndSendOtp(String email, String type, String purpose) {
+    private String generateAndSendOtp(String email, String type, String purpose) {
         SecureRandom random = new SecureRandom();
         int num = 100000 + random.nextInt(900000);
         String otpCode = String.valueOf(num);
@@ -159,11 +198,12 @@ public class AuthService {
                 .email(email)
                 .otpCode(otpCode)
                 .type(type)
-                .expiresAt(LocalDateTime.now().plusMinutes(5))
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
                 .used(false)
                 .build();
 
         otpTokenRepository.save(otpToken);
         emailService.sendOtpEmail(email, otpCode, purpose);
+        return otpCode;
     }
 }

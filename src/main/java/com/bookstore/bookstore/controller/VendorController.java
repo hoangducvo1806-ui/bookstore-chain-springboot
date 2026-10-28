@@ -16,6 +16,8 @@ import com.bookstore.bookstore.security.JwtService;
 import com.bookstore.bookstore.service.OrderService;
 import com.bookstore.bookstore.service.ShopService;
 import com.bookstore.bookstore.service.VendorBookService;
+import com.bookstore.bookstore.service.ChatService;
+
 import com.bookstore.bookstore.util.SecurityUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -50,6 +52,8 @@ public class VendorController {
     private final SecurityUtils securityUtils;
     private final CustomUserDetailsService userDetailsService;
     private final JwtService jwtService;
+    private final ChatService chatService;
+
 
     // =========================================================================
     // 1. ĐĂNG KÝ SHOP (/vendor/register)
@@ -435,5 +439,30 @@ public class VendorController {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa sách: " + e.getMessage());
         }
         return "redirect:/vendor/books";
+    }
+
+    // =========================================================================
+    // 6. KÊNH CHAT / TƯ VẤN VỚI KHÁCH HÀNG (/vendor/chat)
+    // =========================================================================
+
+    @GetMapping("/chat")
+    public String vendorChat(
+            @RequestParam(value = "userId", required = false) Long targetUserId,
+            Model model) {
+        User vendor = securityUtils.getCurrentUser().orElse(null);
+        if (vendor == null) return "redirect:/login";
+
+        if (!shopService.hasShop(vendor)) return "redirect:/vendor/register";
+
+        Shop shop = shopService.getShopByOwner(vendor);
+        List<User> customers = chatService.getCustomersForVendor(vendor);
+
+        model.addAttribute("shop", shop);
+        model.addAttribute("currentUser", vendor);
+        model.addAttribute("customers", customers);
+        model.addAttribute("targetUserId", targetUserId);
+        model.addAttribute("activeNav", "chat");
+
+        return "vendor/chat";
     }
 }

@@ -3,6 +3,7 @@ package com.bookstore.bookstore.controller;
 import com.bookstore.bookstore.dto.ChatMessageDTO;
 import com.bookstore.bookstore.entity.Shop;
 import com.bookstore.bookstore.entity.User;
+import com.bookstore.bookstore.enums.RoleName;
 import com.bookstore.bookstore.repository.ShopRepository;
 import com.bookstore.bookstore.repository.UserRepository;
 import com.bookstore.bookstore.service.ChatService;
@@ -50,6 +51,11 @@ public class ChatController {
 
         if (currentUser == null) {
             return "redirect:/login";
+        }
+
+        // Nếu là Người Bán (Vendor), tự động điều hướng sang giao diện Chat dành riêng cho Vendor
+        if (currentUser.getRoles() != null && currentUser.getRoles().stream().anyMatch(r -> r.getName() == RoleName.VENDOR)) {
+            return "redirect:/vendor/chat" + (receiverId != null ? "?userId=" + receiverId : "");
         }
 
         List<Shop> shops = shopRepository.findAll();

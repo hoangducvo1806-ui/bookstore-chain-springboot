@@ -20,6 +20,43 @@
     </div>
 
     <div class="container pb-5">
+        <!-- Banner Khách Hàng Nâng Cấp Lên Chi Nhánh Cửa Hàng -->
+        <div th:if="${currentUser != null and !currentUser.vendor}" class="card border-0 shadow-sm rounded-4 p-4 mb-4" 
+             style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white;">
+            <div class="row align-items-center g-3">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center mb-1">
+                        <i class="bi bi-shop-window text-warning fs-3 me-2"></i>
+                        <h5 class="fw-bold mb-0 text-white">Đăng Ký Mở Chi Nhánh Cửa Hàng Bán Sách Cũ</h5>
+                    </div>
+                    <p class="mb-0 text-white-50 small">
+                        Gia nhập mạng lưới chuỗi cửa hàng Bookly để trở thành Đối tác / Chủ chi nhánh (Vendor). Đăng bán kho sách của bạn, tiếp cận hàng ngàn độc giả và quản lý đơn hàng chuyên nghiệp.
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a th:href="@{/vendor/register}" class="btn btn-warning px-4 py-2 rounded-pill fw-bold text-dark shadow-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Đăng Ký Mở Shop Ngay
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${currentUser != null and currentUser.vendor}" class="card border-0 shadow-sm rounded-4 p-3 mb-4" 
+             style="background: #181d2a; border: 1px solid #283347 !important;">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-patch-check-fill text-success fs-4 me-2"></i>
+                    <div>
+                        <span class="badge bg-warning text-dark me-1">VENDOR</span>
+                        <span class="text-white fw-semibold">Tài khoản của bạn đã được nâng cấp thành Đối tác / Chủ chi nhánh</span>
+                    </div>
+                </div>
+                <a th:href="@{/vendor/dashboard}" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold">
+                    <i class="bi bi-speedometer2 me-1"></i> Đến Trang Quản Trị Shop
+                </a>
+            </div>
+        </div>
+
         <div class="row g-4">
             <!-- Cột trái: Thông tin cá nhân & Đổi avatar Cloudinary -->
             <div class="col-lg-5">

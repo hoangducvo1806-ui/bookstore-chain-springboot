@@ -22,7 +22,7 @@ public class Voucher {
     @Column(nullable = false, unique = true, length = 50)
     private String code; // Mã voucher (VD: SACHCU10, FREESHIP...)
 
-    @Column(nullable = false, length = 150)
+    @Column(nullable = false, length = 150, columnDefinition = "NVARCHAR(150)")
     private String title;
 
     @Column(nullable = false, length = 30)

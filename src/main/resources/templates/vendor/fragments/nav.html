@@ -38,6 +38,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link px-3" th:classappend="${activeNav == 'chat' ? 'active text-warning fw-bold' : ''}" 
+                           th:href="@{/vendor/chat}">
+                            <i class="bi bi-chat-dots-fill me-1"></i> Tin Nhắn Khách
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link px-3" th:classappend="${activeNav == 'profile' ? 'active text-warning fw-bold' : ''}" 
                            th:href="@{/vendor/shop/profile}">
                             <i class="bi bi-gear me-1"></i> Cấu Hình Shop

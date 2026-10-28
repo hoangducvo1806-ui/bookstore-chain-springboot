@@ -1,17 +1,33 @@
 package com.bookstore.bookstore.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailService {
 
     private final JavaMailSender mailSender;
 
+    @Value("${spring.mail.username:your_email@gmail.com}")
+    private String mailUsername;
+
     public void sendOtpEmail(String toEmail, String otpCode, String purpose) {
+        if ("your_email@gmail.com".equalsIgnoreCase(mailUsername) || mailUsername == null || mailUsername.isBlank()) {
+            log.info("==================================================");
+            log.info("[CHẾ ĐỘ GIẢ LẬP TEST] Bỏ qua SMTP do chưa cấu hình Gmail thật");
+            log.info("GỬI TỚI: {}", toEmail);
+            log.info("MÃ OTP CỦA BẠN LÀ: {}", otpCode);
+            log.info("MỤC ĐÍCH: {}", purpose);
+            log.info("==================================================");
+            return;
+        }
+
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(toEmail);
@@ -22,13 +38,7 @@ public class EmailService {
                     + "Trân trọng,\nĐội ngũ Chuỗi Cửa Hàng Sách Cũ.");
             mailSender.send(message);
         } catch (Exception e) {
-            // Khi chưa cấu hình Gmail thật, in OTP ra console để test
-            System.out.println("==================================================");
-            System.out.println("GỬI EMAIL THẤT BẠI (Chưa có cấu hình Gmail thật)");
-            System.out.println("GỬI TỚI: " + toEmail);
-            System.out.println("MÃ OTP CỦA BẠN LÀ: " + otpCode);
-            System.out.println("MỤC ĐÍCH: " + purpose);
-            System.out.println("==================================================");
+            log.warn("Lỗi gửi email: {}", e.getMessage());
         }
     }
 }

@@ -73,6 +73,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.shop = :shop")
     BigDecimal calculateTotalRevenueByShop(@Param("shop") Shop shop);
 
+    @Query("SELECT DISTINCT o.customer FROM Order o WHERE o.shop = :shop AND o.customer IS NOT NULL")
+    List<User> findDistinctCustomersByShop(@Param("shop") Shop shop);
+
     // Shipper Queries (TV2)
     List<Order> findByShipperOrderByCreatedAtDesc(User shipper);
 

@@ -2,8 +2,12 @@ package com.bookstore.bookstore.service.impl;
 
 import com.bookstore.bookstore.dto.ChatMessageDTO;
 import com.bookstore.bookstore.entity.ChatMessage;
+import com.bookstore.bookstore.entity.Shop;
 import com.bookstore.bookstore.entity.User;
+import com.bookstore.bookstore.enums.RoleName;
 import com.bookstore.bookstore.repository.ChatMessageRepository;
+import com.bookstore.bookstore.repository.OrderRepository;
+import com.bookstore.bookstore.repository.ShopRepository;
 import com.bookstore.bookstore.repository.UserRepository;
 import com.bookstore.bookstore.service.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +24,8 @@ public class ChatServiceImpl implements ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
+    private final ShopRepository shopRepository;
+    private final OrderRepository orderRepository;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
 
@@ -86,5 +91,51 @@ public class ChatServiceImpl implements ChatService {
                         .sentAt(m.getSentAt() != null ? m.getSentAt().format(FORMATTER) : "")
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> getCustomersForVendor(User vendor) {
+        Map<Long, User> customerMap = new LinkedHashMap<>();
+
+        // 1. Những khách hàng đã từng trò chuyện với Vendor
+        try {
+            List<User> partners = chatMessageRepository.findChatPartners(vendor);
+            if (partners != null) {
+                for (User p : partners) {
+                    if (p != null && !p.getId().equals(vendor.getId())) {
+                        customerMap.put(p.getId(), p);
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // 2. Những khách hàng đã từng đặt đơn tại cửa hàng của Vendor
+        try {
+            Shop shop = shopRepository.findByOwner(vendor).orElse(null);
+            if (shop != null) {
+                List<User> orderCustomers = orderRepository.findDistinctCustomersByShop(shop);
+                if (orderCustomers != null) {
+                    for (User c : orderCustomers) {
+                        if (c != null && !c.getId().equals(vendor.getId())) {
+                            customerMap.putIfAbsent(c.getId(), c);
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // 3. Bổ sung các tài khoản khách hàng thông thường để người bán luôn có thể chủ động liên hệ
+        try {
+            List<User> normalUsers = userRepository.findByRoles_Name(RoleName.USER);
+            if (normalUsers != null) {
+                for (User u : normalUsers) {
+                    if (u != null && !u.getId().equals(vendor.getId())) {
+                        customerMap.putIfAbsent(u.getId(), u);
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        return new ArrayList<>(customerMap.values());
     }
 }

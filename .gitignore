@@ -39,3 +39,6 @@ application-local.properties
 .vs/
 *.vsidx
 bin/
+
+*.log
+uploads/
