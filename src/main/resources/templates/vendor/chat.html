@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tư Vấn Khách Hàng - Kênh Người Bán</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background: #f4f6fa; font-family: system-ui, -apple-system, sans-serif; }
+        .chat-container {
+            height: calc(100vh - 120px);
+            min-height: 580px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .customer-item {
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        .customer-item:hover {
+            background: #f1f5f9;
+        }
+        .customer-item.active {
+            background: #e0f2fe;
+            border-left: 4px solid #0284c7;
+        }
+        .messages-box {
+            height: calc(100% - 195px);
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .msg-bubble {
+            max-width: 75%;
+            padding: 10px 16px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .msg-sent {
+            background: #2563eb;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        .msg-received {
+            background: #ffffff;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        .msg-time {
+            font-size: 0.72rem;
+            margin-top: 4px;
+            opacity: 0.75;
+        }
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .quick-pill {
+            cursor: pointer;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .quick-pill:hover {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Vendor Navbar -->
+<div th:replace="~{vendor/fragments/nav :: vendorNav('chat')}"></div>
+
+<div class="container py-3">
+    <div class="row chat-container g-0">
+        <!-- Cột Trái: Danh Sách Khách Hàng -->
+        <div class="col-md-4 col-lg-3 border-end p-3 d-flex flex-column h-100 bg-white">
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold text-uppercase text-secondary small mb-0">
+                        <i class="bi bi-people-fill me-1 text-primary"></i> Khách Hàng (<span th:text="${#lists.size(customers)}">0</span>)
+                    </h6>
+                    <span class="badge bg-success-subtle text-success border border-success small" style="font-size: 0.7rem;">
+                        <i class="bi bi-broadcast"></i> Sẵn sàng
+                    </span>
+                </div>
+                <!-- Search Customer -->
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="customerSearch" class="form-control bg-light border-start-0" 
+                           placeholder="Tìm khách hàng..." onkeyup="filterCustomers()">
+                </div>
+            </div>
+
+            <!-- List Customers -->
+            <div class="overflow-y-auto flex-grow-1 pe-1" id="customerListContainer">
+                <div th:if="${#lists.isEmpty(customers)}" class="text-center text-muted small py-5">
+                    <i class="bi bi-chat-square-text fs-2 d-block mb-2 text-secondary"></i>
+                    Chưa có khách hàng nào trong danh sách.
+                </div>
+
+                <div th:each="cust, iterStat : ${customers}"
+                     class="customer-item p-3 mb-2 border"
+                     th:classappend="${(targetUserId != null and cust.id == targetUserId) or (targetUserId == null and iterStat.first) ? 'active' : ''}"
+                     th:attr="data-customer-id=${cust.id},
+                              data-customer-name=${cust.fullName != null and !cust.fullName.isEmpty() ? cust.fullName : cust.email},
+                              data-customer-email=${cust.email},
+                              data-customer-phone=${cust.phone != null ? cust.phone : 'Chưa cập nhật'}"
+                     onclick="selectCustomer(this)">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="online-dot"></span>
+                        <strong class="text-dark text-truncate" th:text="${cust.fullName != null and !cust.fullName.isEmpty() ? cust.fullName : cust.email}">Tên Khách</strong>
+                    </div>
+                    <div class="small text-muted text-truncate">
+                        <i class="bi bi-envelope me-1"></i><span th:text="${cust.email}">user@gmail.com</span>
+                    </div>
+                    <div class="small text-muted text-truncate" th:if="${cust.phone != null and !cust.phone.isEmpty()}">
+                        <i class="bi bi-telephone me-1"></i><span th:text="${cust.phone}">090...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột Phải: Khung Trò Chuyện Trực Tuyến -->
+        <div class="col-md-8 col-lg-9 d-flex flex-column h-100 bg-white">
+            <!-- Chat Header -->
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 44px; height: 44px;">
+                        <i class="bi bi-person-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark" id="currentChatCustomerName">Khách Hàng</h6>
+                        <small class="text-muted" id="currentChatCustomerInfo">Đang trực tuyến</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-light text-muted border">WebSocket: <span id="wsStatus" class="text-warning">Đang kết nối...</span></span>
+                    <a th:href="@{/vendor/orders}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i class="bi bi-receipt me-1"></i> Xem Đơn Hàng
+                    </a>
+                </div>
+            </div>
+
+            <!-- Messages Box -->
+            <div class="messages-box" id="messagesBox">
+                <div class="text-center text-muted small py-4" id="loadingNotice">
+                    <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                    <div>Đang tải lịch sử trò chuyện...</div>
+                </div>
+            </div>
+
+            <!-- Quick Reply Bar (Mẫu tin nhắn nhanh cho Người Bán) -->
+            <div class="px-3 py-2 bg-light border-top d-flex gap-2 overflow-x-auto" style="scrollbar-width: none;">
+                <span class="badge bg-white text-secondary border quick-pill py-2 px-3" onclick="sendQuickReply(this.innerText)">
+                    👋 Dạ chào bạn! Sách này bên tiệm vẫn còn sẵn nhé.
+                </span>
+                <span class="badge bg-white text-secondary border quick-pill py-2 px-3" onclick="sendQuickReply(this.innerText)">
+                    📖 Sách thực tế còn rất đẹp, gáy chắc, không quăn mép ạ.
+                </span>
+                <span class="badge bg-white text-secondary border quick-pill py-2 px-3" onclick="sendQuickReply(this.innerText)">
+                    📦 Đơn sách của bạn shop đã đóng gói kỹ càng và chuyển Shipper nhé!
+                </span>
+                <span class="badge bg-white text-secondary border quick-pill py-2 px-3" onclick="sendQuickReply(this.innerText)">
+                    📸 Bạn cần shop chụp thêm ảnh thật chi tiết mục lục không ạ?
+                </span>
+            </div>
+
+            <!-- Input Bar -->
+            <div class="p-3 border-top bg-white">
+                <form id="chatForm" onsubmit="handleSend(event)" class="d-flex gap-2">
+                    <input type="text" id="messageInput" class="form-control rounded-pill px-4 py-2 border-secondary-subtle" 
+                           placeholder="Nhập tin nhắn tư vấn gửi khách hàng..." autocomplete="off">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="bi bi-send-fill me-1"></i> Gửi
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SockJS & STOMP JS -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var currentUserId = /*[[${currentUser.id}]]*/ 1;
+    var currentUserName = /*[[${currentUser.fullName}]]*/ 'Vendor';
+    var selectedReceiverId = null;
+    var selectedCustomerName = '';
+    var stompClient = null;
+
+    function connectStomp() {
+        var socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        stompClient.connect({}, function (frame) {
+            var statusEl = document.getElementById('wsStatus');
+            if (statusEl) statusEl.innerHTML = '<span class="text-success fw-bold">Online</span>';
+
+            stompClient.subscribe('/topic/messages', function (messageOutput) {
+                var msg = JSON.parse(messageOutput.body);
+                onMessageReceived(msg);
+            });
+        }, function (error) {
+            var statusEl = document.getElementById('wsStatus');
+            if (statusEl) statusEl.innerHTML = '<span class="text-danger">Offline</span>';
+        });
+    }
+
+    function selectCustomer(element) {
+        document.querySelectorAll('.customer-item').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+
+        selectedReceiverId = parseInt(element.getAttribute('data-customer-id'));
+        selectedCustomerName = element.getAttribute('data-customer-name');
+        var email = element.getAttribute('data-customer-email');
+        var phone = element.getAttribute('data-customer-phone');
+
+        document.getElementById('currentChatCustomerName').innerText = selectedCustomerName;
+        document.getElementById('currentChatCustomerInfo').innerText = email + (phone ? ' | ' + phone : '') + ' • Trực tuyến';
+
+        loadHistory(selectedReceiverId);
+    }
+
+    function loadHistory(receiverId) {
+        var box = document.getElementById('messagesBox');
+        box.innerHTML = '<div class="text-center text-muted small py-4"><div class="spinner-border spinner-border-sm text-primary mb-2"></div><div>Đang tải tin nhắn...</div></div>';
+
+        fetch('/api/chat/history?user1Id=' + currentUserId + '&user2Id=' + receiverId)
+            .then(res => res.json())
+            .then(data => {
+                box.innerHTML = '';
+                if (!data || data.length === 0) {
+                    box.innerHTML = '<div class="text-center text-muted py-5"><i class="bi bi-chat-heart fs-2 d-block mb-2 text-primary"></i>Hãy gửi tin nhắn đầu tiên để tư vấn cho khách hàng này!</div>';
+                    return;
+                }
+                data.forEach(msg => appendMessage(msg));
+                box.scrollTop = box.scrollHeight;
+            })
+            .catch(err => {
+                box.innerHTML = '<div class="text-center text-danger py-4">Không thể tải tin nhắn.</div>';
+            });
+    }
+
+    function appendMessage(msg) {
+        var box = document.getElementById('messagesBox');
+        var isMe = (msg.senderId === currentUserId);
+
+        var bubble = document.createElement('div');
+        bubble.className = 'msg-bubble ' + (isMe ? 'msg-sent' : 'msg-received');
+
+        var senderTag = isMe ? '' : '<div class="fw-bold small mb-1 text-primary">' + escapeHtml(msg.senderName || selectedCustomerName) + '</div>';
+        bubble.innerHTML = senderTag +
+            '<div>' + escapeHtml(msg.content) + '</div>' +
+            '<div class="msg-time text-end">' + (msg.sentAt || 'Vừa xong') + '</div>';
+
+        box.appendChild(bubble);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function onMessageReceived(msg) {
+        if (!selectedReceiverId) return;
+        var relevant = (msg.senderId === currentUserId && msg.receiverId === selectedReceiverId) ||
+                       (msg.senderId === selectedReceiverId && msg.receiverId === currentUserId);
+        if (relevant) {
+            appendMessage(msg);
+        }
+    }
+
+    function handleSend(event) {
+        event.preventDefault();
+        var input = document.getElementById('messageInput');
+        var content = input.value.trim();
+        if (!content || !selectedReceiverId) return;
+
+        sendMessage(content);
+        input.value = '';
+    }
+
+    function sendQuickReply(text) {
+        if (!selectedReceiverId) {
+            alert('Vui lòng chọn một khách hàng bên cột trái để gửi tin nhắn!');
+            return;
+        }
+        sendMessage(text.trim());
+    }
+
+    function sendMessage(content) {
+        if (!stompClient || !stompClient.connected) {
+            alert('Kết nối WebSocket tạm thời gián đoạn. Vui lòng thử lại sau giây lát!');
+            return;
+        }
+
+        var messageDTO = {
+            senderId: currentUserId,
+            senderName: currentUserName,
+            receiverId: selectedReceiverId,
+            content: content
+        };
+
+        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(messageDTO));
+    }
+
+    function filterCustomers() {
+        var query = document.getElementById('customerSearch').value.toLowerCase();
+        var items = document.querySelectorAll('.customer-item');
+        items.forEach(function (item) {
+            var text = item.innerText.toLowerCase();
+            item.style.display = text.indexOf(query) > -1 ? '' : 'none';
+        });
+    }
+
+    function escapeHtml(text) {
+        var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return text ? text.replace(/[&<>"']/g, function(m) { return map[m]; }) : '';
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        connectStomp();
+        var activeItem = document.querySelector('.customer-item.active') || document.querySelector('.customer-item');
+        if (activeItem) {
+            selectCustomer(activeItem);
+        }
+    });
+    /*]]>*/
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

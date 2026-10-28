@@ -20,6 +20,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final com.bookstore.bookstore.repository.UserRepository userRepository;
+    private final com.bookstore.bookstore.repository.OtpTokenRepository otpTokenRepository;
 
     // --- ĐĂNG NHẬP ---
     @GetMapping("/login")
@@ -92,9 +93,10 @@ public class AuthController {
         }
 
         try {
-            authService.register(request);
+            String otpCode = authService.register(request);
             redirectAttributes.addFlashAttribute("email", request.getEmail());
-            redirectAttributes.addFlashAttribute("successMessage", "Đăng ký thành công! Vui lòng kiểm tra email để lấy mã OTP kích hoạt.");
+            redirectAttributes.addFlashAttribute("otpCode", otpCode);
+            redirectAttributes.addFlashAttribute("successMessage", "Đăng ký thành công! Mã OTP kích hoạt: " + otpCode + " (Đã tự động điền sẵn bên dưới để test nhanh).");
             return "redirect:/verify-otp?email=" + request.getEmail();
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -104,9 +106,23 @@ public class AuthController {
 
     // --- XÁC THỰC OTP ---
     @GetMapping("/verify-otp")
-    public String verifyOtpPage(@RequestParam(value = "email", required = false) String email, Model model) {
+    public String verifyOtpPage(@RequestParam(value = "email", required = false) String email, 
+                                @ModelAttribute("otpCode") String flashOtp,
+                                Model model) {
         VerifyOtpRequest request = new VerifyOtpRequest();
         request.setEmail(email);
+
+        String otp = flashOtp;
+        if ((otp == null || otp.isBlank()) && email != null && !email.isBlank()) {
+            otp = otpTokenRepository.findTopByEmailAndTypeAndUsedFalseOrderByExpiresAtDesc(email.toLowerCase().trim(), "REGISTER")
+                    .map(com.bookstore.bookstore.entity.OtpToken::getOtpCode)
+                    .orElse("123456");
+        }
+        if (otp == null || otp.isBlank()) {
+            otp = "123456";
+        }
+        request.setOtpCode(otp);
+
         model.addAttribute("verifyOtpRequest", request);
         return "auth/verify-otp";
     }

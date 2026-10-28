@@ -62,7 +62,7 @@ public class SecurityConfig {
                 ).permitAll()
 
                 // Phân quyền đặc biệt: User đã đăng nhập được vào form đăng ký Shop
-                .requestMatchers("/vendor/register").authenticated()
+                .requestMatchers("/vendor/register", "/vendor", "/vendor/", "/vendor/dashboard").authenticated()
 
                 // Phân quyền theo role
                 .requestMatchers("/admin/users/**").hasRole("ADMIN")

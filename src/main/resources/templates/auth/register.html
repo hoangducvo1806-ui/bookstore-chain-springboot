@@ -26,7 +26,7 @@
     <div class="row justify-content-center">
         <div class="col-md-5">
             <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-body p-4">
+                <div class="card-body p-4 p-md-5">
                     <h3 class="card-title text-center fw-bold mb-4 text-white">📝 Đăng Ký Tài Khoản</h3>
 
                     <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
@@ -44,16 +44,16 @@
                             <label class="form-label text-light">Số điện thoại</label>
                             <input type="tel" class="form-control" th:field="*{phone}" placeholder="0901234567">
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <label class="form-label text-light">Mật khẩu (từ 6 ký tự)</label>
                             <input type="password" class="form-control" th:field="*{password}" placeholder="••••••••" required>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill fw-bold">Nhận Mã OTP Kích Hoạt</button>
                     </form>
 
-                    <div class="text-center mt-3 text-muted">
+                    <div class="text-center mt-4 text-muted">
                         <span>Đã có tài khoản? </span>
-                        <a th:href="@{/login}" class="text-primary text-decoration-none">Đăng nhập</a>
+                        <a th:href="@{/login}" class="text-primary text-decoration-none fw-semibold">Đăng nhập</a>
                     </div>
                 </div>
             </div>
