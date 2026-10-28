@@ -1,0 +1,142 @@
+=========================================================================================
+   DANH SÁCH TÀI KHOẢN, MẬT KHẨU & ĐƯỜNG LINK PUBLIC + LOCAL (BOOKSTORE CHAIN)
+=========================================================================================
+* Mật khẩu chung cho TẤT CẢ 5 tài khoản: 123456
+
+* ĐƯỜNG LINK PUBLIC TRÊN INTERNET (Mở được trên mọi máy tính & điện thoại):
+  + Trang chủ Public   : https://glance-remove-adopt-photo.trycloudflare.com/
+  + Đăng nhập Public   : https://glance-remove-adopt-photo.trycloudflare.com/login
+  + Đăng xuất Public   : https://glance-remove-adopt-photo.trycloudflare.com/logout
+
+* ĐƯỜNG LINK LOCALHOST (Chạy trực tiếp trên máy chủ):
+  + Trang chủ Local    : http://localhost:8080/
+  + Đăng nhập Local    : http://localhost:8080/login
+  + Đăng xuất Local    : http://localhost:8080/logout
+  (Lưu ý: Khi muốn đổi sang tài khoản khác, hãy bấm vào link /logout trước)
+
+=========================================================================================
+1. TÀI KHOẢN QUẢN TRỊ VIÊN HỆ THỐNG (ADMIN - Phần của TV3)
+=========================================================================================
+- Email đăng nhập : admin@gmail.com
+- Mật khẩu        : 123456
+
+[LINK PUBLIC INTERNET]:
+  + Dashboard Tổng quan & Thống kê : https://glance-remove-adopt-photo.trycloudflare.com/admin/dashboard
+  + Xuất Báo cáo Doanh thu (Excel) : https://glance-remove-adopt-photo.trycloudflare.com/admin/revenue/export-excel
+  + Quản lý Người dùng & Phân quyền: https://glance-remove-adopt-photo.trycloudflare.com/admin/users
+  + Quản lý Chi nhánh Cửa hàng     : https://glance-remove-adopt-photo.trycloudflare.com/admin/shops
+  + Quản lý Danh mục Sách          : https://glance-remove-adopt-photo.trycloudflare.com/admin/categories
+  + Quản lý Kho Sách Toàn Chuỗi    : https://glance-remove-adopt-photo.trycloudflare.com/admin/books
+  + Giám sát Đơn hàng Toàn Chuỗi   : https://glance-remove-adopt-photo.trycloudflare.com/admin/orders
+  + Quản lý Chiết khấu Hoa hồng    : https://glance-remove-adopt-photo.trycloudflare.com/admin/commissions
+  + Quản lý Mã giảm giá (Vouchers) : https://glance-remove-adopt-photo.trycloudflare.com/admin/vouchers
+  + Quản lý Đơn vị Vận chuyển      : https://glance-remove-adopt-photo.trycloudflare.com/admin/shipping
+
+[LINK LOCALHOST]:
+  + Dashboard Tổng quan & Thống kê : http://localhost:8080/admin/dashboard
+  + Xuất Báo cáo Doanh thu (Excel) : http://localhost:8080/admin/revenue/export-excel
+  + Quản lý Người dùng & Phân quyền: http://localhost:8080/admin/users
+  + Quản lý Chi nhánh Cửa hàng     : http://localhost:8080/admin/shops
+  + Quản lý Danh mục Sách          : http://localhost:8080/admin/categories
+  + Quản lý Kho Sách Toàn Chuỗi    : http://localhost:8080/admin/books
+  + Giám sát Đơn hàng Toàn Chuỗi   : http://localhost:8080/admin/orders
+  + Quản lý Chiết khấu Hoa hồng    : http://localhost:8080/admin/commissions
+  + Quản lý Mã giảm giá (Vouchers) : http://localhost:8080/admin/vouchers
+  + Quản lý Đơn vị Vận chuyển      : http://localhost:8080/admin/shipping
+
+=========================================================================================
+2. TÀI KHOẢN QUẢN LÝ VẬN HÀNH CHUỖI (MANAGER - Phần của TV3)
+=========================================================================================
+- Email đăng nhập : manager@gmail.com
+- Mật khẩu        : 123456
+
+[LINK PUBLIC INTERNET]:
+  + Dashboard Điều hành Chuỗi      : https://glance-remove-adopt-photo.trycloudflare.com/manager/dashboard
+  + Giám sát các Chi nhánh Shop    : https://glance-remove-adopt-photo.trycloudflare.com/manager/shops
+  + Giám sát Đơn hàng Toàn Chuỗi   : https://glance-remove-adopt-photo.trycloudflare.com/manager/orders
+  + Kiểm duyệt Sách trong Chuỗi    : https://glance-remove-adopt-photo.trycloudflare.com/manager/books
+  + Quản lý Danh mục Sách          : https://glance-remove-adopt-photo.trycloudflare.com/manager/categories
+  + Cấu hình Chiết khấu Hoa hồng   : https://glance-remove-adopt-photo.trycloudflare.com/manager/commissions
+  + Quản lý Chiến dịch Voucher     : https://glance-remove-adopt-photo.trycloudflare.com/manager/vouchers
+  + Quản lý Đối tác Vận chuyển     : https://glance-remove-adopt-photo.trycloudflare.com/manager/shipping
+
+[LINK LOCALHOST]:
+  + Dashboard Điều hành Chuỗi      : http://localhost:8080/manager/dashboard
+  + Giám sát các Chi nhánh Shop    : http://localhost:8080/manager/shops
+  + Giám sát Đơn hàng Toàn Chuỗi   : http://localhost:8080/manager/orders
+  + Kiểm duyệt Sách trong Chuỗi    : http://localhost:8080/manager/books
+  + Quản lý Danh mục Sách          : http://localhost:8080/manager/categories
+  + Cấu hình Chiết khấu Hoa hồng   : http://localhost:8080/manager/commissions
+  + Quản lý Chiến dịch Voucher     : http://localhost:8080/manager/vouchers
+  + Quản lý Đối tác Vận chuyển     : http://localhost:8080/manager/shipping
+
+=========================================================================================
+3. TÀI KHOẢN CHỦ CHI NHÁNH CỬA HÀNG (VENDOR - Phần của TV2)
+=========================================================================================
+- Email đăng nhập : vendor@gmail.com
+- Mật khẩu        : 123456
+
+[LINK PUBLIC INTERNET]:
+  + Dashboard Thống kê Chi nhánh   : https://glance-remove-adopt-photo.trycloudflare.com/vendor/dashboard
+  + Quản lý Sách cũ tại Chi nhánh  : https://glance-remove-adopt-photo.trycloudflare.com/vendor/books
+  + Thêm Sách cũ mới vào Shop      : https://glance-remove-adopt-photo.trycloudflare.com/vendor/books/new
+  + Quản lý & Xác nhận Đơn hàng    : https://glance-remove-adopt-photo.trycloudflare.com/vendor/orders
+  + Báo cáo Doanh thu Chi nhánh    : https://glance-remove-adopt-photo.trycloudflare.com/vendor/revenue
+  + Cập nhật Hồ sơ Chi nhánh       : https://glance-remove-adopt-photo.trycloudflare.com/vendor/shop/profile
+  + Kênh Chat Realtime với Khách   : https://glance-remove-adopt-photo.trycloudflare.com/chat
+
+[LINK LOCALHOST]:
+  + Dashboard Thống kê Chi nhánh   : http://localhost:8080/vendor/dashboard
+  + Quản lý Sách cũ tại Chi nhánh  : http://localhost:8080/vendor/books
+  + Thêm Sách cũ mới vào Shop      : http://localhost:8080/vendor/books/new
+  + Quản lý & Xác nhận Đơn hàng    : http://localhost:8080/vendor/orders
+  + Báo cáo Doanh thu Chi nhánh    : http://localhost:8080/vendor/revenue
+  + Cập nhật Hồ sơ Chi nhánh       : http://localhost:8080/vendor/shop/profile
+  + Kênh Chat Realtime với Khách   : http://localhost:8080/chat
+
+=========================================================================================
+4. TÀI KHOẢN NHÂN VIÊN GIAO HÀNG (SHIPPER - Phần của TV2)
+=========================================================================================
+- Email đăng nhập : shipper@gmail.com
+- Mật khẩu        : 123456
+
+[LINK PUBLIC INTERNET]:
+  + Đơn Sẵn sàng nhận giao (Claim) : https://glance-remove-adopt-photo.trycloudflare.com/shipper/orders?tab=available
+  + Đơn Đã lấy hàng (Chờ đi giao)  : https://glance-remove-adopt-photo.trycloudflare.com/shipper/orders?tab=picked_up
+  + Đơn Đang giao hàng             : https://glance-remove-adopt-photo.trycloudflare.com/shipper/orders?tab=shipping
+  + Đơn Đã giao thành công         : https://glance-remove-adopt-photo.trycloudflare.com/shipper/orders?tab=delivered
+
+[LINK LOCALHOST]:
+  + Đơn Sẵn sàng nhận giao (Claim) : http://localhost:8080/shipper/orders?tab=available
+  + Đơn Đã lấy hàng (Chờ đi giao)  : http://localhost:8080/shipper/orders?tab=picked_up
+  + Đơn Đang giao hàng             : http://localhost:8080/shipper/orders?tab=shipping
+  + Đơn Đã giao thành công         : http://localhost:8080/shipper/orders?tab=delivered
+
+=========================================================================================
+5. TÀI KHOẢN KHÁCH HÀNG MUA SÁCH (USER & GUEST - Phần của TV1)
+=========================================================================================
+- Email đăng nhập : user@gmail.com
+- Mật khẩu        : 123456
+
+[LINK PUBLIC INTERNET]:
+  + Trang chủ (kèm AI Chatbot)     : https://glance-remove-adopt-photo.trycloudflare.com/
+  + Tìm kiếm & Bộ lọc Sách         : https://glance-remove-adopt-photo.trycloudflare.com/books
+  + Trang Chi tiết Sách mẫu        : https://glance-remove-adopt-photo.trycloudflare.com/books/1
+  + Giỏ hàng & Thanh toán Checkout : https://glance-remove-adopt-photo.trycloudflare.com/checkout
+  + Lịch sử Mua hàng & Đơn hàng    : https://glance-remove-adopt-photo.trycloudflare.com/orders
+  + Hồ sơ Cá nhân & Sổ Địa chỉ     : https://glance-remove-adopt-photo.trycloudflare.com/user/profile
+  + Kênh Chat trực tiếp với Shop   : https://glance-remove-adopt-photo.trycloudflare.com/chat
+  + Trang Đăng ký OTP Email        : https://glance-remove-adopt-photo.trycloudflare.com/register
+  + Trang Quên mật khẩu            : https://glance-remove-adopt-photo.trycloudflare.com/forgot-password
+
+[LINK LOCALHOST]:
+  + Trang chủ (kèm AI Chatbot)     : http://localhost:8080/
+  + Tìm kiếm & Bộ lọc Sách         : http://localhost:8080/books
+  + Trang Chi tiết Sách mẫu        : http://localhost:8080/books/1
+  + Giỏ hàng & Thanh toán Checkout : http://localhost:8080/checkout
+  + Lịch sử Mua hàng & Đơn hàng    : http://localhost:8080/orders
+  + Hồ sơ Cá nhân & Sổ Địa chỉ     : http://localhost:8080/user/profile
+  + Kênh Chat trực tiếp với Shop   : http://localhost:8080/chat
+  + Trang Đăng ký OTP Email        : http://localhost:8080/register
+  + Trang Quên mật khẩu            : http://localhost:8080/forgot-password
+=========================================================================================

@@ -58,7 +58,7 @@ public class SecurityConfig {
                         "/", "/home", "/books/**", "/categories/**", "/shops/**", "/search/**", "/payment/**",
                         "/auth/**", "/login", "/register", "/verify-otp", "/forgot-password", "/reset-password",
                         "/logout", "/access-denied",
-                        "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws/**", "/api/upload/**", "/error", "/api/ai/**", "/library", "/api/library/**"
+                        "/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico", "/ws/**", "/api/upload/**", "/error", "/api/ai/**", "/library", "/api/library/**"
                 ).permitAll()
 
                 // Phân quyền đặc biệt: User đã đăng nhập được vào form đăng ký Shop
