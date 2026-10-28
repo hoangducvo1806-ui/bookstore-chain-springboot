@@ -21,11 +21,14 @@
                         Trang bạn đang mở yêu cầu quyền <strong class="text-warning">Chủ cửa hàng (Vendor)</strong> hoặc <strong class="text-danger">Quản trị viên (Admin)</strong>.
                     </p>
                     <div class="d-flex gap-2 justify-content-center flex-wrap">
+                        <a th:href="@{/vendor/register}" class="btn btn-warning px-4 py-2 rounded-pill fw-bold text-dark shadow-sm">
+                            <i class="bi bi-shop-window me-1"></i> Đăng Ký Mở Cửa Hàng Mới
+                        </a>
                         <a th:href="@{/}" class="btn btn-outline-light px-4 py-2 rounded-pill">
                             <i class="bi bi-house me-1"></i> Quay về Trang chủ
                         </a>
                         <a th:href="@{/logout}" class="btn btn-danger px-4 py-2 rounded-pill fw-semibold">
-                            <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất & Đổi tài khoản
+                            <i class="bi bi-box-arrow-right me-1"></i> Đổi tài khoản
                         </a>
                     </div>
                 </div>
