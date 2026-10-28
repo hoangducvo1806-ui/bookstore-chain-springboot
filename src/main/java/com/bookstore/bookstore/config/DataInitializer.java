@@ -123,23 +123,7 @@ public class DataInitializer implements CommandLineRunner {
                         .roles(Set.of(roleMap.get(RoleName.USER)))
                         .build()));
 
-        // Vendor 2 (Chủ chi nhánh 2)
-        User vendor2 = userRepository.findByEmail("vendor2@gmail.com")
-                .map(u -> {
-                    u.setFullName("Chủ Chi Nhánh 2 (Trí Thức Trẻ)");
-                    return userRepository.save(u);
-                })
-                .orElseGet(() -> userRepository.save(User.builder()
-                        .email("vendor2@gmail.com")
-                        .fullName("Chủ Chi Nhánh 2 (Trí Thức Trẻ)")
-                        .password(defaultPassword)
-                        .phone("0900000002")
-                        .enabled(true)
-                        .roles(Set.of(roleMap.get(RoleName.VENDOR), roleMap.get(RoleName.USER)))
-                        .build()));
-
-        // 3. Tạo hoặc cập nhật các chi nhánh cửa hàng trong chuỗi (Multi-Branch Chain)
-        // Chi Nhánh 1
+        // 3. Tạo hoặc cập nhật chi nhánh cửa hàng
         Shop shopChiNhanh1 = shopRepository.findByOwner(vendor).orElseGet(() -> Shop.builder().owner(vendor).build());
         shopChiNhanh1.setName("Hiệu Sách Cũ Thủ Đức - Chi Nhánh 1");
         shopChiNhanh1.setDescription("Chuyên thu mua và bán lại sách cũ, giáo trình sinh viên giá tốt");
@@ -148,46 +132,20 @@ public class DataInitializer implements CommandLineRunner {
         shopChiNhanh1.setActive(true);
         shopChiNhanh1 = shopRepository.save(shopChiNhanh1);
 
-        // Chi Nhánh 2
-        Shop shopChiNhanh2 = shopRepository.findByOwner(vendor2).orElseGet(() -> Shop.builder().owner(vendor2).build());
-        shopChiNhanh2.setName("Hiệu Sách Cũ Tri Thức Trẻ - Chi Nhánh 2");
-        shopChiNhanh2.setDescription("Chuyên giáo trình đại học, sách ngoại văn, văn học kinh điển tuyển chọn chất lượng 85-99%");
-        shopChiNhanh2.setAddress("128 Võ Văn Ngân, Phường Bình Thọ, TP. Thủ Đức, TP. Hồ Chí Minh");
-        shopChiNhanh2.setPhone("0900000002");
-        shopChiNhanh2.setActive(true);
-        shopChiNhanh2 = shopRepository.save(shopChiNhanh2);
-
         // 4. Nạp trọn bộ hơn 90 đầu sách thật phong phú và 7 danh mục lớn
         extendedBookDataSeeder.seedAllBooks(shopChiNhanh1);
-
-        // Phân bổ sách sang Chi nhánh 2 để minh họa chuỗi cửa hàng đa chi nhánh
-        List<Book> allBooks = bookRepository.findAll();
-        for (int i = 0; i < allBooks.size(); i++) {
-            if (i % 3 == 0) { // 1/3 số đầu sách thuộc kho Chi Nhánh 2
-                Book b = allBooks.get(i);
-                b.setShop(shopChiNhanh2);
-                bookRepository.save(b);
-            }
-        }
 
         // 5. Tạo hoặc cập nhật đối tác vận chuyển mẫu (chuẩn tiếng Việt Unicode)
         saveOrUpdateCarrier("Giao Hàng Nhanh (GHN)", new BigDecimal("25000"), "Giao hàng tiêu chuẩn 2-3 ngày toàn quốc");
         saveOrUpdateCarrier("Viettel Post", new BigDecimal("30000"), "Mạng lưới bưu cục rộng khắp cả nước");
         saveOrUpdateCarrier("Hỏa Tốc Nội Thành (Giao trong 2h)", new BigDecimal("45000"), "Chỉ áp dụng trong khu vực nội thành có chi nhánh shop");
 
-        // 6. Tạo chiết khấu mẫu cho các chi nhánh trong chuỗi
+        // 6. Tạo chiết khấu mẫu cho shop chi nhánh 1
         if (!appCommissionRepository.existsByShop(shopChiNhanh1)) {
             appCommissionRepository.save(AppCommission.builder()
                     .shop(shopChiNhanh1)
                     .commissionRate(new BigDecimal("5.00"))
                     .note("Mức chiết khấu ưu đãi cho chi nhánh sáng lập chuỗi")
-                    .build());
-        }
-        if (!appCommissionRepository.existsByShop(shopChiNhanh2)) {
-            appCommissionRepository.save(AppCommission.builder()
-                    .shop(shopChiNhanh2)
-                    .commissionRate(new BigDecimal("5.00"))
-                    .note("Mức chiết khấu tiêu chuẩn hệ thống cho chi nhánh 2")
                     .build());
         }
 
@@ -199,24 +157,22 @@ public class DataInitializer implements CommandLineRunner {
         saveOrUpdateVoucher("CHAOBAN", "Giảm ngay 20.000 VNĐ cho khách hàng mới", "FIXED_AMOUNT",
                 new BigDecimal("20000"), new BigDecimal("50000"), new BigDecimal("20000"), 200);
 
-        // 8. Tạo đơn hàng mẫu cho cả 2 chi nhánh để biểu đồ so sánh doanh thu hoạt động
-        if (orderRepository.count() < 2) {
-            Book sampleBook1 = bookRepository.findAll().stream()
-                    .filter(b -> b.getShop() != null && b.getShop().getId().equals(shopChiNhanh1.getId()))
-                    .findFirst().orElse(null);
-            if (sampleBook1 != null) {
+        // 8. Tạo đơn hàng mẫu cho Admin Dashboard
+        if (orderRepository.count() == 0) {
+            Book sampleBook = bookRepository.findAll().stream().findFirst().orElse(null);
+            if (sampleBook != null) {
                 Order order1 = Order.builder()
-                        .orderCode("ORD20261028-0001")
+                        .orderCode("ORD" + System.currentTimeMillis())
                         .customer(user)
                         .shop(shopChiNhanh1)
                         .shipper(shipper)
                         .status(OrderStatus.DELIVERED)
                         .paymentMethod(PaymentMethod.COD)
                         .paymentStatus(PaymentStatus.COMPLETED)
-                        .subtotal(sampleBook1.getPrice())
+                        .subtotal(sampleBook.getPrice())
                         .shippingFee(new BigDecimal("25000"))
                         .discountAmount(BigDecimal.ZERO)
-                        .totalAmount(sampleBook1.getPrice().add(new BigDecimal("25000")))
+                        .totalAmount(sampleBook.getPrice().add(new BigDecimal("25000")))
                         .recipientName(user.getFullName())
                         .recipientPhone(user.getPhone())
                         .shippingAddress("123 Lê Văn Việt, Tăng Nhơn Phú B, TP. Thủ Đức")
@@ -224,31 +180,6 @@ public class DataInitializer implements CommandLineRunner {
                         .createdAt(LocalDateTime.now().minusDays(1))
                         .build();
                 orderRepository.save(order1);
-            }
-
-            Book sampleBook2 = bookRepository.findAll().stream()
-                    .filter(b -> b.getShop() != null && b.getShop().getId().equals(shopChiNhanh2.getId()))
-                    .findFirst().orElse(null);
-            if (sampleBook2 != null) {
-                Order order2 = Order.builder()
-                        .orderCode("ORD20261028-0002")
-                        .customer(user)
-                        .shop(shopChiNhanh2)
-                        .shipper(shipper)
-                        .status(OrderStatus.DELIVERED)
-                        .paymentMethod(PaymentMethod.VNPAY)
-                        .paymentStatus(PaymentStatus.COMPLETED)
-                        .subtotal(sampleBook2.getPrice())
-                        .shippingFee(new BigDecimal("25000"))
-                        .discountAmount(BigDecimal.ZERO)
-                        .totalAmount(sampleBook2.getPrice().add(new BigDecimal("25000")))
-                        .recipientName(user.getFullName())
-                        .recipientPhone(user.getPhone())
-                        .shippingAddress("128 Võ Văn Ngân, Phường Bình Thọ, TP. Thủ Đức")
-                        .note("Giao tận tay người nhận")
-                        .createdAt(LocalDateTime.now().minusHours(3))
-                        .build();
-                orderRepository.save(order2);
             }
         }
     }
