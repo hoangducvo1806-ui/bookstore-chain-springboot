@@ -56,7 +56,7 @@
                             </button>
 
                             <!-- Nút Ẩn/Hiện -->
-                            <form th:action="@{'/admin/categories/' + ${cat.id} + '/toggle-status'}" method="post" class="d-inline">
+                            <form th:action="@{'/manager/categories/' + ${cat.id} + '/toggle-status'}" method="post" class="d-inline">
                                 <button type="submit" class="btn btn-sm"
                                         th:classappend="${cat.active ? 'btn-outline-danger' : 'btn-outline-success'}"
                                         th:title="${cat.active ? 'Ẩn danh mục' : 'Hiện danh mục'}">
@@ -68,7 +68,7 @@
                             <div class="modal fade text-start" th:id="'editCatModal-' + ${cat.id}" tabindex="-1">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
-                                        <form th:action="@{/admin/categories/save}" method="post">
+                                        <form th:action="@{/manager/categories/save}" method="post">
                                             <input type="hidden" name="id" th:value="${cat.id}">
                                             <input type="hidden" name="active" th:value="${cat.active}">
                                             <div class="modal-header">
@@ -109,7 +109,7 @@
         <div class="modal fade" id="createCategoryModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form th:action="@{/admin/categories/save}" method="post">
+                    <form th:action="@{/manager/categories/save}" method="post">
                         <div class="modal-header">
                             <h5 class="modal-title fw-bold">✨ Thêm Danh Mục Sách Mới</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

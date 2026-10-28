@@ -19,7 +19,7 @@
 
         <!-- Filter Bar -->
         <div class="card table-card p-3 mb-4">
-            <form th:action="@{/admin/books}" method="get" class="row g-2 align-items-center">
+            <form th:action="@{/manager/books}" method="get" class="row g-2 align-items-center">
                 <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
@@ -40,7 +40,7 @@
                 </div>
                 <div class="col-md-2 d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i> Lọc</button>
-                    <a th:href="@{/admin/books}" class="btn btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i></a>
+                    <a th:href="@{/manager/books}" class="btn btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i></a>
                 </div>
             </form>
         </div>
@@ -95,7 +95,7 @@
                             <span th:if="${!b.active}" class="badge bg-danger"><i class="bi bi-eye-slash"></i> Đã ẩn / Gỡ</span>
                         </td>
                         <td class="text-center">
-                            <form th:action="@{'/admin/books/' + ${b.id} + '/toggle-status'}" method="post" class="d-inline">
+                            <form th:action="@{'/manager/books/' + ${b.id} + '/toggle-status'}" method="post" class="d-inline">
                                 <button type="submit" class="btn btn-sm"
                                         th:classappend="${b.active ? 'btn-outline-danger' : 'btn-outline-success'}"
                                         th:title="${b.active ? 'Gỡ/Ẩn sách vi phạm' : 'Mở lại hiển thị cho sách'}"
@@ -118,13 +118,13 @@
                 <nav>
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" th:classappend="${booksPage.first ? 'disabled' : ''}">
-                            <a class="page-link" th:href="@{/admin/books(page=${booksPage.number - 1}, keyword=${keyword}, shopId=${selectedShopId}, categoryId=${selectedCategoryId})}">Trước</a>
+                            <a class="page-link" th:href="@{/manager/books(page=${booksPage.number - 1}, keyword=${keyword}, shopId=${selectedShopId}, categoryId=${selectedCategoryId})}">Trước</a>
                         </li>
                         <li class="page-item" th:each="i : ${#numbers.sequence(0, booksPage.totalPages - 1)}" th:classappend="${i == booksPage.number ? 'active' : ''}">
-                            <a class="page-link" th:href="@{/admin/books(page=${i}, keyword=${keyword}, shopId=${selectedShopId}, categoryId=${selectedCategoryId})}" th:text="${i + 1}">1</a>
+                            <a class="page-link" th:href="@{/manager/books(page=${i}, keyword=${keyword}, shopId=${selectedShopId}, categoryId=${selectedCategoryId})}" th:text="${i + 1}">1</a>
                         </li>
                         <li class="page-item" th:classappend="${booksPage.last ? 'disabled' : ''}">
-                            <a class="page-link" th:href="@{/admin/books(page=${booksPage.number + 1}, keyword=${keyword}, shopId=${selectedShopId}, categoryId=${selectedCategoryId})}">Sau</a>
+                            <a class="page-link" th:href="@{/manager/books(page=${booksPage.number + 1}, keyword=${keyword}, shopId=${selectedShopId}, categoryId=${selectedCategoryId})}">Sau</a>
                         </li>
                     </ul>
                 </nav>

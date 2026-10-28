@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/layout :: header('Vận Hành Chuỗi')}"></head>
+<head th:replace="~{admin/fragments/layout :: header('Trung Tâm Điều Hành')}"></head>
 <body>
 <div class="d-flex">
     <!-- Sidebar -->
     <div th:replace="~{admin/fragments/layout :: sidebar('dashboard')}"></div>
 
     <!-- Main Content -->
-    <div class="content-area" style="background-color: #f0f4f8;">
+    <div class="content-area" style="background-color: #ecfdf5;">
         <!-- Topbar -->
         <nav th:replace="~{admin/fragments/layout :: topbar}"></nav>
 
@@ -16,73 +16,57 @@
 
         <!-- Banner Chào Mừng Vận Hành Chuỗi -->
         <div class="card border-0 shadow-sm rounded-4 mb-4 text-white p-4" 
-             style="background: linear-gradient(135deg, #0d3b66 0%, #0077b6 100%);">
+             style="background: linear-gradient(135deg, #064e3b 0%, #059669 100%); border-left: 5px solid #fbbf24 !important;">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-2">
                         <span class="badge bg-warning text-dark fw-bold px-3 py-2 rounded-pill">
-                            <i class="bi bi-kanban me-1"></i> PHÂN HỆ QUẢN LÝ VẬN HÀNH CHUỖI
+                            <i class="bi bi-compass-fill me-1"></i> TRUNG TÂM ĐIỀU HÀNH KINH DOANH & KHO HÀNG
                         </span>
                         <span class="badge bg-light text-dark px-2 py-1 rounded-pill small">OPERATIONS MANAGER</span>
                     </div>
-                    <h3 class="fw-bold mb-1">🏬 Trung Tâm Điều Hành Chuỗi Hiệu Sách Cũ Bookly</h3>
+                    <h3 class="fw-bold mb-1">🧭 Bảng Điều Hành Nghiệp Vụ Chuỗi Sách Cũ Bookly</h3>
                     <p class="text-white-50 mb-0" style="font-size: 0.95rem;">
-                        Chào mừng bạn quay lại bảng điều khiển vận hành. Theo dõi tiến độ đơn hàng, kiểm duyệt chất lượng sách cũ và giám sát hiệu quả từng chi nhánh cửa hàng.
+                        Chuyên trách kiểm duyệt chất lượng kho sách cũ, điều phối luồng đơn hàng, tổ chức danh mục sản phẩm, phát hành chiến dịch khuyến mãi và giám sát năng suất nhân sự.
                     </p>
                 </div>
                 <div class="d-flex gap-2">
-                    <a th:href="@{/admin/shops}" class="btn btn-warning text-dark fw-bold rounded-pill btn-sm px-3 shadow-sm">
-                        <i class="bi bi-shop me-1"></i> Quản Lý Chi Nhánh
+                    <a th:href="@{/manager/books}" class="btn btn-warning text-dark fw-bold rounded-pill btn-sm px-3 shadow-sm">
+                        <i class="bi bi-journal-check me-1"></i> Kiểm Duyệt Sách Cũ
                     </a>
-                    <a th:href="@{/admin/books}" class="btn btn-light text-primary fw-bold rounded-pill btn-sm px-3 shadow-sm">
-                        <i class="bi bi-journal-check me-1"></i> Duyệt Sách Cũ
+                    <a th:href="@{/manager/staff}" class="btn btn-light text-success fw-bold rounded-pill btn-sm px-3 shadow-sm">
+                        <i class="bi bi-person-badge me-1"></i> Giám Sát Nhân Sự
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- KPI Cards: Thước đo vận hành chuỗi -->
+        <!-- KPI Cards: Thước đo vận hành kinh doanh -->
         <div class="row g-3 mb-4">
-            <!-- 1. Chi nhánh shop -->
-            <div class="col-xl-3 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="background: white; border-left: 5px solid #0077b6 !important;">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Chi Nhánh Cửa Hàng</small>
-                            <h3 class="fw-bold my-1 text-primary" th:text="${stats.totalShops}">0</h3>
-                            <small class="text-muted"><i class="bi bi-check-circle-fill text-success me-1"></i>Đối tác đang mở bán</small>
-                        </div>
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background-color: #e0f2fe;">
-                            <i class="bi bi-shop fs-3 text-primary"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. Sách cũ toàn chuỗi -->
+            <!-- 1. Sách cũ toàn chuỗi -->
             <div class="col-xl-3 col-md-6">
                 <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="background: white; border-left: 5px solid #059669 !important;">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Kho Sách Cũ Toàn Chuỗi</small>
+                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Kho Sách Cũ Đang Mở Bán</small>
                             <h3 class="fw-bold my-1 text-success" th:text="${stats.totalBooks}">0</h3>
-                            <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i>Đã thẩm định chất lượng</small>
+                            <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i>Đã kiểm duyệt chất lượng</small>
                         </div>
                         <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background-color: #d1fae5;">
-                            <i class="bi bi-book-half fs-3 text-success"></i>
+                            <i class="bi bi-journal-check fs-3 text-success"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. Đơn hàng chuỗi -->
+            <!-- 2. Đơn hàng chuỗi -->
             <div class="col-xl-3 col-md-6">
                 <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="background: white; border-left: 5px solid #d97706 !important;">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Tổng Đơn Cần Giám Sát</small>
+                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Luồng Đơn Hàng Điều Phối</small>
                             <h3 class="fw-bold my-1 text-warning" th:text="${stats.totalOrders}">0</h3>
-                            <small class="text-muted"><i class="bi bi-truck text-warning me-1"></i>Điều phối shipper chuỗi</small>
+                            <small class="text-muted"><i class="bi bi-box-seam text-warning me-1"></i>Đang luân chuyển trong chuỗi</small>
                         </div>
                         <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background-color: #fef3c7;">
                             <i class="bi bi-box-seam-fill fs-3 text-warning"></i>
@@ -91,70 +75,83 @@
                 </div>
             </div>
 
-            <!-- 4. Danh mục & Voucher -->
+            <!-- 3. Danh mục & Voucher -->
             <div class="col-xl-3 col-md-6">
                 <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="background: white; border-left: 5px solid #7c3aed !important;">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Danh Mục & Mã Khuyến Mãi</small>
-                            <h3 class="fw-bold my-1 text-purple" style="color: #7c3aed;">
-                                <span th:text="${totalCategories}">7</span> <small class="fs-6 text-muted">/ <span th:text="${totalVouchers}">4</span> mã</small>
+                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Danh Mục & Chiến Dịch</small>
+                            <h3 class="fw-bold my-1" style="color: #7c3aed;">
+                                <span th:text="${totalCategories}">7</span> <small class="fs-6 text-muted">nhóm / <span th:text="${totalVouchers}">4</span> mã</small>
                             </h3>
-                            <small class="text-muted"><i class="bi bi-tags-fill me-1" style="color: #7c3aed;"></i>Chiến dịch marketing</small>
+                            <small class="text-muted"><i class="bi bi-ticket-perforated-fill me-1" style="color: #7c3aed;"></i>Voucher kích cầu mua sắm</small>
                         </div>
                         <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background-color: #ede9fe;">
-                            <i class="bi bi-ticket-perforated-fill fs-3" style="color: #7c3aed;"></i>
+                            <i class="bi bi-tags-fill fs-3" style="color: #7c3aed;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Đối tác vận hành -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="background: white; border-left: 5px solid #0284c7 !important;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Cửa Hàng Đang Vận Hành</small>
+                            <h3 class="fw-bold my-1 text-info" th:text="${stats.totalShops}">0</h3>
+                            <small class="text-muted"><i class="bi bi-person-workspace text-info me-1"></i>Đội ngũ Vendor & Shipper</small>
+                        </div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background-color: #e0f2fe;">
+                            <i class="bi bi-people-fill fs-3 text-info"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Lối tắt thao tác nhanh (Quick Action Bar) -->
+        <!-- Lối tắt thao tác nghiệp vụ của Manager -->
         <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
-            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Thao Tác Nghiệp Vụ Vận Hành Chuỗi:</h6>
+            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-lightning-charge-fill text-success me-2"></i>Phân Hệ Nghiệp Vụ Dành Riêng Cho Manager:</h6>
             <div class="d-flex flex-wrap gap-2">
-                <a th:href="@{/admin/orders}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                    <i class="bi bi-receipt me-1"></i> Điều Phối Đơn Hàng Chuỗi
+                <a th:href="@{/manager/books}" class="btn btn-success btn-sm rounded-pill px-3">
+                    <i class="bi bi-journal-check me-1"></i> 1. Kiểm Duyệt Kho Sách Cũ
                 </a>
-                <a th:href="@{/admin/books}" class="btn btn-outline-success btn-sm rounded-pill px-3">
-                    <i class="bi bi-journal-album me-1"></i> Giám Sát Sách Cũ Của Shop
+                <a th:href="@{/manager/orders}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                    <i class="bi bi-box-seam me-1"></i> 2. Điều Phối Đơn Hàng
                 </a>
-                <a th:href="@{/admin/shops}" class="btn btn-outline-info btn-sm rounded-pill px-3">
-                    <i class="bi bi-shop-window me-1"></i> Danh Sách Chi Nhánh Hiệu Sách
+                <a th:href="@{/manager/categories}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                    <i class="bi bi-tags me-1"></i> 3. Quản Lý Danh Mục Sách
                 </a>
-                <a th:href="@{/admin/categories}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                    <i class="bi bi-tags me-1"></i> Thêm / Sửa Danh Mục Sách
+                <a th:href="@{/manager/vouchers}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                    <i class="bi bi-ticket-perforated me-1"></i> 4. Phát Hành Mã Giảm Giá
                 </a>
-                <a th:href="@{/admin/vouchers}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-                    <i class="bi bi-ticket-perforated me-1"></i> Tạo Voucher Khuyến Mãi
-                </a>
-                <a th:href="@{/admin/shipping}" class="btn btn-outline-dark btn-sm rounded-pill px-3">
-                    <i class="bi bi-truck me-1"></i> Cước Vận Chuyển Chi Nhánh
+                <a th:href="@{/manager/staff}" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                    <i class="bi bi-person-badge me-1"></i> 5. Giám Sát Nhân Sự & Shipper
                 </a>
             </div>
         </div>
 
         <!-- Hai Bảng Dữ Liệu Nghiệp Vụ Vận Hành -->
         <div class="row g-4">
-            <!-- Cột Trái: Đơn hàng mới nhất toàn chuỗi cần theo dõi -->
+            <!-- Cột Trái: Đơn hàng mới nhất toàn chuỗi cần điều phối -->
             <div class="col-lg-7">
                 <div class="card border-0 shadow-sm rounded-4 p-3 h-100 bg-white">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold mb-0 text-dark">
-                            <i class="bi bi-clock-history text-primary me-2"></i>Đơn Hàng Toàn Chuỗi Mới Nhất
+                            <i class="bi bi-box-seam text-success me-2"></i>Tiến Độ Xử Lý Đơn Hàng Đang Điều Phối
                         </h6>
-                        <a th:href="@{/admin/orders}" class="btn btn-link btn-sm text-decoration-none">Xem tất cả &rarr;</a>
+                        <a th:href="@{/manager/orders}" class="btn btn-link btn-sm text-success text-decoration-none fw-semibold">Điều phối tất cả &rarr;</a>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
                             <thead class="table-light">
                             <tr>
                                 <th>Mã Đơn</th>
-                                <th>Người Mua</th>
-                                <th>Shop Cung Cấp</th>
-                                <th>Tổng Tiền</th>
-                                <th>Trạng Thái</th>
+                                <th>Khách Nhận</th>
+                                <th>Shop Xuất Kho</th>
+                                <th>Giá Trị Đơn</th>
+                                <th>Khâu Vận Hành</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -170,7 +167,7 @@
                                     <span class="fw-semibold text-dark" th:text="${order.recipientName}">Nguyễn Văn A</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-info-subtle text-info border border-info-subtle" th:text="${order.shop != null ? order.shop.name : 'N/A'}">Shop Thủ Đức</span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle" th:text="${order.shop != null ? order.shop.name : 'N/A'}">Shop Thủ Đức</span>
                                 </td>
                                 <td class="fw-bold text-dark" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">100.000 đ</td>
                                 <td>
@@ -188,38 +185,38 @@
                 </div>
             </div>
 
-            <!-- Cột Phải: Bảng Thống Kê Hiệu Năng Chi Nhánh Cửa Hàng -->
+            <!-- Cột Phải: Năng Suất Vận Hành Cửa Hàng & Nhân Sự -->
             <div class="col-lg-5">
                 <div class="card border-0 shadow-sm rounded-4 p-3 h-100 bg-white">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold mb-0 text-dark">
-                            <i class="bi bi-shop text-success me-2"></i>Hiệu Quả Từng Chi Nhánh
+                            <i class="bi bi-award-fill text-warning me-2"></i>Năng Suất Xử Lý Đơn Theo Cửa Hàng
                         </h6>
-                        <a th:href="@{/admin/shops}" class="btn btn-link btn-sm text-decoration-none">Quản lý shop &rarr;</a>
+                        <a th:href="@{/manager/staff}" class="btn btn-link btn-sm text-success text-decoration-none fw-semibold">Xem nhân sự &rarr;</a>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
                             <thead class="table-light">
                             <tr>
-                                <th>Chi Nhánh</th>
-                                <th>Đơn Đã Giao</th>
-                                <th class="text-end">Doanh Số Hoàn Tất</th>
+                                <th>Cửa Hàng & Quản Lý</th>
+                                <th class="text-center">Tổng Đơn</th>
+                                <th class="text-end">Đã Giao Thành Công</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:if="${#lists.isEmpty(shopRevenues)}">
-                                <td colspan="3" class="text-center py-4 text-muted">Chưa có dữ liệu chi nhánh.</td>
+                                <td colspan="3" class="text-center py-4 text-muted">Chưa có dữ liệu cửa hàng.</td>
                             </tr>
                             <tr th:each="sr : ${shopRevenues}">
                                 <td>
                                     <div class="fw-semibold text-dark" th:text="${sr.shopName}">Hiệu Sách Cũ Thủ Đức</div>
-                                    <small class="text-muted d-block text-truncate" style="max-width: 160px;" th:text="${sr.ownerName}">Chủ chi nhánh</small>
+                                    <small class="text-muted d-block text-truncate" style="max-width: 160px;">Phụ trách: <span th:text="${sr.ownerName}">Chủ chi nhánh</span></small>
                                 </td>
-                                <td>
-                                    <span class="badge bg-info-subtle text-info border border-info-subtle" th:text="${sr.deliveredOrders} + ' đơn'">5 đơn</span>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark border" th:text="${sr.totalOrders} + ' đơn'">8 đơn</span>
                                 </td>
-                                <td class="text-end fw-bold text-success" th:text="${#numbers.formatDecimal(sr.deliveredRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">
-                                    500.000 đ
+                                <td class="text-end">
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold" th:text="${sr.deliveredOrders} + ' đơn hoàn tất'">5 đơn</span>
                                 </td>
                             </tr>
                             </tbody>

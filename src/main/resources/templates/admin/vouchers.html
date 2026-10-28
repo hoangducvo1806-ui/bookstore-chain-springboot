@@ -65,7 +65,7 @@
                             <span th:if="${!v.active}" class="badge bg-secondary"><i class="bi bi-x-circle"></i> Tạm dừng</span>
                         </td>
                         <td class="text-center">
-                            <form th:action="@{'/admin/vouchers/' + ${v.id} + '/toggle-status'}" method="post" class="d-inline">
+                            <form th:action="@{'/manager/vouchers/' + ${v.id} + '/toggle-status'}" method="post" class="d-inline">
                                 <button type="submit" class="btn btn-sm"
                                         th:classappend="${v.active ? 'btn-outline-danger' : 'btn-outline-success'}"
                                         th:title="${v.active ? 'Tạm dừng mã' : 'Kích hoạt lại mã'}">
@@ -84,7 +84,7 @@
         <div class="modal fade" id="createVoucherModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form th:action="@{/admin/vouchers/save}" method="post">
+                    <form th:action="@{/manager/vouchers/save}" method="post">
                         <div class="modal-header">
                             <h5 class="modal-title fw-bold">✨ Tạo Mã Giảm Giá Mới</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

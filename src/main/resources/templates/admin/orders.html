@@ -20,11 +20,11 @@
         <!-- Filter by Status -->
         <div class="card table-card p-3 mb-4">
             <div class="d-flex flex-wrap gap-2">
-                <a th:href="@{/admin/orders}" class="btn btn-sm" th:classappend="${selectedStatus == null ? 'btn-primary' : 'btn-outline-secondary'}">
+                <a th:href="@{/manager/orders}" class="btn btn-sm" th:classappend="${selectedStatus == null ? 'btn-primary' : 'btn-outline-secondary'}">
                     Tất cả đơn hàng
                 </a>
                 <a th:each="st : ${allStatuses}"
-                   th:href="@{/admin/orders(status=${st})}"
+                   th:href="@{/manager/orders(status=${st})}"
                    class="btn btn-sm"
                    th:classappend="${selectedStatus == st ? 'btn-primary' : 'btn-outline-secondary'}"
                    th:text="${st.label}">
@@ -91,13 +91,13 @@
                 <nav>
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" th:classappend="${ordersPage.first ? 'disabled' : ''}">
-                            <a class="page-link" th:href="@{/admin/orders(page=${ordersPage.number - 1}, status=${selectedStatus})}">Trước</a>
+                            <a class="page-link" th:href="@{/manager/orders(page=${ordersPage.number - 1}, status=${selectedStatus})}">Trước</a>
                         </li>
                         <li class="page-item" th:each="i : ${#numbers.sequence(0, ordersPage.totalPages - 1)}" th:classappend="${i == ordersPage.number ? 'active' : ''}">
-                            <a class="page-link" th:href="@{/admin/orders(page=${i}, status=${selectedStatus})}" th:text="${i + 1}">1</a>
+                            <a class="page-link" th:href="@{/manager/orders(page=${i}, status=${selectedStatus})}" th:text="${i + 1}">1</a>
                         </li>
                         <li class="page-item" th:classappend="${ordersPage.last ? 'disabled' : ''}">
-                            <a class="page-link" th:href="@{/admin/orders(page=${ordersPage.number + 1}, status=${selectedStatus})}">Sau</a>
+                            <a class="page-link" th:href="@{/manager/orders(page=${ordersPage.number + 1}, status=${selectedStatus})}">Sau</a>
                         </li>
                     </ul>
                 </nav>
