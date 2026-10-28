@@ -1,0 +1,21 @@
+=========================================================================
+THÔNG TIN SOURCE CODE & LINK GITHUB ĐỒ ÁN CUỐI KỲ
+=========================================================================
+1. Tên đề tài: Đề tài 14 – Xây dựng Website Quản lý Chuỗi Cửa hàng Sách cũ (Bookstore Chain)
+2. Link GitHub Repository: https://github.com/hoangducvo1806-ui/bookstore-chain-springboot
+   - Nhánh nộp bài chính thức (Release): https://github.com/hoangducvo1806-ui/bookstore-chain-springboot/tree/main
+   - Nhánh tích hợp phát triển (Develop): https://github.com/hoangducvo1806-ui/bookstore-chain-springboot/tree/develop
+
+3. Danh sách file nộp trong thư mục này:
+   - bookstore_db_full.sql          : File Database đầy đủ (Schema 23 bảng + 100% dữ liệu 93 đầu sách, 7 danh mục, 5 tài khoản, đơn hàng)
+   - bookstore_db_schema.sql        : File khởi tạo cấu trúc bảng chuẩn
+   - AI_Chatbot_Datasheet.xlsx      : Datasheet huấn luyện & từ điển NLP cho AI Chatbot tư vấn sách
+   - AI_Chatbot_Knowledge_Base.json : Dữ liệu tri thức JSON cho hệ thống gợi ý sách thông minh
+
+4. Tài khoản đăng nhập kiểm thử (Mật khẩu chung: 123456):
+   - Quản trị viên (ADMIN)   : admin@gmail.com   | 123456
+   - Quản lý chuỗi (MANAGER) : manager@gmail.com | 123456
+   - Chủ chi nhánh (VENDOR)  : vendor@gmail.com  | 123456
+   - Giao hàng (SHIPPER)     : shipper@gmail.com | 123456
+   - Khách hàng (USER)       : user@gmail.com    | 123456
+=========================================================================

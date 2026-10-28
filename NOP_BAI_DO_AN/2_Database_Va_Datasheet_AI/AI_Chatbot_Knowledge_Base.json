@@ -1,0 +1,185 @@
+{
+  "system_name": "Bookly AI Consultant - Hệ thống Tư vấn Sách Cũ Thông minh",
+  "engine_architecture": "Hybrid NLP Intent Classification + Token Scoring + SQL Server Real-time Book Query",
+  "intents": [
+    {
+      "intent_id": "GREETING",
+      "triggers": [
+        "xin chào",
+        "hello",
+        "hi",
+        "chào shop",
+        "bắt đầu"
+      ],
+      "response_strategy": "Chào mừng khách hàng, giới thiệu các tính năng tìm sách theo thể loại, mức giá, tình trạng sách và chính sách chuỗi."
+    },
+    {
+      "intent_id": "BOOK_CONDITION",
+      "triggers": [
+        "tình trạng",
+        "sách cũ",
+        "độ mới",
+        "99%",
+        "90%",
+        "80%",
+        "chất lượng"
+      ],
+      "response_strategy": "Giải thích 4 cấp độ sách cũ: Như mới (99%), Rất tốt (90%), Tốt (80%), Khá (70%) và cam kết ảnh chụp thật."
+    },
+    {
+      "intent_id": "SHIPPING_POLICY",
+      "triggers": [
+        "phí ship",
+        "vận chuyển",
+        "giao hàng",
+        "bao lâu",
+        "freeship"
+      ],
+      "response_strategy": "Thông tin các đối tác GHN, GHTK, Viettel Post và thời gian giao hàng nội/ngoại thành."
+    },
+    {
+      "intent_id": "RETURN_POLICY",
+      "triggers": [
+        "đổi trả",
+        "hoàn tiền",
+        "bảo hành",
+        "lỗi",
+        "rách",
+        "thiếu trang"
+      ],
+      "response_strategy": "Chính sách đổi trả miễn phí 100% trong vòng 7 ngày nếu sách sai mô tả hoặc thiếu trang."
+    },
+    {
+      "intent_id": "VOUCHER_INQUIRY",
+      "triggers": [
+        "mã giảm giá",
+        "voucher",
+        "khuyến mãi",
+        "code",
+        "giảm giá"
+      ],
+      "response_strategy": "Truy vấn trực tiếp bảng vouchers đang active và còn lượt dùng trong CSDL để hiển thị cho khách."
+    },
+    {
+      "intent_id": "SHOP_BRANCH_INQUIRY",
+      "triggers": [
+        "chi nhánh",
+        "cửa hàng",
+        "địa chỉ shop",
+        "mua trực tiếp",
+        "ở đâu"
+      ],
+      "response_strategy": "Truy vấn bảng shops đang hoạt động để liệt kê tên chi nhánh, địa chỉ, số điện thoại liên hệ."
+    },
+    {
+      "intent_id": "BOOK_RECOMMENDATION",
+      "triggers": [
+        "tìm sách",
+        "gợi ý",
+        "tư vấn",
+        "sách về",
+        "dưới ... k",
+        "code",
+        "lập trình",
+        "kinh tế",
+        "văn học"
+      ],
+      "response_strategy": "Trích xuất thực thể (Category, MaxPrice, BookCondition, Keywords), chấm điểm khớp từ khóa (Token Scoring) và trả về danh sách sách kèm ảnh bìa, giá bán, chi nhánh."
+    }
+  ],
+  "category_nlp_aliases": {
+    "cong-nghe-thong-tin": [
+      "cntt",
+      "công nghệ",
+      "lập trình",
+      "code",
+      "coding",
+      "coder",
+      "developer",
+      "it",
+      "phần mềm",
+      "java",
+      "python",
+      "web",
+      "ai",
+      "thuật toán",
+      "clean code",
+      "sql",
+      "cơ sở dữ liệu",
+      "mạng máy tính",
+      "kỹ thuật phần mềm"
+    ],
+    "kinh-te-tai-chinh": [
+      "kinh tế",
+      "tài chính",
+      "kinh doanh",
+      "khởi nghiệp",
+      "đầu tư",
+      "chứng khoán",
+      "làm giàu",
+      "quản trị",
+      "marketing",
+      "bán hàng",
+      "tiền bạc",
+      "doanh nhân",
+      "chiến lược"
+    ],
+    "tam-ly-ky-nang": [
+      "tâm lý",
+      "kỹ năng",
+      "self help",
+      "phát triển bản thân",
+      "giao tiếp",
+      "đắc nhân tâm",
+      "thói quen",
+      "tư duy",
+      "chữa lành",
+      "hạnh phúc",
+      "cảm xúc"
+    ],
+    "truyen-tranh-thieu-nhi": [
+      "truyện tranh",
+      "thiếu nhi",
+      "manga",
+      "comic",
+      "conan",
+      "doraemon",
+      "one piece",
+      "naruto",
+      "dragon ball",
+      "cổ tích",
+      "truyện ngắn thiếu nhi"
+    ],
+    "van-hoc-viet-nam": [
+      "văn học việt nam",
+      "văn học trong nước",
+      "nguyễn nhật ánh",
+      "nam cao",
+      "vũ trọng phụng",
+      "tô hoài",
+      "thơ việt"
+    ],
+    "van-hoc-nuoc-ngoai": [
+      "văn học nước ngoài",
+      "tiểu thuyết",
+      "nhà giả kim",
+      "kinh điển",
+      "trinh thám",
+      "sherlock holmes",
+      "haruki murakami",
+      "ngôn tình"
+    ],
+    "khoa-hoc-lich-su": [
+      "khoa học",
+      "lịch sử",
+      "vũ trụ",
+      "sapiens",
+      "địa lý",
+      "triết học",
+      "tiến hóa",
+      "vật lý",
+      "sinh học",
+      "lược sử"
+    ]
+  }
+}
